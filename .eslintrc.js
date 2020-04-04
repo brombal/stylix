@@ -86,7 +86,7 @@ const tsRules = {
 };
 
 module.exports = {
-  extends: ['eslint:recommended', 'react-app', 'prettier'],
+  extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:prettier/recommended'],
   env: {
     browser: true,
     jest: true,
@@ -100,10 +100,10 @@ module.exports = {
       plugins: ['@typescript-eslint'],
       extends: [
         'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:prettier/recommended',
         'plugin:@typescript-eslint/eslint-recommended',
         'plugin:@typescript-eslint/recommended',
-        'react-app',
-        'prettier',
       ],
       rules: {
         ...jsRules,
