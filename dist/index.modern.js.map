@@ -1,0 +1,1 @@
+{"version":3,"file":"index.modern.js","sources":["../src/index.tsx"],"sourcesContent":["import React from 'react';\n\nexport default function $$() {\n  return (\n    <div>\n      helddlo!\n    </div>\n  )\n}\n"],"names":["$$","React"],"mappings":";;SAEwBA;AACtB,SACEC,mBAAA,MAAA,MAAA,YAAA,CADF;AAKD;;;;"}

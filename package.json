@@ -1,0 +1,54 @@
+{
+  "name": "stylix",
+  "version": "1.0.0",
+  "description": "Styles with props!",
+  "source": "src/index.tsx",
+  "main": "dist/index.js",
+  "module": "dist/index.modern.js",
+  "scripts": {
+    "build": "microbundle --jsx -f modern,cjs --target node",
+    "watch": "npm run build watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "prettier": "prettier --write .",
+    "eslint": "eslint --ext=.ts,.tsx,.js,.jsx ./src",
+    "eslint:fix": "eslint --fix --ext=.ts,.tsx,.js,.jsx ./src"
+  },
+  "author": "Alex Brombal",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@storybook/addon-actions": "^5.3.18",
+    "@storybook/addon-docs": "^5.3.18",
+    "@storybook/addon-links": "^5.3.18",
+    "@storybook/addons": "^5.3.18",
+    "@storybook/preset-create-react-app": "^2.1.1",
+    "@storybook/react": "^5.3.18",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
+    "babel-loader": "^8.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-simple-import-sort": "^5.0.2",
+    "eslint-plugin-unused-imports": "^0.1.2",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.1.1",
+    "microbundle": "^0.12.0-next.8",
+    "prettier": "^2.0.2",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,md,mdx,json}": [
+      "prettier --write"
+    ],
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "eslint -c .eslintrc.git.js"
+    ]
+  }
+}
