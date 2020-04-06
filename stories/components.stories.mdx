@@ -1,33 +1,9 @@
 import { Meta, Story, Preview } from '@storybook/addon-docs/blocks';
 import $ from '../';
 
-<Meta title="Stylix" />
+<Meta title="Custom Components" />
 
-# Stylix Demos
-
-These demos are to develop and test functionality. They aren't meant to be exhaustive tests or be
-full demonstrations. They are just a useful way to playground features.
-
-<Preview>
-  <Story name="Media query and pseudo class">
-    <$ $media="(min-width: 1300px)" $selector="&:hover" color="green">
-      <$ color="blue">Blue text / Green text on hover & > 1300px</$>
-    </$>
-  </Story>
-</Preview>
-
-<Preview>
-  <Story name="Combine with other classes">
-    <>
-      <style>{`.custom-class { color: red; }`}</style>
-      <$ $inject background="lightgray">
-        <div className="custom-class">red</div>
-      </$>
-    </>
-  </Story>
-</Preview>
-
-## Injecting to custom components
+## Custom components
 
 The following demonstrates using `__isStylix` to pass styling props down to a custom component.
 

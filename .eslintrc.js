@@ -1,9 +1,12 @@
 const fs = require('fs');
 
-const jsRules = {
-  /** We feel that this is a useless warning, as mount hooks require empty arrays
-   * and sometimes you just don't need to track all dependencies. */
+const rules = {
+  // This is a useless warning, as mount hooks require empty arrays
+  // and sometimes you just don't need to track all dependencies.
   'react-hooks/exhaustive-deps': 0,
+
+  // Disabled in favor of TS definitions.
+  'react/prop-types': 0,
 
   'no-empty': [
     2,
@@ -18,10 +21,6 @@ const jsRules = {
   // Warn on unused imports.
   // Note that this is upgraded to an error during git commits.
   'unused-imports/no-unused-imports': 1,
-
-  // Warn on unused variables.
-  // Note that this is upgraded to an error during git commits.
-  'unused-imports/no-unused-vars': [1, { ignoreRestSiblings: true }],
 
   // Turn this off in favor of simple-import-sort rule.
   'sort-imports': 0,
@@ -56,9 +55,7 @@ const jsRules = {
   // 'debugger' statements are only warnings because we want to allow them during local development
   // Note that this is upgraded to an error during git commits.
   'no-debugger': 1,
-};
 
-const tsRules = {
   /** We warn about this to make you aware that require() is not recommended, but sometimes
    * needed. You should eslint-ignore any valid usages. */
   '@typescript-eslint/no-var-requires': 1,
@@ -83,6 +80,8 @@ const tsRules = {
   // Note that this is upgraded to an error during git commits.
   'unused-imports/no-unused-vars': 0,
   '@typescript-eslint/no-unused-vars': 1,
+
+  'prettier/prettier': 1,
 };
 
 module.exports = {
@@ -91,7 +90,7 @@ module.exports = {
     browser: true,
     jest: true,
   },
-  rules: jsRules,
+  rules,
   plugins: ['simple-import-sort', 'unused-imports'],
   overrides: [
     {
@@ -105,10 +104,7 @@ module.exports = {
         'plugin:@typescript-eslint/eslint-recommended',
         'plugin:@typescript-eslint/recommended',
       ],
-      rules: {
-        ...jsRules,
-        ...tsRules,
-      },
+      rules,
     },
   ],
 };
