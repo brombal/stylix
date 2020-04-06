@@ -3,7 +3,7 @@ import React, { CSSProperties } from 'react';
 /**
  * These are the basic Box props, not including css properties, shortcuts, or pseudo classes.
  */
-interface StylixCoreProps<T extends React.ElementType = 'div'> {
+interface StylixCoreProps<T extends React.ElementType> {
     $el?: T;
     $selector?: string;
     $inject?: boolean;
@@ -68,7 +68,7 @@ declare type StylixStyleProps = Omit<CSSProperties, BoxCssShortcutPropsKey> & IB
  * 2. Style properties (StylixStyleProps)
  * 3. General React props and ref (React.ComponentPropsWithRef)
  */
-export declare type StylixProps<T extends React.ElementType = 'div'> = StylixCoreProps<T> & StylixStyleProps & React.ComponentPropsWithRef<T>;
+export declare type StylixProps<T extends React.ElementType> = StylixCoreProps<T> & StylixStyleProps & React.ComponentPropsWithRef<T>;
 export declare type StylixComponentType<T extends React.ElementType = 'div'> = React.ComponentType<StylixProps<T>> & {
     __isStylix?: boolean;
 };

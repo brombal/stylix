@@ -1,1 +1,5 @@
 node_modules/
+
+# Ignore the Stylix build files for the UMD module in the docs folder
+docs/public/stylix/
+docs/.env

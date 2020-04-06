@@ -15,12 +15,13 @@
     "gh-pages": "^2.2.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-markdown": "^4.3.1",
     "react-scripts": "3.4.1",
     "typescript": "^3.7.5"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "REACT_APP_SANDBOX_LIB=/stylix.umd.js react-scripts build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },

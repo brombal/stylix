@@ -7,8 +7,9 @@ import { addon as addonRule } from 'nano-css/addon/rule';
 import { addon as addonStable } from 'nano-css/addon/stable';
 import { addon as addonUnitless } from 'nano-css/addon/unitless';
 import React, { CSSProperties } from 'react';
-import htmlTags from './html-tags.json';
+
 import cssPropertyNames from './css-props.json';
+import htmlTags from './html-tags.json';
 import { StylixComponentType, StylixProps } from './types';
 
 const nano = create({

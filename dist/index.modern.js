@@ -41,126 +41,6 @@ function _objectWithoutPropertiesLoose(source, excluded) {
   return target;
 }
 
-var htmlTags = [
-	"a",
-	"abbr",
-	"address",
-	"area",
-	"article",
-	"aside",
-	"audio",
-	"b",
-	"base",
-	"bdi",
-	"bdo",
-	"blockquote",
-	"body",
-	"br",
-	"button",
-	"canvas",
-	"caption",
-	"cite",
-	"code",
-	"col",
-	"colgroup",
-	"data",
-	"datalist",
-	"dd",
-	"del",
-	"details",
-	"dfn",
-	"dialog",
-	"div",
-	"dl",
-	"dt",
-	"em",
-	"embed",
-	"fieldset",
-	"figcaption",
-	"figure",
-	"footer",
-	"form",
-	"h1",
-	"h2",
-	"h3",
-	"h4",
-	"h5",
-	"h6",
-	"head",
-	"header",
-	"hgroup",
-	"hr",
-	"html",
-	"i",
-	"iframe",
-	"img",
-	"input",
-	"ins",
-	"kbd",
-	"label",
-	"legend",
-	"li",
-	"link",
-	"main",
-	"map",
-	"mark",
-	"math",
-	"menu",
-	"menuitem",
-	"meta",
-	"meter",
-	"nav",
-	"noscript",
-	"object",
-	"ol",
-	"optgroup",
-	"option",
-	"output",
-	"p",
-	"param",
-	"picture",
-	"pre",
-	"progress",
-	"q",
-	"rb",
-	"rp",
-	"rt",
-	"rtc",
-	"ruby",
-	"s",
-	"samp",
-	"script",
-	"section",
-	"select",
-	"slot",
-	"small",
-	"source",
-	"span",
-	"strong",
-	"style",
-	"sub",
-	"summary",
-	"sup",
-	"svg",
-	"table",
-	"tbody",
-	"td",
-	"template",
-	"textarea",
-	"tfoot",
-	"th",
-	"thead",
-	"time",
-	"title",
-	"tr",
-	"track",
-	"u",
-	"ul",
-	"var",
-	"video",
-	"wbr"
-];
-
 var cssPropertyNames = [
 	"-ms-accelerator",
 	"msAccelerator",
@@ -1103,16 +983,136 @@ var cssPropertyNames = [
 	"zoom"
 ];
 
-var nano = create({
+var htmlTags = [
+	"a",
+	"abbr",
+	"address",
+	"area",
+	"article",
+	"aside",
+	"audio",
+	"b",
+	"base",
+	"bdi",
+	"bdo",
+	"blockquote",
+	"body",
+	"br",
+	"button",
+	"canvas",
+	"caption",
+	"cite",
+	"code",
+	"col",
+	"colgroup",
+	"data",
+	"datalist",
+	"dd",
+	"del",
+	"details",
+	"dfn",
+	"dialog",
+	"div",
+	"dl",
+	"dt",
+	"em",
+	"embed",
+	"fieldset",
+	"figcaption",
+	"figure",
+	"footer",
+	"form",
+	"h1",
+	"h2",
+	"h3",
+	"h4",
+	"h5",
+	"h6",
+	"head",
+	"header",
+	"hgroup",
+	"hr",
+	"html",
+	"i",
+	"iframe",
+	"img",
+	"input",
+	"ins",
+	"kbd",
+	"label",
+	"legend",
+	"li",
+	"link",
+	"main",
+	"map",
+	"mark",
+	"math",
+	"menu",
+	"menuitem",
+	"meta",
+	"meter",
+	"nav",
+	"noscript",
+	"object",
+	"ol",
+	"optgroup",
+	"option",
+	"output",
+	"p",
+	"param",
+	"picture",
+	"pre",
+	"progress",
+	"q",
+	"rb",
+	"rp",
+	"rt",
+	"rtc",
+	"ruby",
+	"s",
+	"samp",
+	"script",
+	"section",
+	"select",
+	"slot",
+	"small",
+	"source",
+	"span",
+	"strong",
+	"style",
+	"sub",
+	"summary",
+	"sup",
+	"svg",
+	"table",
+	"tbody",
+	"td",
+	"template",
+	"textarea",
+	"tfoot",
+	"th",
+	"thead",
+	"time",
+	"title",
+	"tr",
+	"track",
+	"u",
+	"ul",
+	"var",
+	"video",
+	"wbr"
+];
+
+const nano = create({
   pfx: 'stylix'
 });
 
 function myplugin(renderer) {
-  var origPut = renderer.put;
-  var cache = {};
+  const origPut = renderer.put;
+  const cache = {};
 
   renderer.put = (selector, decls, atrule) => {
-    var cacheKey = atrule ? atrule + "{" + selector + "}" : selector;
+    const cacheKey = atrule ? `${atrule}{${selector}}` : selector;
 
     if (cache[cacheKey]) {
       return;
@@ -1133,7 +1133,7 @@ addon$6(nano);
 myplugin(nano);
 
 function classifyProps(props) {
-  var values = {
+  const values = {
     styles: {},
     advanced: {},
     other: {}
@@ -1159,8 +1159,8 @@ function createRule(ref, styles) {
   }
 }
 
-var Stylix = React.forwardRef(function Stylix(props, ref) {
-  var {
+const Stylix = React.forwardRef(function Stylix(props, ref) {
+  const {
     $el: El = 'div',
     $media,
     $selector,
@@ -1169,23 +1169,23 @@ var Stylix = React.forwardRef(function Stylix(props, ref) {
     className,
     children
   } = props,
-      rest = _objectWithoutPropertiesLoose(props, ["$el", "$disable", "$enable", "$media", "$selector", "$inject", "$injected", "className", "children"]);
+        rest = _objectWithoutPropertiesLoose(props, ["$el", "$disable", "$enable", "$media", "$selector", "$inject", "$injected", "className", "children"]);
 
-  var styleProps = classifyProps(rest);
-  var enabled = true;
+  const styleProps = classifyProps(rest);
+  let enabled = true;
   if ('$enable' in props && !props.$enable) enabled = false;
   if ('$disable' in props && props.$disable) enabled = false;
-  var druleRef = React.useRef();
+  const druleRef = React.useRef();
 
   if ($inject || $media) {
-    var styles = _extends({}, styleProps.advanced);
+    const styles = _extends({}, styleProps.advanced);
 
     if ($media && $selector) {
-      styles["@media " + $media] = {
+      styles[`@media ${$media}`] = {
         [$selector]: styleProps.styles
       };
     } else if ($media) {
-      styles["@media " + $media] = styleProps.styles;
+      styles[`@media ${$media}`] = styleProps.styles;
     } else if ($selector) {
       styles[$selector] = styleProps.styles;
     }
@@ -1199,10 +1199,9 @@ var Stylix = React.forwardRef(function Stylix(props, ref) {
           ref
         });
       } else {
-        var _generatedClass = createRule(druleRef, _extends({}, enabled ? styles : {}, {}, $injected));
-
+        const generatedClass = createRule(druleRef, _extends({}, enabled ? styles : {}, {}, $injected));
         return React.cloneElement(child, {
-          className: [_generatedClass || '', child.props.className || ''].join(' '),
+          className: [generatedClass || '', child.props.className || ''].join(' '),
           ref
         });
       }
@@ -1216,7 +1215,7 @@ var Stylix = React.forwardRef(function Stylix(props, ref) {
     styleProps.styles = {};
   }
 
-  var generatedClass = enabled ? createRule(druleRef, _extends({}, styleProps.styles, {}, styleProps.advanced, {}, $injected)) : '';
+  const generatedClass = enabled ? createRule(druleRef, _extends({}, styleProps.styles, {}, styleProps.advanced, {}, $injected)) : '';
   return React.createElement(El, Object.assign({
     className: [generatedClass || '', className || ''].join(' ').trim(),
     ref: ref
@@ -1225,20 +1224,16 @@ var Stylix = React.forwardRef(function Stylix(props, ref) {
 Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
 
-var _loop = function _loop(i) {
-  var tag = htmlTags[i];
+for (const i in htmlTags) {
+  const tag = htmlTags[i];
 
-  var htmlComponent = props => React.createElement(Stylix, Object.assign({
+  const htmlComponent = props => React.createElement(Stylix, Object.assign({
     "$el": tag
   }, props));
 
   htmlComponent.displayName = 'Stylix.' + htmlTags[i];
   htmlComponent.__isStylix = true;
   Stylix[tag] = htmlComponent;
-};
-
-for (var i in htmlTags) {
-  _loop(i);
 }
 
 export default Stylix;
