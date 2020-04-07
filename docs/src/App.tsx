@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Markdown from 'react-markdown';
 import './github.css';
 import reactMarkdownSandbox from './react-markdown-sandbox';
 
 export default function App() {
+  console.log('render App');
   return (
     <div>
       <Markdown className="markdown-body" astPlugins={[reactMarkdownSandbox]} escapeHtml={false}>{`

@@ -87,8 +87,12 @@ const rules = {
 module.exports = {
   extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:prettier/recommended'],
   env: {
+    es6: true,
     browser: true,
-    jest: true,
+    node: true,
+  },
+  parserOptions: {
+    ecmaVersion: 9,
   },
   rules,
   plugins: ['simple-import-sort', 'unused-imports'],

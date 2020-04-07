@@ -1,6 +1,7 @@
 import { create } from 'nano-css';
 import { addon as addonCache } from 'nano-css/addon/cache';
 import { addon as addonDrule } from 'nano-css/addon/drule';
+import { addon as addonGlobal } from 'nano-css/addon/global';
 import { addon as addonNesting } from 'nano-css/addon/nesting';
 import { addon as addonPrefixer } from 'nano-css/addon/prefixer';
 import { addon as addonRule } from 'nano-css/addon/rule';
@@ -15,6 +16,8 @@ import { StylixComponentType, StylixProps } from './types';
 const nano = create({
   pfx: 'stylix',
 });
+
+console.log('asdf');
 
 function myplugin(renderer) {
   const origPut = renderer.put;
@@ -36,6 +39,7 @@ addonUnitless(nano);
 addonPrefixer(nano);
 addonStable(nano);
 addonNesting(nano);
+addonGlobal(nano);
 myplugin(nano);
 
 type ClassifiedProps = {
@@ -80,14 +84,17 @@ const Stylix: (<ElType extends React.ElementType = 'div'>(props: StylixProps<ElT
   props: StylixProps<ElType>,
   ref,
 ) {
+  console.log('render $', props);
+
   const {
     $el: El = 'div',
-    $disable,
-    $enable,
+    $global,
     $media,
     $selector,
     $inject,
     $injected,
+    $disable,
+    $enable,
     className,
     children,
     ...rest
@@ -147,9 +154,19 @@ const Stylix: (<ElType extends React.ElementType = 'div'>(props: StylixProps<ElT
     styleProps.styles = {};
   }
 
-  const generatedClass = enabled
-    ? createRule(druleRef, { ...styleProps.styles, ...styleProps.advanced, ...$injected })
-    : '';
+  let generatedClass = '';
+  if (enabled) {
+    const styles = {
+      ...styleProps.styles,
+      ...styleProps.advanced,
+      ...$injected,
+    };
+    if ($global) {
+      generatedClass = nano.global({ [$global]: styles });
+    } else {
+      generatedClass = createRule(druleRef, styles);
+    }
+  }
 
   return (
     <El
