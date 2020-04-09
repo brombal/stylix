@@ -1,7 +1,4 @@
-import React from 'react';
-import { StylixProps } from './types';
-declare const Stylix: (<ElType extends React.ElementType = 'div'>(props: StylixProps<ElType>) => any) & {
-    displayName?: string;
-    __isStylix?: true;
-};
+import { StylixType } from './types';
+export { StylixPropsExtensions } from './types';
+declare const Stylix: StylixType;
 export default Stylix;

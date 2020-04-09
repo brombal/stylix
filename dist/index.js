@@ -24,7 +24,6 @@ import htmlTags from './html-tags.json';
 const nano = create({
     pfx: 'stylix',
 });
-console.log('asdf');
 function myplugin(renderer) {
     const origPut = renderer.put;
     const cache = {};
@@ -57,7 +56,8 @@ function classifyProps(props) {
             values.styles[key] = props[key];
         }
         else if (key[0] === '@' || key.includes('&')) {
-            values.advanced[key] = props[key];
+            // TODO i don't think this is necessary
+            // values.advanced[key] = props[key];
         }
         else {
             values.other[key] = props[key];
@@ -75,8 +75,7 @@ function createRule(ref, styles) {
     }
 }
 const Stylix = React.forwardRef(function Stylix(props, ref) {
-    console.log('render $', props);
-    const { $el: El = 'div', $global, $media, $selector, $inject, $injected, $disable, $enable, className, children } = props, rest = __rest(props, ["$el", "$global", "$media", "$selector", "$inject", "$injected", "$disable", "$enable", "className", "children"]);
+    const { $el: El = 'div', $global, $media, $selector, $selectors, $inject, $injected, $disable, $enable, className, children } = props, rest = __rest(props, ["$el", "$global", "$media", "$selector", "$selectors", "$inject", "$injected", "$disable", "$enable", "className", "children"]);
     const styleProps = classifyProps(rest);
     let enabled = true;
     if ('$enable' in props && !props.$enable)
@@ -87,15 +86,16 @@ const Stylix = React.forwardRef(function Stylix(props, ref) {
     // If injecting, iterate over children
     if ($inject || $media) {
         const styles = Object.assign({}, styleProps.advanced);
-        // If media or selector props were given, nest the styles into the correct structure
+        const innerStyles = Object.assign(Object.assign({}, $selectors), styleProps.styles);
+        // If $media and/or $selector props were given, nest the styles into the correct structure
         if ($media && $selector) {
-            styles[`@media ${$media}`] = { [$selector]: styleProps.styles };
+            styles[`@media ${$media}`] = { [$selector]: innerStyles };
         }
         else if ($media) {
-            styles[`@media ${$media}`] = styleProps.styles;
+            styles[`@media ${$media}`] = innerStyles;
         }
         else if ($selector) {
-            styles[$selector] = styleProps.styles;
+            styles[$selector] = innerStyles;
         }
         return (React.createElement(React.Fragment, null, React.Children.map(children, (child) => {
             if (!child.type)
@@ -125,9 +125,10 @@ const Stylix = React.forwardRef(function Stylix(props, ref) {
     }
     let generatedClass = '';
     if (enabled) {
-        const styles = Object.assign(Object.assign(Object.assign({}, styleProps.styles), styleProps.advanced), $injected);
+        const styles = Object.assign(Object.assign(Object.assign(Object.assign({}, styleProps.styles), styleProps.advanced), $selectors), $injected);
         if ($global) {
-            generatedClass = nano.global({ [$global]: styles });
+            nano.put('.' + nano.hash(styles), { ':global': { [$global]: styles } });
+            return null;
         }
         else {
             generatedClass = createRule(druleRef, styles);
@@ -139,10 +140,19 @@ Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
 for (const i in htmlTags) {
     const tag = htmlTags[i];
-    const htmlComponent = (props) => React.createElement(Stylix, Object.assign({ "$el": tag }, props));
+    const htmlComponent = ((props) => React.createElement(Stylix, Object.assign({ "$el": tag }, props)));
     htmlComponent.displayName = 'Stylix.' + htmlTags[i];
     htmlComponent.__isStylix = true;
     Stylix[tag] = htmlComponent;
 }
+// function Foo(props: { a: number }) {
+//   return <div>{props.a}</div>;
+// }
+// const foo1 = <Stylix $el={Foo} a={12} foo={3} />;
+// const foo2 = <Stylix $el={Foo} a="asdf" />;
+// const def1 = <Stylix onClick={() => null} />;
+// const def2 = <Stylix onClick="asdf" />;
+// const a1 = <Stylix.a href="asdf" />;
+// const a2 = <Stylix.a href={123} />;
 export default Stylix;
 //# sourceMappingURL=index.js.map

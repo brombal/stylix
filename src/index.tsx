@@ -11,13 +11,19 @@ import React, { CSSProperties } from 'react';
 
 import cssPropertyNames from './css-props.json';
 import htmlTags from './html-tags.json';
-import { StylixComponentType, StylixProps } from './types';
+import {
+  StylixComponentType,
+  StylixProps,
+  StylixCoreProps,
+  StylixHtmlTags,
+  StylixType,
+} from './types';
+
+export { StylixPropsExtensions } from './types';
 
 const nano = create({
   pfx: 'stylix',
 });
-
-console.log('asdf');
 
 function myplugin(renderer) {
   const origPut = renderer.put;
@@ -59,7 +65,8 @@ function classifyProps(props: StylixProps<any>): ClassifiedProps {
     if (cssPropertyNames.includes(key)) {
       values.styles[key] = props[key];
     } else if (key[0] === '@' || key.includes('&')) {
-      values.advanced[key] = props[key];
+      // TODO i don't think this is necessary
+      // values.advanced[key] = props[key];
     } else {
       values.other[key] = props[key];
     }
@@ -77,20 +84,16 @@ function createRule(ref, styles) {
   }
 }
 
-const Stylix: (<ElType extends React.ElementType = 'div'>(props: StylixProps<ElType>) => any) & {
-  displayName?: string;
-  __isStylix?: true;
-} = React.forwardRef(function Stylix<ElType extends React.ElementType = 'div'>(
+const Stylix: StylixType = React.forwardRef(function Stylix<ElType extends React.ElementType>(
   props: StylixProps<ElType>,
-  ref,
+  ref: any,
 ) {
-  console.log('render $', props);
-
   const {
     $el: El = 'div',
     $global,
     $media,
     $selector,
+    $selectors,
     $inject,
     $injected,
     $disable,
@@ -111,13 +114,15 @@ const Stylix: (<ElType extends React.ElementType = 'div'>(props: StylixProps<ElT
   // If injecting, iterate over children
   if ($inject || $media) {
     const styles: any = { ...styleProps.advanced };
-    // If media or selector props were given, nest the styles into the correct structure
+    const innerStyles = { ...$selectors, ...styleProps.styles };
+
+    // If $media and/or $selector props were given, nest the styles into the correct structure
     if ($media && $selector) {
-      styles[`@media ${$media}`] = { [$selector]: styleProps.styles };
+      styles[`@media ${$media}`] = { [$selector]: innerStyles };
     } else if ($media) {
-      styles[`@media ${$media}`] = styleProps.styles;
+      styles[`@media ${$media}`] = innerStyles;
     } else if ($selector) {
-      styles[$selector] = styleProps.styles;
+      styles[$selector] = innerStyles;
     }
 
     return (
@@ -159,10 +164,12 @@ const Stylix: (<ElType extends React.ElementType = 'div'>(props: StylixProps<ElT
     const styles = {
       ...styleProps.styles,
       ...styleProps.advanced,
+      ...$selectors,
       ...$injected,
     };
     if ($global) {
-      generatedClass = nano.global({ [$global]: styles });
+      nano.put('.' + (nano as any).hash(styles), { ':global': { [$global]: styles } });
+      return null;
     } else {
       generatedClass = createRule(druleRef, styles);
     }
@@ -177,18 +184,27 @@ const Stylix: (<ElType extends React.ElementType = 'div'>(props: StylixProps<ElT
       {children}
     </El>
   );
-});
+}) as any;
 
 Stylix.displayName = 'Stylix';
-
 Stylix.__isStylix = true;
 
 for (const i in htmlTags) {
   const tag = htmlTags[i];
-  const htmlComponent: StylixComponentType<any> = (props) => <Stylix $el={tag} {...props} />;
+  const htmlComponent: StylixComponentType<any> = ((props) => <Stylix $el={tag} {...props} />) as any;
   htmlComponent.displayName = 'Stylix.' + htmlTags[i];
   htmlComponent.__isStylix = true;
   Stylix[tag] = htmlComponent;
 }
+
+// function Foo(props: { a: number }) {
+//   return <div>{props.a}</div>;
+// }
+// const foo1 = <Stylix $el={Foo} a={12} foo={3} />;
+// const foo2 = <Stylix $el={Foo} a="asdf" />;
+// const def1 = <Stylix onClick={() => null} />;
+// const def2 = <Stylix onClick="asdf" />;
+// const a1 = <Stylix.a href="asdf" />;
+// const a2 = <Stylix.a href={123} />;
 
 export default Stylix;

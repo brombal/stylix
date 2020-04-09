@@ -10,7 +10,11 @@
     "moduleResolution": "node",
     "declaration": true,
     "outDir": "dist",
-    "sourceMap": true
+    "sourceMap": true,
+    "lib": [
+      "dom",
+      "es6"
+    ]
   },
   "files": ["src/index.tsx"]
 }

@@ -7,6 +7,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'stylix.js',
     library: 'Stylix',
+    libraryExport: 'default',
     libraryTarget: 'window',
   },
   module: {

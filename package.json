@@ -5,12 +5,17 @@
   "source": "src/index.tsx",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npm run build:node && npm run build:web",
+    "build": "npm run clean && npm run build:node && npm run build:web",
     "build:node": "tsc",
     "build:web": "webpack",
     "watch": "concurrently npm:watch:node npm:watch:web",
     "watch:node": "tsc --watch",
     "watch:web": "webpack --watch",
+    "serve": "webpack-dev-server --mode development",
+    "clean": "rm -rf dist",
+    "docs": "npm run clean && concurrently npm:watch:node \"wait-on dist/index.js && npm run docs:start\"",
+    "docs:start": "cd docs && npm start",
+    "docs:deploy": "cd docs && npm run deploy",
     "prettier": "prettier --write .",
     "eslint": "eslint --ext=.ts,.tsx,.js,.jsx ./src",
     "eslint:fix": "eslint --fix --ext=.ts,.tsx,.js,.jsx ./src"
@@ -18,6 +23,8 @@
   "author": "Alex Brombal",
   "license": "MIT",
   "devDependencies": {
+    "@types/react": "^16.9.32",
+    "@types/react-dom": "^16.9.6",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
     "concurrently": "^5.1.0",
@@ -35,6 +42,7 @@
     "react-dom": "^16.13.1",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",
+    "wait-on": "^4.0.1",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"
