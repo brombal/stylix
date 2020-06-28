@@ -24,6 +24,8 @@ exports.css = utils_2.css;
 var context_2 = require("./context");
 exports.useStylixSheetContext = context_2.useStylixSheetContext;
 exports.StylixProvider = context_2.StylixProvider;
+exports.StylixTheme = context_2.StylixTheme;
+exports.useStylixThemeContext = context_2.useStylixThemeContext;
 const Stylix = react_1.default.forwardRef(function Stylix(props, ref) {
     const _a = props, { $el, $elProps, $global, $media, $selector, $css, $injected, $disabled, className, children } = _a, rest = __rest(_a, ["$el", "$elProps", "$global", "$media", "$selector", "$css", "$injected", "$disabled", "className", "children"]);
     let enabled = true;

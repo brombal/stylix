@@ -187,7 +187,7 @@ function classifyProps(props) {
     const styles = {};
     const other = {};
     Object.keys(props).forEach((key) => {
-        if (css_props_json_1.default.includes(key) || css_props_json_1.default.includes(lodash_camelcase_1.default(key))) {
+        if (css_props_json_1.default.includes(lodash_camelcase_1.default(key))) {
             styles[key] = props[key];
         }
         else {
