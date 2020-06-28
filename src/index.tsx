@@ -8,7 +8,12 @@ import { classifyProps, hashString, postcssSerialize } from './utils';
 
 export { css } from './utils';
 export { StylixPropsExtensions, StylixProps } from './types';
-export { useStylixSheetContext, StylixProvider } from './context';
+export {
+  useStylixSheetContext,
+  StylixProvider,
+  StylixTheme,
+  useStylixThemeContext,
+} from './context';
 
 const Stylix: Stylix$Component = React.forwardRef(function Stylix<ElType>(
   props: Stylix$Props<ElType>,
