@@ -44,6 +44,7 @@ const defaultStylixSheetContext = () => ({
     stylesheet: null,
     styles: {},
     currentRules: [],
+    plugins: [],
 });
 const stylixSheetContext = react_1.default.createContext(defaultStylixSheetContext());
 /**
@@ -61,9 +62,11 @@ function useStylixSheetContext() {
     return ctx;
 }
 exports.useStylixSheetContext = useStylixSheetContext;
-function StylixProvider({ id, devMode = undefined, styleElement, stylesheet, children, }) {
+// TODO memoize. Currently there is no prop that should cause re-render.
+function StylixProvider({ id, devMode = undefined, styleElement, stylesheet, plugins, children, }) {
     const ctx = react_1.useRef(Object.assign(Object.assign({}, defaultStylixSheetContext()), { id, devMode: devMode !== null && devMode !== void 0 ? devMode : IS_DEV_ENV, styleElement,
-        stylesheet }));
+        stylesheet,
+        plugins }));
     if (!ctx.current.styleElement) {
         ctx.current.styleElement = document.createElement('style');
         ctx.current.styleElement.id = 'stylix-style-' + ctx.current.id;

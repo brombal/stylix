@@ -167,7 +167,7 @@ export async function applyContextRules(ctx: StylixSheetContext) {
   const allStyles = Object.values(ctx.styles)
     .map((s) => s.styles)
     .join('');
-  const newRules = await postcssToRuleArray(allStyles);
+  const newRules = await postcssToRuleArray(allStyles, ctx.plugins);
   if (!newRules.every((v, i) => ctx.currentRules[i] === newRules[i])) {
     const container = ctx.devMode ? ctx.styleElement : ctx.stylesheet;
     ctx.currentRules = newRules;

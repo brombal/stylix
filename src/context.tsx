@@ -50,6 +50,7 @@ export interface StylixSheetContextProps {
   devMode: boolean;
   styleElement: HTMLStyleElement;
   stylesheet: CSSStyleSheet;
+  plugins: any[];
 }
 
 export type StylixSheetContext = StylixSheetContextProps & {
@@ -64,6 +65,7 @@ const defaultStylixSheetContext: () => StylixSheetContext = () => ({
   stylesheet: null,
   styles: {},
   currentRules: [],
+  plugins: [],
 });
 
 const stylixSheetContext = React.createContext(defaultStylixSheetContext());
@@ -84,11 +86,14 @@ export function useStylixSheetContext(): StylixSheetContext {
   return ctx;
 }
 
+// TODO memoize. Currently there is no prop that should cause re-render.
+
 export function StylixProvider({
   id,
   devMode = undefined,
   styleElement,
   stylesheet,
+  plugins,
   children,
 }: Partial<StylixSheetContextProps> & { children: any }) {
   const ctx = useRef({
@@ -97,6 +102,7 @@ export function StylixProvider({
     devMode: devMode ?? IS_DEV_ENV,
     styleElement,
     stylesheet,
+    plugins,
   } as StylixSheetContext);
 
   if (!ctx.current.styleElement) {

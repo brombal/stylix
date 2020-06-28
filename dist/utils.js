@@ -164,7 +164,7 @@ function applyContextRules(ctx) {
         const allStyles = Object.values(ctx.styles)
             .map((s) => s.styles)
             .join('');
-        const newRules = yield postcssToRuleArray(allStyles);
+        const newRules = yield postcssToRuleArray(allStyles, ctx.plugins);
         if (!newRules.every((v, i) => ctx.currentRules[i] === newRules[i])) {
             const container = ctx.devMode ? ctx.styleElement : ctx.stylesheet;
             ctx.currentRules = newRules;
