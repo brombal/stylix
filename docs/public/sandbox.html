@@ -4,29 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Stylix Sandbox</title>
+
+    <!-- React -->
     <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- CodeMirror -->
+    <script src="https://unpkg.com/codemirror@^5/lib/codemirror.js"></script>
+    <script src="https://unpkg.com/codemirror@^5/mode/javascript/javascript.js"></script>
+    <script src="https://unpkg.com/codemirror@^5/mode/xml/xml.js"></script>
+    <script src="https://unpkg.com/codemirror@^5/mode/jsx/jsx.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/codemirror@^5/lib/codemirror.css" />
+    <link rel="stylesheet" href="https://codemirror.net/theme/material.css" />
+
+    <!-- Local -->
     <script src="http://localhost:8080/stylix.js"></script>
-    <script type="text/javascript">
-      function receiveMessage(event) {
-        // if (event.origin !== "http://example.org:8080")
-        //   return;
-
-        if (event && event.data && event.data.type === 'react') {
-          const s = document.createElement('script');
-          s.src = event.data.lib;
-          document.head.appendChild(s);
-          s.onload = () => {
-            const script = 'ReactDOM.render(' + event.data.script + ', document.getElementById("root"));';
-            eval(Babel.transform(script, { presets: ['env', 'react']}).code);
-          }
-        }
-      }
-
-      window.addEventListener("message", receiveMessage, false);
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@400;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Mono&family=Baloo+Thambi+2:wght@400;700"
+      rel="stylesheet"
+    />
     <style type="text/css">
       * {
         margin: 0;
@@ -35,12 +34,176 @@
         outline: 0;
       }
       body {
-        padding: 15px 20px;
-        font: 14px / 1.4 "Baloo Thambi 2", sans-serif, Apple Color Emoji, Segoe UI Emoji;
+        font: 16px / 1.4 'Baloo Thambi 2', sans-serif, Apple Color Emoji, Segoe UI Emoji;
+      }
+      #root {
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-start;
+        height: 100vh;
+      }
+      #codemirror-container {
+        flex: 1 1 50%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #result-container {
+        flex: 1 1 50%;
+        padding: 14px 20px;
+        box-sizing: border-box;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .CodeMirror {
+        flex: 1 1 auto;
+        font-family: 'Fira Mono', monospace;
+        font-size: 14px;
+        cursor: text;
+        height: auto;
+      }
+      .CodeMirror-scroll {
+        padding: 0 20px;
+        margin-right: 0;
+      }
+      .CodeMirror-lines {
+        box-sizing: border-box;
+        padding: 14px 0 0;
+        line-height: 1.8;
+      }
+      .CodeMirror-scroll > div:nth-child(2) {
+        display: none;
+      }
+
+      .cm-s-readonly {
+        opacity: 0.9;
+      }
+
+      .cm-s-material .cm-tag {
+        color: #f07178;
+      }
+      .cm-s-material .cm-tag.cm-bracket {
+        color: #6bdfff;
+      }
+      .cm-s-material .cm-attribute {
+        color: #ffc957;
+      }
+      .cm-s-material .cm-number {
+        color: #ce93d8;
+      }
+      .cm-s-material .cm-error {
+        color: white !important;
+        background-color: #c2185b;
       }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="codemirror-container"></div>
+      <div id="result-container">
+        <div id="result-content"></div>
+        <div id="result-error"></div>
+      </div>
+    </div>
+    <script>
+      window.$ = Stylix;
+
+      function debounce(fn, delay) {
+        var t;
+        return function () {
+          const a = arguments;
+          clearTimeout(t);
+          t = setTimeout(() => fn.apply(null, a), delay);
+        };
+      }
+
+      function execute() {
+        const scripts = codeEditors
+          .map((editor) => {
+            let script = editor.getValue();
+            if (editor.options['ignore']) script = '';
+            if (editor.options['wrap-fragment']) script = `<>${script}</>`;
+            if (editor.options['wrap-export-default']) script = `export default (${script});`;
+            return script;
+          })
+          .join('\n');
+        try {
+          const c = Babel.transform(scripts, {
+            filename: 'main.tsx',
+            presets: ['env', 'react', 'typescript'],
+          }).code;
+          var exports = {};
+          eval(c);
+          document.getElementById('result-error').innerText = '';
+          if (typeof exports.default === 'function')
+            exports.default = React.createElement(exports.default);
+          ReactDOM.render(exports.default, document.getElementById('result-content'));
+        } catch (e) {
+          let message = e.message;
+          if (e.code === 'BABEL_PARSE_ERROR') {
+            message = e.message
+              .split('\n')[0]
+              .replace('/main.tsx: ', '')
+              .replace(/ \(\d+:\d+\)$/, '');
+          }
+          showError(message);
+        }
+      }
+      const debouncedExecute = debounce(execute, 500);
+
+      function showError(message) {
+        ReactDOM.unmountComponentAtNode(document.getElementById('result-content'));
+        document.getElementById('result-error').innerText = message;
+      }
+
+      var codeEditors = [];
+
+      window.addEventListener(
+        'message',
+        function receiveMessage(event) {
+          // if (event.origin !== "http://example.org:8080")
+          //   return;
+
+          if (event && event.data && event.data.type === 'react') {
+            const scriptEl = document.createElement('script');
+            scriptEl.src = event.data.lib;
+
+            const opts = event.data.opts;
+
+            document.getElementById('root').style = opts.rootStyle;
+            document.getElementById('codemirror-container').style = opts.codeStyle;
+            if (opts.ratio) {
+              document.getElementById('codemirror-container').style.flex =
+                '1 1 ' + opts.ratio * 100 + '%';
+            }
+            document.getElementById('result-container').style = opts.resultStyle;
+
+            document.head.appendChild(scriptEl);
+            scriptEl.onload = () => {
+              event.data.editors.forEach((editorInfo) => {
+                const config = Object.assign(
+                  {
+                    mode: 'text/typescript-jsx',
+                    theme: 'material ' + (editorInfo.readOnly ? 'readonly' : ''),
+                    scrollbarStyle: 'null',
+                  },
+                  editorInfo,
+                );
+                if (config.readOnly) config.readOnly = 'nocursor';
+                const editor = CodeMirror(document.getElementById('codemirror-container'), config);
+                codeEditors.push(editor);
+                editor.on('change', debouncedExecute);
+                if (config.hidden) editor.display.wrapper.style.display = 'none';
+              });
+              execute();
+            };
+          }
+        },
+        false,
+      );
+    </script>
   </body>
 </html>

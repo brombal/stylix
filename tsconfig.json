@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "jsx": "react",
     "jsxFactory": "",
     "resolveJsonModule": true,
     "baseUrl": "./src",
-    "module": "es6",
+    "module": "commonjs",
     "target": "es6",
     "moduleResolution": "node",
     "declaration": true,

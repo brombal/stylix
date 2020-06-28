@@ -10,6 +10,7 @@ module.exports = {
     libraryExport: 'default',
     libraryTarget: 'window',
   },
+  resolve: { extensions: ['.ts', '.tsx', '.js', '.jsx'] },
   module: {
     rules: [
       {

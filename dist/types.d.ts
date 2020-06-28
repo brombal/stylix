@@ -1,27 +1,193 @@
 import React, { CSSProperties } from 'react';
+declare type StyleProperties = {
+    [key in keyof CSSProperties]: CSSProperties[key] | CSSProperties[key][] | ((theme: any, media: string[]) => CSSProperties[key] | CSSProperties[key][]);
+};
+declare type ComponentType<P = {}> = React.ElementType | React.ComponentClass<P> | ((p: P) => React.ReactElement | null);
 /**
- * These are the basic Box props, not including css properties, shortcuts, or pseudo classes.
+ * Props that exist on all Stylix components
  */
-export interface StylixCoreProps<T extends React.ElementType> {
-    $el?: T;
-    $media?: string;
-    $selector?: string;
-    $selectors?: {
-        [key: string]: StylixStyleProps;
-    };
-    $inject?: boolean;
-    $global?: string;
-    $disable?: boolean;
-    $enable?: boolean;
-    children?: any;
+interface StylixCommonProps {
+    $css?: any;
+    $disabled?: boolean;
 }
+/**
+ $global: string | object; // Applies styles globally
+ $media?: never; // Applies styles to child elements when media query matches
+ $selector?: never; // Applies styles to a custom selector (such as "& > a") relative to the child(ren).
+ $inject?: never; // Instead of creating an element, injects styles down to the element's children.
+ */
+/** $global only; no children or other props allowed */
+interface StylixGlobalProps {
+    $global: string | object;
+    $media?: never;
+    $selector?: never;
+    $el?: never;
+    children?: never;
+}
+/** $media or $selector; children required; no $el */
+interface StylixMediaProps {
+    $media: string;
+    children: any;
+    $selector?: never;
+    $el?: never;
+    $global?: never;
+}
+/** $selector; children required; no $media or $el */
+interface StylixSelectorProps {
+    $selector: string;
+    children: any;
+    $media?: never;
+    $el?: never;
+    $global?: never;
+}
+declare type ComponentProps<TComponent extends ComponentType> = Omit<React.ComponentPropsWithRef<TComponent>, keyof StyleProperties>;
+/** $el; children optional; no other Stylix props allowed; */
+export declare type StylixElProps<TComponent extends ComponentType> = {
+    $el: TComponent;
+    $elProps?: Partial<React.ComponentPropsWithoutRef<TComponent>>;
+} & ComponentProps<TComponent> & {
+    $media?: never;
+    $selector?: never;
+    $global?: never;
+};
+export interface StylixPropsExtensions {
+}
+declare type StylixExtensions = {
+    displayName?: string;
+    __isStylix: true;
+};
+export declare type StylixProps = StylixCommonProps & StyleProperties & StylixPropsExtensions;
+export declare type Stylix$Props<T> = (T extends ComponentType ? StylixElProps<T> : StylixGlobalProps | StylixMediaProps | StylixSelectorProps) & StylixProps & {
+    [key: string]: any;
+};
+export declare type Stylix$Component = {
+    <T>(props: Stylix$Props<T>, context?: any): React.ReactElement<any, any> | null;
+} & StylixExtensions & StylixHtmlTags;
+export declare type StylixHtmlProps<ElType extends React.ElementType> = ComponentProps<ElType> | StylixProps;
+export declare type StylixHtmlComponent<ElType extends React.ElementType> = React.FunctionComponent<StylixHtmlProps<ElType>> & StylixExtensions;
+export declare type StylixHtmlTags = {
+    a: StylixHtmlComponent<'a'>;
+    abbr: StylixHtmlComponent<'abbr'>;
+    address: StylixHtmlComponent<'address'>;
+    area: StylixHtmlComponent<'area'>;
+    article: StylixHtmlComponent<'article'>;
+    aside: StylixHtmlComponent<'aside'>;
+    audio: StylixHtmlComponent<'audio'>;
+    b: StylixHtmlComponent<'b'>;
+    base: StylixHtmlComponent<'base'>;
+    bdi: StylixHtmlComponent<'bdi'>;
+    bdo: StylixHtmlComponent<'bdo'>;
+    blockquote: StylixHtmlComponent<'blockquote'>;
+    body: StylixHtmlComponent<'body'>;
+    br: StylixHtmlComponent<'br'>;
+    button: StylixHtmlComponent<'button'>;
+    canvas: StylixHtmlComponent<'canvas'>;
+    caption: StylixHtmlComponent<'caption'>;
+    cite: StylixHtmlComponent<'cite'>;
+    code: StylixHtmlComponent<'code'>;
+    col: StylixHtmlComponent<'col'>;
+    colgroup: StylixHtmlComponent<'colgroup'>;
+    data: StylixHtmlComponent<'data'>;
+    datalist: StylixHtmlComponent<'datalist'>;
+    dd: StylixHtmlComponent<'dd'>;
+    del: StylixHtmlComponent<'del'>;
+    details: StylixHtmlComponent<'details'>;
+    dfn: StylixHtmlComponent<'dfn'>;
+    dialog: StylixHtmlComponent<'dialog'>;
+    div: StylixHtmlComponent<'div'>;
+    dl: StylixHtmlComponent<'dl'>;
+    dt: StylixHtmlComponent<'dt'>;
+    em: StylixHtmlComponent<'em'>;
+    embed: StylixHtmlComponent<'embed'>;
+    fieldset: StylixHtmlComponent<'fieldset'>;
+    figcaption: StylixHtmlComponent<'figcaption'>;
+    figure: StylixHtmlComponent<'figure'>;
+    footer: StylixHtmlComponent<'footer'>;
+    form: StylixHtmlComponent<'form'>;
+    h1: StylixHtmlComponent<'h1'>;
+    h2: StylixHtmlComponent<'h2'>;
+    h3: StylixHtmlComponent<'h3'>;
+    h4: StylixHtmlComponent<'h4'>;
+    h5: StylixHtmlComponent<'h5'>;
+    h6: StylixHtmlComponent<'h6'>;
+    head: StylixHtmlComponent<'head'>;
+    header: StylixHtmlComponent<'header'>;
+    hgroup: StylixHtmlComponent<'hgroup'>;
+    hr: StylixHtmlComponent<'hr'>;
+    html: StylixHtmlComponent<'html'>;
+    i: StylixHtmlComponent<'i'>;
+    iframe: StylixHtmlComponent<'iframe'>;
+    img: StylixHtmlComponent<'img'>;
+    input: StylixHtmlComponent<'input'>;
+    ins: StylixHtmlComponent<'ins'>;
+    kbd: StylixHtmlComponent<'kbd'>;
+    label: StylixHtmlComponent<'label'>;
+    legend: StylixHtmlComponent<'legend'>;
+    li: StylixHtmlComponent<'li'>;
+    link: StylixHtmlComponent<'link'>;
+    main: StylixHtmlComponent<'main'>;
+    map: StylixHtmlComponent<'map'>;
+    mark: StylixHtmlComponent<'mark'>;
+    menu: StylixHtmlComponent<'menu'>;
+    menuitem: StylixHtmlComponent<'menuitem'>;
+    meta: StylixHtmlComponent<'meta'>;
+    meter: StylixHtmlComponent<'meter'>;
+    nav: StylixHtmlComponent<'nav'>;
+    noscript: StylixHtmlComponent<'noscript'>;
+    object: StylixHtmlComponent<'object'>;
+    ol: StylixHtmlComponent<'ol'>;
+    optgroup: StylixHtmlComponent<'optgroup'>;
+    option: StylixHtmlComponent<'option'>;
+    output: StylixHtmlComponent<'output'>;
+    p: StylixHtmlComponent<'p'>;
+    param: StylixHtmlComponent<'param'>;
+    picture: StylixHtmlComponent<'picture'>;
+    pre: StylixHtmlComponent<'pre'>;
+    progress: StylixHtmlComponent<'progress'>;
+    q: StylixHtmlComponent<'q'>;
+    rp: StylixHtmlComponent<'rp'>;
+    rt: StylixHtmlComponent<'rt'>;
+    ruby: StylixHtmlComponent<'ruby'>;
+    s: StylixHtmlComponent<'s'>;
+    samp: StylixHtmlComponent<'samp'>;
+    script: StylixHtmlComponent<'script'>;
+    section: StylixHtmlComponent<'section'>;
+    select: StylixHtmlComponent<'select'>;
+    slot: StylixHtmlComponent<'slot'>;
+    small: StylixHtmlComponent<'small'>;
+    source: StylixHtmlComponent<'source'>;
+    span: StylixHtmlComponent<'span'>;
+    strong: StylixHtmlComponent<'strong'>;
+    style: StylixHtmlComponent<'style'>;
+    sub: StylixHtmlComponent<'sub'>;
+    summary: StylixHtmlComponent<'summary'>;
+    sup: StylixHtmlComponent<'sup'>;
+    svg: StylixHtmlComponent<'svg'>;
+    table: StylixHtmlComponent<'table'>;
+    tbody: StylixHtmlComponent<'tbody'>;
+    td: StylixHtmlComponent<'td'>;
+    template: StylixHtmlComponent<'template'>;
+    textarea: StylixHtmlComponent<'textarea'>;
+    tfoot: StylixHtmlComponent<'tfoot'>;
+    th: StylixHtmlComponent<'th'>;
+    thead: StylixHtmlComponent<'thead'>;
+    time: StylixHtmlComponent<'time'>;
+    title: StylixHtmlComponent<'title'>;
+    tr: StylixHtmlComponent<'tr'>;
+    track: StylixHtmlComponent<'track'>;
+    u: StylixHtmlComponent<'u'>;
+    ul: StylixHtmlComponent<'ul'>;
+    video: StylixHtmlComponent<'video'>;
+    wbr: StylixHtmlComponent<'wbr'>;
+};
+export {};
 /**
  * Additional css shortcut props.
  * These props are accepted in addition to all other valid css properties. These mostly just get converted to the
  * long versions (see `shortcutMappings` values below), but some have special treatment (see `shortcutConversions`).
  * Comments indicate what shortcuts are for.
- 
-interface IBoxCssShortcutProps {
+
+ interface IBoxCssShortcutProps {
   inline?: boolean; // display="inline"
   block?: boolean; // display="block"
   inlineBlock?: boolean; // display="inline-block"
@@ -61,141 +227,3 @@ interface IBoxCssShortcutProps {
 /**
  * A string type that represents any valid key in IBoxCssShortcutProps.
  */
-/**
- * A type that represents any object containing style information that Box understands.
- * This includes all known css properties (kebab-case and camelCase), Box css shortcut props, and all css pseudo classes.
- */
-declare type StylixStyleProps = CSSProperties;
-export interface StylixPropsExtensions {
-}
-/**
- * All Stylix component props:
- * 1. Core props (StylixCoreProps)
- * 2. Style properties (StylixStyleProps)
- * 3. General React props and ref (React.ComponentPropsWithRef)
- */
-export declare type StylixProps<T extends React.ElementType> = StylixPropsExtensions & StylixCoreProps<T> & StylixStyleProps & React.ComponentPropsWithRef<T>;
-declare type StylixExtensions = {
-    displayName?: string;
-    __isStylix: true;
-};
-export declare type StylixComponentType<ElType extends React.ElementType> = ((props: StylixProps<ElType>) => React.ReactElement) & StylixExtensions;
-export declare type StylixType = {
-    <ElType extends React.ElementType = 'div'>(props: StylixProps<ElType>): React.ReactElement;
-} & StylixExtensions & StylixHtmlTags;
-export declare type StylixHtmlTags = {
-    a: StylixComponentType<'a'>;
-    abbr: StylixComponentType<'abbr'>;
-    address: StylixComponentType<'address'>;
-    area: StylixComponentType<'area'>;
-    article: StylixComponentType<'article'>;
-    aside: StylixComponentType<'aside'>;
-    audio: StylixComponentType<'audio'>;
-    b: StylixComponentType<'b'>;
-    base: StylixComponentType<'base'>;
-    bdi: StylixComponentType<'bdi'>;
-    bdo: StylixComponentType<'bdo'>;
-    blockquote: StylixComponentType<'blockquote'>;
-    body: StylixComponentType<'body'>;
-    br: StylixComponentType<'br'>;
-    button: StylixComponentType<'button'>;
-    canvas: StylixComponentType<'canvas'>;
-    caption: StylixComponentType<'caption'>;
-    cite: StylixComponentType<'cite'>;
-    code: StylixComponentType<'code'>;
-    col: StylixComponentType<'col'>;
-    colgroup: StylixComponentType<'colgroup'>;
-    data: StylixComponentType<'data'>;
-    datalist: StylixComponentType<'datalist'>;
-    dd: StylixComponentType<'dd'>;
-    del: StylixComponentType<'del'>;
-    details: StylixComponentType<'details'>;
-    dfn: StylixComponentType<'dfn'>;
-    dialog: StylixComponentType<'dialog'>;
-    div: StylixComponentType<'div'>;
-    dl: StylixComponentType<'dl'>;
-    dt: StylixComponentType<'dt'>;
-    em: StylixComponentType<'em'>;
-    embed: StylixComponentType<'embed'>;
-    fieldset: StylixComponentType<'fieldset'>;
-    figcaption: StylixComponentType<'figcaption'>;
-    figure: StylixComponentType<'figure'>;
-    footer: StylixComponentType<'footer'>;
-    form: StylixComponentType<'form'>;
-    h1: StylixComponentType<'h1'>;
-    h2: StylixComponentType<'h2'>;
-    h3: StylixComponentType<'h3'>;
-    h4: StylixComponentType<'h4'>;
-    h5: StylixComponentType<'h5'>;
-    h6: StylixComponentType<'h6'>;
-    head: StylixComponentType<'head'>;
-    header: StylixComponentType<'header'>;
-    hgroup: StylixComponentType<'hgroup'>;
-    hr: StylixComponentType<'hr'>;
-    html: StylixComponentType<'html'>;
-    i: StylixComponentType<'i'>;
-    iframe: StylixComponentType<'iframe'>;
-    img: StylixComponentType<'img'>;
-    input: StylixComponentType<'input'>;
-    ins: StylixComponentType<'ins'>;
-    kbd: StylixComponentType<'kbd'>;
-    label: StylixComponentType<'label'>;
-    legend: StylixComponentType<'legend'>;
-    li: StylixComponentType<'li'>;
-    link: StylixComponentType<'link'>;
-    main: StylixComponentType<'main'>;
-    map: StylixComponentType<'map'>;
-    mark: StylixComponentType<'mark'>;
-    menu: StylixComponentType<'menu'>;
-    menuitem: StylixComponentType<'menuitem'>;
-    meta: StylixComponentType<'meta'>;
-    meter: StylixComponentType<'meter'>;
-    nav: StylixComponentType<'nav'>;
-    noscript: StylixComponentType<'noscript'>;
-    object: StylixComponentType<'object'>;
-    ol: StylixComponentType<'ol'>;
-    optgroup: StylixComponentType<'optgroup'>;
-    option: StylixComponentType<'option'>;
-    output: StylixComponentType<'output'>;
-    p: StylixComponentType<'p'>;
-    param: StylixComponentType<'param'>;
-    picture: StylixComponentType<'picture'>;
-    pre: StylixComponentType<'pre'>;
-    progress: StylixComponentType<'progress'>;
-    q: StylixComponentType<'q'>;
-    rp: StylixComponentType<'rp'>;
-    rt: StylixComponentType<'rt'>;
-    ruby: StylixComponentType<'ruby'>;
-    s: StylixComponentType<'s'>;
-    samp: StylixComponentType<'samp'>;
-    script: StylixComponentType<'script'>;
-    section: StylixComponentType<'section'>;
-    select: StylixComponentType<'select'>;
-    slot: StylixComponentType<'slot'>;
-    small: StylixComponentType<'small'>;
-    source: StylixComponentType<'source'>;
-    span: StylixComponentType<'span'>;
-    strong: StylixComponentType<'strong'>;
-    style: StylixComponentType<'style'>;
-    sub: StylixComponentType<'sub'>;
-    summary: StylixComponentType<'summary'>;
-    sup: StylixComponentType<'sup'>;
-    svg: StylixComponentType<'svg'>;
-    table: StylixComponentType<'table'>;
-    tbody: StylixComponentType<'tbody'>;
-    td: StylixComponentType<'td'>;
-    template: StylixComponentType<'template'>;
-    textarea: StylixComponentType<'textarea'>;
-    tfoot: StylixComponentType<'tfoot'>;
-    th: StylixComponentType<'th'>;
-    thead: StylixComponentType<'thead'>;
-    time: StylixComponentType<'time'>;
-    title: StylixComponentType<'title'>;
-    tr: StylixComponentType<'tr'>;
-    track: StylixComponentType<'track'>;
-    u: StylixComponentType<'u'>;
-    ul: StylixComponentType<'ul'>;
-    video: StylixComponentType<'video'>;
-    wbr: StylixComponentType<'wbr'>;
-};
-export {};

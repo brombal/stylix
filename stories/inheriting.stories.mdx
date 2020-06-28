@@ -1,0 +1,29 @@
+dimport { Meta, Story, Preview } from '@storybook/addon-docs/blocks';
+import $ from '../';
+
+<Meta title="Stylix" />
+
+# Stylix Demos
+
+These demos are to develop and test functionality. They aren't meant to be exhaustive tests or be
+full demonstrations. They are just a useful way to playground features.
+
+## Inheriting styles
+
+Just like with regular css, deeper element styles will naturally override styles from the parent
+elements.
+
+This is in contrast with `$inject`ing styles, which overrides the children's styles with the
+parent's (see below).
+
+<Preview>
+  <Story name="Inherited style">
+    <>
+      <$ color="green">
+        <div>green text</div>
+        <$ color="blue">blue text (override)</$>
+        <div>green text</div>
+      </$>
+    </>
+  </Story>
+</Preview>

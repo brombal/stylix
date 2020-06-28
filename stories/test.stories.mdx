@@ -1,0 +1,77 @@
+import { Meta, Story, Preview } from '@storybook/addon-docs/blocks';
+import $ from '../';
+
+<Meta title="Stylix" />
+
+# Stylix Demos
+
+These demos are to develop and test functionality. They aren't meant to be exhaustive tests or be
+full demonstrations. They are just a useful way to playground features.
+
+<Preview>
+  <Story name="Media query and pseudo class">
+    <$ $media="(min-width: 1300px)" $selector="&:hover" color="green">
+      <$ color="blue">Blue text / Green text on hover & > 1300px</$>
+    </$>
+  </Story>
+</Preview>
+
+<Preview>
+  <Story name="Combine with other classes">
+    <>
+      <style>{`.custom-class { color: red; }`}</style>
+      <$ $inject background="lightgray">
+        <div className="custom-class">red</div>
+      </$>
+    </>
+  </Story>
+</Preview>
+
+## Injecting to custom components
+
+The following demonstrates using `__isStylix` to pass styling props down to a custom component.
+
+Normally, using `$inject` will just pass a css class to any non-Stylix children. If you would rather
+your component receive all the inherited style props individually, add a property (not a prop, but a
+regular JavaScript property) to the component class or function:
+
+```jsx
+function MyComponent(props) {
+  ...
+}
+MyComponent.__isStylix = true;
+```
+
+You can then spread the props to your component.
+
+<Preview>
+  <Story name="Injecting style props to custom components">
+    {() => {
+      const MyComponent = (props) => (
+        <$ color="red" {...props}>
+          red text {JSON.stringify(props)}
+        </$>
+      );
+      MyComponent.__isStylix = true;
+      return (
+        <$ $selector="&:hover" color="red">
+          <$ $inject color="blue" background="lightgray">
+            <$ $inject color="orange" text-decoration="underline">
+              <MyComponent />
+            </$>
+          </$>
+        </$>
+      );
+    }}
+  </Story>
+</Preview>
+
+<Preview>
+  <Story name="last-child">
+    <$ $selector="&:last-child" color="red">
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+    </$>
+  </Story>
+</Preview>

@@ -1,0 +1,26 @@
+import { Meta, Story, Preview } from '@storybook/addon-docs/blocks';
+import $ from '../';
+
+<Meta title="Stylix" />
+
+# Stylix Demos
+
+These demos are to develop and test functionality. They aren't meant to be exhaustive tests or be
+full demonstrations. They are just a useful way to playground features.
+
+## Media queries
+
+Use the `$media` prop to specify the media query that the style props should apply to. Just like
+`$inject`, this will not create an element but will just pass the styles down to each child element.
+
+<Preview>
+  <Story name="Media query">
+    <$ $media="(min-width: 1300px)" color="green">
+      <$ color="orange">(Stylix) Orange text (&lt; 1300px) / Green text (> 1300px)</$>
+      <div>(div) Black text (&lt; 1300px) / Green text (> 1300px)</div>
+      <$ $inject color="red">
+        <div>(injected) Red text (&lt; 1300px) / Green text (> 1300px)</div>
+      </$>
+    </$>
+  </Story>
+</Preview>

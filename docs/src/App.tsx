@@ -15,13 +15,16 @@ export default function App() {
   const history = useHistory();
   const location = useLocation();
 
-  const navRef = useRef<HTMLDivElement>();
+  const navRef = useRef<HTMLDivElement>(null);
 
   const updateSelectedNav = useCallback(() => {
-    console.log('updateSelectedNav');
     navRef.current &&
       navRef.current.querySelectorAll('a').forEach((a) => {
-        a.classList.toggle('active', a.getAttribute('href') === '/stylix' + location.pathname);
+        a.classList.toggle(
+          'active',
+          a.getAttribute('href')!.replace(/\/$/, '') ===
+            '/stylix' + location.pathname.replace(/\/$/, ''),
+        );
       });
   }, [location]);
 
@@ -100,18 +103,26 @@ export default function App() {
             border-right="1px solid #DDD"
             background="#f8f8f8"
             padding="30px 40px"
-            $selectors={{
-              li: { listStyle: 'none', marginTop: 15 },
-              'li ul': { paddingLeft: 20 },
-              'li ul li': { fontSize: '0.9em' },
-              a: { display: 'block' },
-              'a.active': { color: '#333', fontWeight: 'bold' },
-            }}
           >
-            <Markdown ref={navRef} path="_menu" onRender={updateSelectedNav} />
+            <Markdown
+              ref={navRef}
+              path="_menu"
+              onRender={updateSelectedNav}
+              line-height={1.2}
+              font-size={17}
+              $selectors={{
+                ul: { marginLeft: 0 },
+                li: { listStyle: 'none' },
+                'li:not(:first-child)': { marginTop: 20 },
+                'li ul': { paddingLeft: 20 },
+                'li ul li': { fontSize: '0.9em' },
+                a: { display: 'block' },
+                'a.active': { color: '#333', fontWeight: 'bold' },
+              }}
+            />
           </$>
           <$ display="flex" flex="1 1 auto" flex-direction="column" align-items="center">
-            <$ width="100%" flex="1 1 auto" max-width={800} padding="50px 0 100px">
+            <$ width="100%" flex="1 1 auto" max-width={960} padding="50px 0 100px">
               <Markdown path={location.pathname} />
             </$>
             <$ text-align="center" color="#BBB" font-style="italic" padding="0 0 50px">

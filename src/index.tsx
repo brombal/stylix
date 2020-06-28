@@ -1,120 +1,49 @@
-import { create } from 'nano-css';
-import { addon as addonCache } from 'nano-css/addon/cache';
-import { addon as addonDrule } from 'nano-css/addon/drule';
-import { addon as addonGlobal } from 'nano-css/addon/global';
-import { addon as addonNesting } from 'nano-css/addon/nesting';
-import { addon as addonPrefixer } from 'nano-css/addon/prefixer';
-import { addon as addonRule } from 'nano-css/addon/rule';
-import { addon as addonStable } from 'nano-css/addon/stable';
-import { addon as addonUnitless } from 'nano-css/addon/unitless';
-import React, { CSSProperties } from 'react';
+import React from 'react';
 
-import cssPropertyNames from './css-props.json';
+import { useStylixThemeContext } from './context';
+import { useStyles } from './hooks';
 import htmlTags from './html-tags.json';
-import {
-  StylixComponentType,
-  StylixProps,
-  StylixCoreProps,
-  StylixHtmlTags,
-  StylixType,
-} from './types';
+import { Stylix$Component, Stylix$Props, StylixHtmlComponent, StylixHtmlTags } from './types';
+import { classifyProps, hashString, postcssSerialize } from './utils';
 
-export { StylixPropsExtensions } from './types';
+export { css } from './utils';
+export { StylixPropsExtensions, StylixProps } from './types';
+export { useStylixSheetContext, StylixProvider } from './context';
 
-const nano = create({
-  pfx: 'stylix',
-});
-
-function myplugin(renderer) {
-  const origPut = renderer.put;
-  const cache = {};
-  renderer.put = (selector, decls, atrule) => {
-    const cacheKey = atrule ? `${atrule}{${selector}}` : selector;
-    if (cache[cacheKey]) {
-      return;
-    }
-    cache[cacheKey] = true;
-    origPut(selector, decls, atrule);
-  };
-}
-
-addonCache(nano);
-addonRule(nano);
-addonDrule(nano);
-addonUnitless(nano);
-addonPrefixer(nano);
-addonStable(nano);
-addonNesting(nano);
-addonGlobal(nano);
-myplugin(nano);
-
-type ClassifiedProps = {
-  styles: CSSProperties;
-  advanced: any;
-  other: any;
-};
-
-function classifyProps(props: StylixProps<any>): ClassifiedProps {
-  const values: ClassifiedProps = {
-    styles: {},
-    advanced: {},
-    other: {},
-  };
-
-  Object.keys(props).forEach((key) => {
-    if (cssPropertyNames.includes(key)) {
-      values.styles[key] = props[key];
-    } else if (key[0] === '@' || key.includes('&')) {
-      // TODO i don't think this is necessary
-      // values.advanced[key] = props[key];
-    } else {
-      values.other[key] = props[key];
-    }
-  });
-
-  return values;
-}
-
-function createRule(ref, styles) {
-  if (!ref.current) {
-    ref.current = nano.drule(styles);
-    return ref.current();
-  } else {
-    return ref.current(styles);
-  }
-}
-
-const Stylix: StylixType = React.forwardRef(function Stylix<ElType extends React.ElementType>(
-  props: StylixProps<ElType>,
+const Stylix: Stylix$Component = React.forwardRef(function Stylix<ElType>(
+  props: Stylix$Props<ElType>,
   ref: any,
 ) {
   const {
-    $el: El = 'div',
+    $el,
+    $elProps,
     $global,
     $media,
     $selector,
-    $selectors,
-    $inject,
+    $css,
     $injected,
-    $disable,
-    $enable,
+    $disabled,
     className,
     children,
     ...rest
-  } = props;
-
-  const styleProps = classifyProps(rest);
+  } = props as any;
 
   let enabled = true;
-  if ('$enable' in props && !props.$enable) enabled = false;
-  if ('$disable' in props && props.$disable) enabled = false;
+  if ('$disabled' in props && $disabled) enabled = false;
 
-  const druleRef = React.useRef<any>();
+  const ctx = useStylixThemeContext();
+  const [styleProps, otherProps] = classifyProps(rest);
+
+  if ($global) {
+    if (enabled)
+      useStyles(postcssSerialize($global, ctx) + postcssSerialize(styleProps, ctx), '@global');
+    return null;
+  }
 
   // If injecting, iterate over children
-  if ($inject || $media) {
-    const styles: any = { ...styleProps.advanced };
-    const innerStyles = { ...$selectors, ...styleProps.styles };
+  if (!$el || $selector || $media) {
+    const styles: any = {};
+    const innerStyles = { ...$css, ...styleProps };
 
     // If $media and/or $selector props were given, nest the styles into the correct structure
     if ($media && $selector) {
@@ -138,10 +67,13 @@ const Stylix: StylixType = React.forwardRef(function Stylix<ElType extends React
             });
           } else {
             // If it's a regular html element or other component, just generate a className.
-            const generatedClass = createRule(druleRef, {
-              ...(enabled ? styles : {}),
-              ...$injected,
-            });
+            // console.log('stylix: generate class for regular el');
+            const generatedClass = hashString(
+              JSON.stringify({
+                ...(enabled ? styles : {}),
+                ...$injected,
+              }),
+            );
             return React.cloneElement(child, {
               className: [generatedClass || '', child.props.className || ''].join(' '),
               ref,
@@ -154,35 +86,27 @@ const Stylix: StylixType = React.forwardRef(function Stylix<ElType extends React
 
   // If not injecting, create an element and pass the merged class names
 
-  if ($selector) {
-    Object.assign(styleProps.advanced, { [$selector]: styleProps.styles });
-    styleProps.styles = {};
-  }
-
-  let generatedClass = '';
-  if (enabled) {
-    const styles = {
-      ...styleProps.styles,
-      ...styleProps.advanced,
-      ...$selectors,
-      ...$injected,
-    };
-    if ($global) {
-      nano.put('.' + (nano as any).hash(styles), { ':global': { [$global]: styles } });
-      return null;
-    } else {
-      generatedClass = createRule(druleRef, styles);
-    }
+  const styles = [styleProps, $css, $injected];
+  const css = styles
+    .map((s) => postcssSerialize(s, ctx))
+    .join('')
+    .trim();
+  let hash = '';
+  if (css && enabled) {
+    hash = hashString(css);
+    const classCss = { [`.${hash}`]: { $css: css } };
+    useStyles(postcssSerialize(classCss, ctx), hash);
   }
 
   return (
-    <El
-      className={[generatedClass || '', className || ''].join(' ').trim()}
+    <$el
+      className={[hash || '', className || ''].join(' ').trim()}
       ref={ref}
-      {...styleProps.other}
+      {...otherProps}
+      {...$elProps}
     >
       {children}
-    </El>
+    </$el>
   );
 }) as any;
 
@@ -190,21 +114,14 @@ Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
 
 for (const i in htmlTags) {
-  const tag = htmlTags[i];
-  const htmlComponent: StylixComponentType<any> = ((props) => <Stylix $el={tag} {...props} />) as any;
+  const tag = htmlTags[i] as keyof StylixHtmlTags;
+  // eslint-disable-next-line react/display-name
+  const htmlComponent: StylixHtmlComponent<any> = React.forwardRef((props, ref: any) => (
+    <Stylix $el={tag} ref={ref} {...(props as any)} />
+  )) as any;
   htmlComponent.displayName = 'Stylix.' + htmlTags[i];
   htmlComponent.__isStylix = true;
   Stylix[tag] = htmlComponent;
 }
-
-// function Foo(props: { a: number }) {
-//   return <div>{props.a}</div>;
-// }
-// const foo1 = <Stylix $el={Foo} a={12} foo={3} />;
-// const foo2 = <Stylix $el={Foo} a="asdf" />;
-// const def1 = <Stylix onClick={() => null} />;
-// const def2 = <Stylix onClick="asdf" />;
-// const a1 = <Stylix.a href="asdf" />;
-// const a2 = <Stylix.a href={123} />;
 
 export default Stylix;

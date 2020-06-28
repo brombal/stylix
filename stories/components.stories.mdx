@@ -1,0 +1,53 @@
+import { Meta, Story, Preview } from '@storybook/addon-docs/blocks';
+import $ from '../';
+
+<Meta title="Custom Components" />
+
+## Custom components
+
+The following demonstrates using `__isStylix` to pass styling props down to a custom component.
+
+Normally, using `$inject` will just pass a css class to any non-Stylix children. If you would rather
+your component receive all the inherited style props individually, add a property (not a prop, but a
+regular JavaScript property) to the component class or function:
+
+```jsx
+function MyComponent(props) {
+  ...
+}
+MyComponent.__isStylix = true;
+```
+
+You can then spread the props to your component.
+
+<Preview>
+  <Story name="Injecting style props to custom components">
+    {() => {
+      const MyComponent = (props) => (
+        <$ color="red" {...props}>
+          red text {JSON.stringify(props)}
+        </$>
+      );
+      MyComponent.__isStylix = true;
+      return (
+        <$ $selector="&:hover" color="red">
+          <$ $inject color="blue" background="lightgray">
+            <$ $inject color="orange" text-decoration="underline">
+              <MyComponent />
+            </$>
+          </$>
+        </$>
+      );
+    }}
+  </Story>
+</Preview>
+
+<Preview>
+  <Story name="last-child">
+    <$ $selector="&:last-child" color="red">
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+    </$>
+  </Story>
+</Preview>
