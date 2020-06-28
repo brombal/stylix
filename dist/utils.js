@@ -66,21 +66,19 @@ function postcssSerialize(obj, getStylixContext) {
         const ctx = typeof getStylixContext === 'function' ? getStylixContext() : getStylixContext;
         if (!ctx)
             console.error('Stylix error: interpolating arrays into a css-like object requires access to the StylixContext.');
-        const allStrings = obj.every((s) => typeof s === 'string' || typeof s === 'number');
-        const mediaMapped = obj.slice(0, ctx.media.length);
-        const unknown = obj.slice(ctx.media.length);
-        const mapStrings = (mediaContent, i) => {
-            if (allStrings)
-                mediaContent = postcssSerialize(mediaContent, getStylixContext);
+        const isInline = obj.every((s) => typeof s === 'string' || typeof s === 'number');
+        const styles = obj.map((mediaStyles, i) => {
+            mediaStyles = postcssSerialize(mediaStyles, getStylixContext);
             return ctx.media[i]
-                ? allStrings
-                    ? `@${ctx.media[i]} ${mediaContent}`
-                    : `@media ${ctx.media[i]} { ${mediaContent} }`
-                : mediaContent;
-        };
-        return (unknown.join(allStrings ? ' ' : '\n') +
-            ' ' +
-            mediaMapped.map(mapStrings).join(allStrings ? ' ' : '\n'));
+                ? isInline
+                    ? `@${ctx.media[i]} ${mediaStyles}`
+                    : `@media ${ctx.media[i]} { ${mediaStyles} }`
+                : mediaStyles;
+        });
+        const mediaStyles = styles.slice(0, ctx.media.length);
+        const otherStyles = styles.slice(ctx.media.length);
+        const sep = isInline ? ' ' : '\n';
+        return otherStyles.join(sep) + ' ' + mediaStyles.join(sep);
     }
     if (typeof obj === 'function') {
         const ctx = typeof getStylixContext === 'function' ? getStylixContext() : getStylixContext;
