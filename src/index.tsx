@@ -7,7 +7,7 @@ import { Stylix$Component, Stylix$Props, StylixHtmlComponent, StylixHtmlTags } f
 import { classifyProps, hashString, postcssSerialize } from './utils';
 
 export { css } from './utils';
-export { StylixPropsExtensions, StylixProps } from './types';
+export { StylixPropsExtensions, StylixProps, StylixHtmlProps } from './types';
 export {
   useStylixSheetContext,
   StylixProvider,

@@ -57,17 +57,10 @@ interface StylixSelectorProps {
   $global?: never;
 }
 
-// type SafeHtmlProps<TComponent extends React.ElementType> = Omit<React.ComponentPropsWithRef<TComponent>, "color" | "translate">;
 type ComponentProps<TComponent extends ComponentType> = Omit<
   React.ComponentPropsWithRef<TComponent>,
   keyof StyleProperties
 >;
-
-//   React.ComponentPropsWithRef<TComponent> extends {
-//   dangerouslySetInnerHTML?: any; // cheap way to determine that props are for an html element
-// }
-//   ? SafeHtmlProps<TComponent>
-//   : React.ComponentPropsWithRef<TComponent>;
 
 /** $el; children optional; no other Stylix props allowed; */
 export type StylixElProps<TComponent extends ComponentType> = {
@@ -103,9 +96,8 @@ export type Stylix$Component = {
   StylixHtmlTags;
 
 // Props for html components
-export type StylixHtmlProps<ElType extends React.ElementType> =
-  | ComponentProps<ElType>
-  | StylixProps;
+export type StylixHtmlProps<ElType extends React.ElementType> = ComponentProps<ElType> &
+  StylixProps;
 
 // html component
 export type StylixHtmlComponent<ElType extends React.ElementType> = React.FunctionComponent<

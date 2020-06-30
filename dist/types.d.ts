@@ -63,7 +63,7 @@ export declare type Stylix$Props<T> = (T extends ComponentType ? StylixElProps<T
 export declare type Stylix$Component = {
     <T>(props: Stylix$Props<T>, context?: any): React.ReactElement<any, any> | null;
 } & StylixExtensions & StylixHtmlTags;
-export declare type StylixHtmlProps<ElType extends React.ElementType> = ComponentProps<ElType> | StylixProps;
+export declare type StylixHtmlProps<ElType extends React.ElementType> = ComponentProps<ElType> & StylixProps;
 export declare type StylixHtmlComponent<ElType extends React.ElementType> = React.FunctionComponent<StylixHtmlProps<ElType>> & StylixExtensions;
 export declare type StylixHtmlTags = {
     a: StylixHtmlComponent<'a'>;
