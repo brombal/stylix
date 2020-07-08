@@ -14,6 +14,7 @@ export interface StylixSheetContextProps {
     styleElement: HTMLStyleElement;
     stylesheet: CSSStyleSheet;
     plugins: any[];
+    customProps: string[];
 }
 export declare type StylixSheetContext = StylixSheetContextProps & {
     styles: {
@@ -28,7 +29,7 @@ export declare type StylixSheetContext = StylixSheetContextProps & {
  * Returns the current Stylix context value.
  */
 export declare function useStylixSheetContext(): StylixSheetContext;
-export declare function StylixProvider({ id, devMode, styleElement, stylesheet, plugins, children, }: Partial<StylixSheetContextProps> & {
+export declare function StylixProvider({ id, devMode, styleElement, stylesheet, plugins, children, customProps, }: Partial<StylixSheetContextProps> & {
     children: any;
 }): JSX.Element;
 export {};

@@ -81,7 +81,6 @@ type StylixExtensions = {
 };
 
 export type StylixProps = StylixCommonProps & StyleProperties & StylixPropsExtensions;
-// export type StylixProps<T = any> = Omit<StylixCommonProps & StyleProperties & StylixPropsExtensions, keyof T>;
 
 // Props for main Stylix component ($)
 export type Stylix$Props<T> = (T extends ComponentType

@@ -33,4 +33,4 @@ export declare function css(str: TemplateStringsArray, ...args: any[]): any;
  * Applies all the rules from the current Stylix context (only updates if they have changed)
  */
 export declare function applyContextRules(ctx: StylixSheetContext): Promise<void>;
-export declare function classifyProps(props: StylixElProps<any>): [any, any];
+export declare function classifyProps(ctx: StylixSheetContext, props: StylixElProps<any>): [any, any];

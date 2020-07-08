@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useStylixThemeContext } from './context';
+import { useStylixSheetContext, useStylixThemeContext } from './context';
 import { useStyles } from './hooks';
 import htmlTags from './html-tags.json';
 import { Stylix$Component, Stylix$Props, StylixHtmlComponent, StylixHtmlTags } from './types';
@@ -36,12 +36,16 @@ const Stylix: Stylix$Component = React.forwardRef(function Stylix<ElType>(
   let enabled = true;
   if ('$disabled' in props && $disabled) enabled = false;
 
-  const ctx = useStylixThemeContext();
-  const [styleProps, otherProps] = classifyProps(rest);
+  const sheetCtx = useStylixSheetContext();
+  const themeCtx = useStylixThemeContext();
+  const [styleProps, otherProps] = classifyProps(sheetCtx, rest);
 
   if ($global) {
     if (enabled)
-      useStyles(postcssSerialize($global, ctx) + postcssSerialize(styleProps, ctx), '@global');
+      useStyles(
+        postcssSerialize($global, themeCtx) + postcssSerialize(styleProps, themeCtx),
+        '@global',
+      );
     return null;
   }
 
@@ -93,14 +97,14 @@ const Stylix: Stylix$Component = React.forwardRef(function Stylix<ElType>(
 
   const styles = [styleProps, $css, $injected];
   const css = styles
-    .map((s) => postcssSerialize(s, ctx))
+    .map((s) => postcssSerialize(s, themeCtx))
     .join('')
     .trim();
   let hash = '';
   if (css && enabled) {
     hash = hashString(css);
     const classCss = { [`.${hash}`]: { $css: css } };
-    useStyles(postcssSerialize(classCss, ctx), hash);
+    useStyles(postcssSerialize(classCss, themeCtx), hash);
   }
 
   return (

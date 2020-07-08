@@ -182,12 +182,12 @@ export async function applyContextRules(ctx: StylixSheetContext) {
   }
 }
 
-export function classifyProps(props: StylixElProps<any>): [any, any] {
+export function classifyProps(ctx: StylixSheetContext, props: StylixElProps<any>): [any, any] {
   const styles = {} as any;
   const other = {} as any;
 
   Object.keys(props).forEach((key) => {
-    if (cssPropertyNames.includes(camelcase(key))) {
+    if (cssPropertyNames.includes(camelcase(key)) || ctx.customProps?.includes(key)) {
       styles[key] = props[key];
     } else {
       other[key] = props[key];

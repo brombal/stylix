@@ -237,6 +237,30 @@ const rebeccapurple = postcssRebeccaPurple();
 </StylixProvider>;
 ```
 
+### Custom style props
+
+If a plugin provides (or allows you to define) custom css properties, you can tell Stylix about them
+using the `customProps` prop of `<StylixProvider>`:
+
+```jsx
+import $, { StylixProvider } from 'stylix';
+import postcssAlias from 'postcss-alias';
+
+<StylixProvider plugins={[postcssAlias]} customProps={['m']}>
+  <$
+    $global={css`
+      @alias {
+        m: margin;
+      }
+    `}
+  />
+  <$.div m={20}>...</$.div>
+</StylixProvider>;
+```
+
+Without telling Stylix about custom props, they would be passed through to the component as regular
+props or html attributes.
+
 ## Development
 
 ### Scripts

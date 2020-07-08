@@ -181,11 +181,12 @@ function applyContextRules(ctx) {
     });
 }
 exports.applyContextRules = applyContextRules;
-function classifyProps(props) {
+function classifyProps(ctx, props) {
     const styles = {};
     const other = {};
     Object.keys(props).forEach((key) => {
-        if (css_props_json_1.default.includes(lodash_camelcase_1.default(key))) {
+        var _a;
+        if (css_props_json_1.default.includes(lodash_camelcase_1.default(key)) || ((_a = ctx.customProps) === null || _a === void 0 ? void 0 : _a.includes(key))) {
             styles[key] = props[key];
         }
         else {

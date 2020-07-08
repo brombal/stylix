@@ -51,6 +51,7 @@ export interface StylixSheetContextProps {
   styleElement: HTMLStyleElement;
   stylesheet: CSSStyleSheet;
   plugins: any[];
+  customProps: string[];
 }
 
 export type StylixSheetContext = StylixSheetContextProps & {
@@ -66,6 +67,7 @@ const defaultStylixSheetContext: () => StylixSheetContext = () => ({
   styles: {},
   currentRules: [],
   plugins: [],
+  customProps: [],
 });
 
 const stylixSheetContext = React.createContext(defaultStylixSheetContext());
@@ -95,6 +97,7 @@ export function StylixProvider({
   stylesheet,
   plugins,
   children,
+  customProps,
 }: Partial<StylixSheetContextProps> & { children: any }) {
   const ctx = useRef({
     ...defaultStylixSheetContext(),
@@ -103,6 +106,7 @@ export function StylixProvider({
     styleElement,
     stylesheet,
     plugins,
+    customProps,
   } as StylixSheetContext);
 
   if (!ctx.current.styleElement) {

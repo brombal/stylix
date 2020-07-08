@@ -31,11 +31,12 @@ const Stylix = react_1.default.forwardRef(function Stylix(props, ref) {
     let enabled = true;
     if ('$disabled' in props && $disabled)
         enabled = false;
-    const ctx = context_1.useStylixThemeContext();
-    const [styleProps, otherProps] = utils_1.classifyProps(rest);
+    const sheetCtx = context_1.useStylixSheetContext();
+    const themeCtx = context_1.useStylixThemeContext();
+    const [styleProps, otherProps] = utils_1.classifyProps(sheetCtx, rest);
     if ($global) {
         if (enabled)
-            hooks_1.useStyles(utils_1.postcssSerialize($global, ctx) + utils_1.postcssSerialize(styleProps, ctx), '@global');
+            hooks_1.useStyles(utils_1.postcssSerialize($global, themeCtx) + utils_1.postcssSerialize(styleProps, themeCtx), '@global');
         return null;
     }
     // If injecting, iterate over children
@@ -77,14 +78,14 @@ const Stylix = react_1.default.forwardRef(function Stylix(props, ref) {
     // If not injecting, create an element and pass the merged class names
     const styles = [styleProps, $css, $injected];
     const css = styles
-        .map((s) => utils_1.postcssSerialize(s, ctx))
+        .map((s) => utils_1.postcssSerialize(s, themeCtx))
         .join('')
         .trim();
     let hash = '';
     if (css && enabled) {
         hash = utils_1.hashString(css);
         const classCss = { [`.${hash}`]: { $css: css } };
-        hooks_1.useStyles(utils_1.postcssSerialize(classCss, ctx), hash);
+        hooks_1.useStyles(utils_1.postcssSerialize(classCss, themeCtx), hash);
     }
     return (react_1.default.createElement($el, Object.assign({ className: [hash || '', className || ''].join(' ').trim(), ref: ref }, otherProps, $elProps), children));
 });
