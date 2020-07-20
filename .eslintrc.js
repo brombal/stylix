@@ -24,8 +24,8 @@ const rules = {
 
   // Turn this off in favor of simple-import-sort rule.
   'sort-imports': 0,
-
-  'simple-import-sort/sort': [
+  'import/order': 0,
+  'simple-import-sort/imports': [
     1,
     {
       // Custom groupings based on documentation from
@@ -75,6 +75,8 @@ const rules = {
   // necessary.
   '@typescript-eslint/no-explicit-any': 0,
 
+  '@typescript-eslint/explicit-module-boundary-types': 0,
+
   // Unused vars are warnings during local development.
   // Disables eslint rule in favor of typescript-specific rule below.
   // Note that this is upgraded to an error during git commits.
@@ -111,4 +113,9 @@ module.exports = {
       rules,
     },
   ],
+  settings: {
+    react: {
+      version: '17',
+    },
+  },
 };

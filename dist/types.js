@@ -1,12 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+export {};
 /**
- * Additional css shortcut props.
- * These props are accepted in addition to all other valid css properties. These mostly just get converted to the
- * long versions (see `shortcutMappings` values below), but some have special treatment (see `shortcutConversions`).
- * Comments indicate what shortcuts are for.
-
- interface IBoxCssShortcutProps {
   inline?: boolean; // display="inline"
   block?: boolean; // display="block"
   inlineBlock?: boolean; // display="inline-block"
@@ -43,8 +36,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
   ellipsis?: boolean; // textOverflow="ellipsis" overflow="hidden" whiteSpace="nowrap"
 }
  */
-/**
- * A string type that represents any valid key in IBoxCssShortcutProps.
- */
-// type BoxCssShortcutPropsKey = keyof IBoxCssShortcutProps;
 //# sourceMappingURL=types.js.map

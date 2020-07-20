@@ -1,109 +1,104 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, JSXElementConstructor } from 'react';
 
-type StyleProperties = {
-  [key in keyof CSSProperties]:
-    | CSSProperties[key]
-    | CSSProperties[key][]
-    | ((theme: any, media: string[]) => CSSProperties[key] | CSSProperties[key][]);
-};
-
-type ComponentType<P = {}> =
-  | React.ElementType
-  | React.ComponentClass<P>
-  | ((p: P) => React.ReactElement | null);
-
-/**
- * Props that exist on all Stylix components
- */
-interface StylixCommonProps {
-  $css?: any; // Applies additional styles
+interface Stylix$disabledProp {
   $disabled?: boolean; // Pass true to disable applying styles
 }
 
+interface Stylix$cssProp {
+  $css?: any;
+}
+
 /**
- $global: string | object; // Applies styles globally
- $media?: never; // Applies styles to child elements when media query matches
- $selector?: never; // Applies styles to a custom selector (such as "& > a") relative to the child(ren).
- $inject?: never; // Instead of creating an element, injects styles down to the element's children.
+ * Props for main Stylix component (<$>)
+ * The presence of `TComponent` is determined automatically by $el.
+ * <$ $el={...}>...</$>
  */
-
-/** $global only; no children or other props allowed */
-interface StylixGlobalProps {
-  $global: string | object;
-
-  $media?: never;
-  $selector?: never;
-  $el?: never;
-  children?: never;
-}
-
-/** $media or $selector; children required; no $el */
-interface StylixMediaProps {
-  $media: string;
-  children: any;
-
-  $selector?: never;
-  $el?: never;
-  $global?: never;
-}
-
-/** $selector; children required; no $media or $el */
-interface StylixSelectorProps {
-  $selector: string;
-  children: any;
-
-  $media?: never;
-  $el?: never;
-  $global?: never;
-}
-
-type ComponentProps<TComponent extends ComponentType> = Omit<
-  React.ComponentPropsWithRef<TComponent>,
-  keyof StyleProperties
->;
-
-/** $el; children optional; no other Stylix props allowed; */
-export type StylixElProps<TComponent extends ComponentType> = {
+export type Stylix$Props<TComponent extends HasProps> = {
   $el: TComponent;
   $elProps?: Partial<React.ComponentPropsWithoutRef<TComponent>>;
-} & ComponentProps<TComponent> & {
-    $media?: never;
-    $selector?: never;
-    $global?: never;
-  };
+  children?: any;
+} & Stylix$disabledProp &
+  ComponentPropsWithoutCSS<TComponent> &
+  StylixStyleProperties &
+  Record<string, any>;
+// You can add any props in order to pass them through to $el. Stylix can't be too restrictive because some components
+// (like Material UI stuff) have weird generic props that don't work well with this.
 
+/**
+ * Useful for users to define components that accept Stylix style props.
+ * - $elProps (all props of T)
+ * - $disabled prop
+ * - All props of T that don't conflict with Stylix styles
+ * - All Stylix properties
+ */
+export type StylixProps<T extends HasProps = any> = Omit<Stylix$Props<T>, '$el'>;
+
+/**
+ * All standard CSS properties plus the $css prop.
+ */
+type StylixStyleProperties = Stylix$cssProp &
+  {
+    [key in keyof CSSProperties]:
+      | CSSProperties[key]
+      | CSSProperties[key][]
+      | ((theme: any, media: string[]) => CSSProperties[key] | CSSProperties[key][]);
+  } &
+  StylixPropsExtensions;
+
+/**
+ * Allows users to add custom props to Stylix components:
+ *
+ * declare module 'stylix' {
+ *   interface StylixStyleProperties {
+ *     ...
+ *   }
+ * }
+ */
 export interface StylixPropsExtensions {} // eslint-disable-line
 
-// Additional properties on Stylix component functions
-type StylixExtensions = {
+/**
+ * Any kind of React component or DOM node.
+ */
+export type HasProps = keyof JSX.IntrinsicElements | JSXElementConstructor<any>;
+
+/**
+ * Any component's props without css properties (to avoid conflicts).
+ */
+type ComponentPropsWithoutCSS<TComponent extends HasProps> = Omit<
+  React.ComponentPropsWithRef<TComponent>,
+  keyof CSSProperties
+>;
+
+/**
+ * Additional properties on Stylix component functions.
+ */
+type StylixMetaProperties = {
   displayName?: string;
   __isStylix: true;
 };
 
-export type StylixProps = StylixCommonProps & StyleProperties & StylixPropsExtensions;
-
-// Props for main Stylix component ($)
-export type Stylix$Props<T> = (T extends ComponentType
-  ? StylixElProps<T>
-  : StylixGlobalProps | StylixMediaProps | StylixSelectorProps) &
-  StylixProps & { [key: string]: any };
-
-// Type of main Stylix component ($)
+/**
+ * Type of main Stylix component ($)
+ */
 export type Stylix$Component = {
-  <T>(props: Stylix$Props<T>, context?: any): React.ReactElement<any, any> | null;
-} & StylixExtensions &
+  <TComponent extends HasProps>(props: Stylix$Props<TComponent>, context?: any): React.ReactElement<
+    any,
+    any
+  > | null;
+} & StylixMetaProperties &
   StylixHtmlTags;
 
-// Props for html components
-export type StylixHtmlProps<ElType extends React.ElementType> = ComponentProps<ElType> &
-  StylixProps;
-
-// html component
+/**
+ * Type of Stylix html components ($.div, $.span, etc)
+ */
 export type StylixHtmlComponent<ElType extends React.ElementType> = React.FunctionComponent<
-  StylixHtmlProps<ElType>
+  StylixProps<ElType>
 > &
-  StylixExtensions;
+  StylixMetaProperties;
 
+/**
+ * Props for Stylix html components ($.div, $.span, etc)
+ */
 export type StylixHtmlTags = {
   a: StylixHtmlComponent<'a'>;
   abbr: StylixHtmlComponent<'abbr'>;
@@ -221,12 +216,6 @@ export type StylixHtmlTags = {
 };
 
 /**
- * Additional css shortcut props.
- * These props are accepted in addition to all other valid css properties. These mostly just get converted to the
- * long versions (see `shortcutMappings` values below), but some have special treatment (see `shortcutConversions`).
- * Comments indicate what shortcuts are for.
-
- interface IBoxCssShortcutProps {
   inline?: boolean; // display="inline"
   block?: boolean; // display="block"
   inlineBlock?: boolean; // display="inline-block"
@@ -263,7 +252,3 @@ export type StylixHtmlTags = {
   ellipsis?: boolean; // textOverflow="ellipsis" overflow="hidden" whiteSpace="nowrap"
 }
  */
-/**
- * A string type that represents any valid key in IBoxCssShortcutProps.
- */
-// type BoxCssShortcutPropsKey = keyof IBoxCssShortcutProps;

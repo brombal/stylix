@@ -6,7 +6,7 @@
     "jsxFactory": "",
     "resolveJsonModule": true,
     "baseUrl": "./src",
-    "module": "commonjs",
+    "module": "es6",
     "target": "es6",
     "moduleResolution": "node",
     "declaration": true,
