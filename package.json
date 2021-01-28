@@ -1,6 +1,6 @@
 {
   "name": "stylix",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Styles with props!",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -39,9 +39,9 @@
     "cssbeautify": "^0.3.1",
     "merge": "^2.1.0",
     "path-browserify": "^1.0.1",
-    "postcss": "^8.2.3",
+    "postcss": "^8.0.0",
     "postcss-default-unit": "github:brombal/postcss-default-unit#main",
-    "postcss-inline-media": "github:brombal/postcss-inline-media",
+    "postcss-inline-media": "github:brombal/postcss-inline-media#main",
     "postcss-nested": "^5.0.3",
     "throttle-debounce": "^3.0.1"
   },
