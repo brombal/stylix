@@ -3,98 +3,70 @@ import React from 'react';
 import { classifyProps } from './classifyProps';
 import htmlTags from './html-tags.json';
 import { useStylixContext } from './StylixProvider';
-import {
-  HasProps,
-  Stylix$Component,
-  Stylix$Props,
-  StylixHtmlComponent,
-  StylixHtmlTags,
-} from './types';
+import { Stylix$Component, Stylix$Props } from './types';
 import { useStyles } from './useStyles';
 
-const Stylix: Stylix$Component = React.forwardRef(function Stylix<ElType extends HasProps>(
+function _Stylix<ElType extends React.ElementType>(
   props: Stylix$Props<ElType>,
-  ref: any,
+  ref: React.Ref<ElType>,
 ) {
-  const { $el, $elProps, $css, $injected, $disabled, className, children, ...rest } = props as any;
+  const { $el, $css, $disabled, className, children, ...rest } = props as any;
 
-  let enabled = true;
-  if ('$disabled' in props && $disabled) enabled = false;
+  const ctx = useStylixContext();
+  const [styleProps, otherProps] = classifyProps(rest, ctx.styleProps);
+  if ($css) styleProps.$css = $css;
+  const hash = useStyles(styleProps, { disabled: $disabled });
 
-  const sheetCtx = useStylixContext();
-  const [styleProps, otherProps] = classifyProps(sheetCtx, rest);
+  const allProps = {
+    className: `${hash} ${className || ''}`.trim(),
+    ref: ref,
+    ...otherProps,
+  };
 
-  // TODO move this out to new $inject component
-  // If injecting, iterate over children
-  // if (!$el || $selector || $media) {
-  //   const styles: any = {};
-  //   const innerStyles = { ...$css, ...styleProps };
-  //
-  //   // If $media and/or $selector props were given, nest the styles into the correct structure
-  //   if ($media && $selector) {
-  //     styles[`@media ${$media}`] = { [$selector]: innerStyles };
-  //   } else if ($media) {
-  //     styles[`@media ${$media}`] = innerStyles;
-  //   } else if ($selector) {
-  //     styles[$selector] = innerStyles;
-  //   }
-  //
-  //   return (
-  //     <>
-  //       {React.Children.map(children, (child) => {
-  //         if (!child.type) throw new Error("Sorry, you can't $inject styles to a child text node.");
-  //         if (child.type.__isStylix) {
-  //           // If it's another Stylix component, just inject the style props.
-  //           // If this element isn't enabled, just pass the inherited style props.
-  //           return React.cloneElement(child, {
-  //             $injected: enabled ? { ...styles, ...$injected } : $injected,
-  //             ref,
-  //           });
-  //         } else {
-  //           // If it's a regular html element or other component, just generate a className.
-  //           const generatedClass = hashString(
-  //             JSON.stringify({
-  //               ...(enabled ? styles : {}),
-  //               ...$injected,
-  //             }),
-  //           );
-  //           return React.cloneElement(child, {
-  //             className: [generatedClass || '', child.props.className || ''].join(' '),
-  //             ref,
-  //           });
-  //         }
-  //       })}
-  //     </>
-  //   );
-  // }
+  if (React.isValidElement($el)) {
+    const $elProps = { ...($el.props as any) };
+    allProps.className += ' ' + $elProps.className;
+    delete $elProps.className;
+    return React.cloneElement($el, { ...allProps, ...$elProps }, ...(children || []));
+  } else {
+    if (typeof $el === 'function') {
+      return $el({ ...allProps, children });
+    } else {
+      return <$el {...allProps}>{children}</$el>;
+    }
+  }
+}
 
-  // Create an element and pass the merged class names
-  const hash = useStyles({ ...styleProps, ...$injected, $css }, false, enabled);
+const Stylix: Stylix$Component = React.forwardRef(_Stylix) as any;
 
-  return (
-    <$el
-      className={[hash || '', className || ''].join(' ').trim()}
-      ref={ref}
-      {...otherProps}
-      {...$elProps}
-    >
-      {children}
-    </$el>
-  );
-}) as any;
+Stylix.styled = ($el, conflictingPropMapping?) => {
+  // We could go through the mental gymnastics to figure out the correct type here, but it really doesn't matter,
+  // as the return type specified in types.ts is correct.
+  const r: any = React.forwardRef((props, ref) => {
+    let el = $el as React.ElementType | React.ReactElement;
+    if (conflictingPropMapping) {
+      const newProps = {} as any;
+      for (const k in conflictingPropMapping) {
+        newProps[conflictingPropMapping[k]] = (props as any)[k];
+      }
+      el = <$el {...newProps} />;
+    }
+    return _Stylix({ $el: el as any, ...props }, ref as any);
+  });
+  r.displayName = `$.${
+    ($el as any).displayName || ($el as any).name || $el.toString?.() || 'Unnamed'
+  }`;
+  r.__isStylix = true;
+  return r;
+};
 
 Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
 
 for (const i in htmlTags) {
-  const tag = htmlTags[i] as keyof StylixHtmlTags;
-  // eslint-disable-next-line react/display-name
-  const htmlComponent: StylixHtmlComponent<any> = React.forwardRef((props, ref: any) => (
-    <Stylix $el={tag} ref={ref} {...(props as any)} />
-  )) as any;
-  htmlComponent.displayName = 'Stylix.' + htmlTags[i];
-  htmlComponent.__isStylix = true;
-  Stylix[tag] = htmlComponent;
+  const tag = htmlTags[i] as keyof JSX.IntrinsicElements;
+  const htmlComponent = Stylix.styled(tag);
+  Stylix[tag] = htmlComponent as any;
 }
 
 export default Stylix;

@@ -14,7 +14,7 @@
     "sourceMap": true,
     "lib": [
       "dom",
-      "es6"
+      "es6",
     ]
   },
   "files": ["src/index.tsx"]

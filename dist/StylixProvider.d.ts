@@ -1,48 +1,50 @@
 import React from 'react';
-import { StylixThemeProps } from './StylixTheme';
+import { StylixPlugin } from './plugins';
 /**
  * Stylix context
  *
- * The <StylixProvider> wrapper represents an "instance" of Stylix - somewhat vaguely defined as a configuration,
- * set of plugins, and reference to the <style> element where css is output. All nodes contained within a
- * <StylixProvider> element will share this Stylix instance's configuration.
+ * The <StylixProvider> wrapper represents an "instance" of Stylix - a configuration, set of plugins, and reference to
+ * the <style> element where css is output. All nodes contained within a <StylixProvider> element will share this
+ * Stylix instance's configuration.
  *
- * A StylixProvider also contains a <StylixTheme>, so you can conveniently provide a theme object and media query array
- * with a single element.
+ * A StylixProvider internally contains a <StylixTheme>, so you can conveniently provide a theme object and media query
+ * array with a single element.
  *
  * See the README for more details.
  */
-export interface StylixContextProps {
-    id: string;
-    devMode: boolean;
-    plugins: StylixPlugin[];
-    stylixPluginSettings: {
-        defaultUnit?: any;
-        nested?: any;
-    };
-    styleElement: HTMLStyleElement;
-}
-declare type StylixPlugin = (ctx: StylixContext) => void;
-export interface StylixContext extends StylixContextProps {
-    stylesheet: CSSStyleSheet;
-    defs: Map<any, string>;
-    hashRefs: {
-        [key: string]: number;
-    };
-    rules: {
-        [key: string]: {
-            postcss: string;
-            hash: string;
-            rules: string[];
-        };
-    };
-    postcssPlugins: any[];
-    customProps: Set<string>;
-    initialized: boolean;
-}
-export declare function useStylixContext(): StylixContext;
-declare type StylixProviderProps = Partial<StylixContextProps> & Partial<StylixThemeProps> & {
+declare type StylixProviderProps<Theme = any> = StylixThemeProps<Theme> & {
+    id?: string;
+    devMode?: boolean;
+    plugins?: StylixPlugin[] | StylixPlugin[][];
+    styleElement?: HTMLStyleElement;
     children: any;
 };
-export declare function StylixProvider({ id, devMode, plugins, stylixPluginSettings, styleElement, children, ...other }: StylixProviderProps): React.ReactElement;
+declare type StylixThemeProps<Theme = any> = {
+    theme?: Theme;
+    media?: string[];
+    children: any;
+};
+export declare type StylixContext<Theme = any> = {
+    id: string;
+    devMode: boolean;
+    theme: Theme;
+    media: string[];
+    plugins: StylixPlugin[];
+    stylesheet: CSSStyleSheet;
+    styleElement: HTMLStyleElement;
+    rules: {
+        [key: string]: {
+            hash: string;
+            rules: string[];
+            refs: number;
+        };
+    };
+    styleProps: Record<string, string>;
+    cleanupRequest: number;
+};
+export declare type StylixPublicContext = Pick<StylixContext, 'id' | 'devMode' | 'theme' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'>;
+export declare function useStylixContext<Theme = any>(): StylixContext<Theme>;
+export declare function useStylixTheme<Theme = any>(): Theme;
+export declare function StylixProvider({ id, devMode, plugins, styleElement, children, ...themeProps }: StylixProviderProps): React.ReactElement;
+export declare function StylixTheme({ children, media, theme }: StylixThemeProps): JSX.Element;
 export {};

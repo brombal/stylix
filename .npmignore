@@ -1,0 +1,6 @@
+src/
+tests/
+.eslintignore
+.eslintrc.js
+jest.config.js
+.husky/

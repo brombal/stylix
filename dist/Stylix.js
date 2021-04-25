@@ -14,68 +14,54 @@ import { classifyProps } from './classifyProps';
 import htmlTags from './html-tags.json';
 import { useStylixContext } from './StylixProvider';
 import { useStyles } from './useStyles';
-const Stylix = React.forwardRef(function Stylix(props, ref) {
-    const _a = props, { $el, $elProps, $css, $injected, $disabled, className, children } = _a, rest = __rest(_a, ["$el", "$elProps", "$css", "$injected", "$disabled", "className", "children"]);
-    let enabled = true;
-    if ('$disabled' in props && $disabled)
-        enabled = false;
-    const sheetCtx = useStylixContext();
-    const [styleProps, otherProps] = classifyProps(sheetCtx, rest);
-    // TODO move this out to new $inject component
-    // If injecting, iterate over children
-    // if (!$el || $selector || $media) {
-    //   const styles: any = {};
-    //   const innerStyles = { ...$css, ...styleProps };
-    //
-    //   // If $media and/or $selector props were given, nest the styles into the correct structure
-    //   if ($media && $selector) {
-    //     styles[`@media ${$media}`] = { [$selector]: innerStyles };
-    //   } else if ($media) {
-    //     styles[`@media ${$media}`] = innerStyles;
-    //   } else if ($selector) {
-    //     styles[$selector] = innerStyles;
-    //   }
-    //
-    //   return (
-    //     <>
-    //       {React.Children.map(children, (child) => {
-    //         if (!child.type) throw new Error("Sorry, you can't $inject styles to a child text node.");
-    //         if (child.type.__isStylix) {
-    //           // If it's another Stylix component, just inject the style props.
-    //           // If this element isn't enabled, just pass the inherited style props.
-    //           return React.cloneElement(child, {
-    //             $injected: enabled ? { ...styles, ...$injected } : $injected,
-    //             ref,
-    //           });
-    //         } else {
-    //           // If it's a regular html element or other component, just generate a className.
-    //           const generatedClass = hashString(
-    //             JSON.stringify({
-    //               ...(enabled ? styles : {}),
-    //               ...$injected,
-    //             }),
-    //           );
-    //           return React.cloneElement(child, {
-    //             className: [generatedClass || '', child.props.className || ''].join(' '),
-    //             ref,
-    //           });
-    //         }
-    //       })}
-    //     </>
-    //   );
-    // }
-    // Create an element and pass the merged class names
-    const hash = useStyles(Object.assign(Object.assign(Object.assign({}, styleProps), $injected), { $css }), false, enabled);
-    return (React.createElement($el, Object.assign({ className: [hash || '', className || ''].join(' ').trim(), ref: ref }, otherProps, $elProps), children));
-});
+function _Stylix(props, ref) {
+    const _a = props, { $el, $css, $disabled, className, children } = _a, rest = __rest(_a, ["$el", "$css", "$disabled", "className", "children"]);
+    const ctx = useStylixContext();
+    const [styleProps, otherProps] = classifyProps(rest, ctx.styleProps);
+    if ($css)
+        styleProps.$css = $css;
+    const hash = useStyles(styleProps, { disabled: $disabled });
+    const allProps = Object.assign({ className: `${hash} ${className || ''}`.trim(), ref: ref }, otherProps);
+    if (React.isValidElement($el)) {
+        const $elProps = Object.assign({}, $el.props);
+        allProps.className += ' ' + $elProps.className;
+        delete $elProps.className;
+        return React.cloneElement($el, Object.assign(Object.assign({}, allProps), $elProps), ...(children || []));
+    }
+    else {
+        if (typeof $el === 'function') {
+            return $el(Object.assign(Object.assign({}, allProps), { children }));
+        }
+        else {
+            return React.createElement($el, Object.assign({}, allProps), children);
+        }
+    }
+}
+const Stylix = React.forwardRef(_Stylix);
+Stylix.styled = ($el, conflictingPropMapping) => {
+    var _a;
+    // We could go through the mental gymnastics to figure out the correct type here, but it really doesn't matter,
+    // as the return type specified in types.ts is correct.
+    const r = React.forwardRef((props, ref) => {
+        let el = $el;
+        if (conflictingPropMapping) {
+            const newProps = {};
+            for (const k in conflictingPropMapping) {
+                newProps[conflictingPropMapping[k]] = props[k];
+            }
+            el = React.createElement($el, Object.assign({}, newProps));
+        }
+        return _Stylix(Object.assign({ $el: el }, props), ref);
+    });
+    r.displayName = `$.${$el.displayName || $el.name || ((_a = $el.toString) === null || _a === void 0 ? void 0 : _a.call($el)) || 'Unnamed'}`;
+    r.__isStylix = true;
+    return r;
+};
 Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
 for (const i in htmlTags) {
     const tag = htmlTags[i];
-    // eslint-disable-next-line react/display-name
-    const htmlComponent = React.forwardRef((props, ref) => (React.createElement(Stylix, Object.assign({ "$el": tag, ref: ref }, props))));
-    htmlComponent.displayName = 'Stylix.' + htmlTags[i];
-    htmlComponent.__isStylix = true;
+    const htmlComponent = Stylix.styled(tag);
     Stylix[tag] = htmlComponent;
 }
 export default Stylix;

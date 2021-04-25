@@ -1,13 +1,9 @@
-import cssPropertyNames from './css-props.json';
-/**
- * Determines which props are styles to be converted to css, or regular props to be passed down to the
- * underlying element.
- */
-export function classifyProps(ctx, props) {
+export function classifyProps(props, knownProps) {
     const styles = {};
     const other = {};
     Object.keys(props).forEach((key) => {
-        if (isCSSProperty(key, ctx) || !isValidJSXProp(key)) {
+        // If prop is not a valid JSX prop, it must be a CSS selector
+        if (!isValidJSXProp(key) || isStyleProp(key, knownProps)) {
             styles[key] = props[key];
         }
         else {
@@ -17,16 +13,16 @@ export function classifyProps(ctx, props) {
     return [styles, other];
 }
 /**
- * Determines if `value` is a recognized (standard or custom Stylix) CSS property.
+ * Determines if `value` is a recognized CSS property (can be standard CSS or custom Stylix prop).
  */
-export function isCSSProperty(value, ctx) {
-    if (!isValidJSXProp(value))
-        return false; // Not an exact check, but mostly rules out complex css selectors
-    value = value.toLowerCase().replace(/[^a-z]/gi, '');
-    return (cssPropertyNames.includes(value) ||
-        [...ctx.customProps].map((s) => s.toLowerCase().replace(/[^a-z]/gi, '')).includes(value));
+export function isStyleProp(value, knownProps) {
+    return isValidJSXProp(value) && simplifyStylePropName(value) in knownProps;
 }
-function isValidJSXProp(value) {
+export function isValidJSXProp(value) {
+    // Not an exact check, but mostly rules out complex css selectors
     return /^[a-z$][a-z0-9_-]*$/i.test(value);
+}
+export function simplifyStylePropName(value) {
+    return value.toLowerCase().replace(/[^a-z]/gi, '');
 }
 //# sourceMappingURL=classifyProps.js.map

@@ -1,123 +1,165 @@
-import postcssDefaultUnit from 'postcss-default-unit';
-import postcssInlineMedia from 'postcss-inline-media';
-import postcssNested from 'postcss-nested';
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 
-import { StylixTheme, StylixThemeProps } from './StylixTheme';
+import { simplifyStylePropName } from './classifyProps';
+import cssProps from './css-props.json';
+import { applyPlugins, defaultPlugins, StylixPlugin } from './plugins';
+import { flatten } from './util/flatten';
+import { merge } from './util/merge';
 
 const IS_DEV_ENV = process.env.NODE_ENV !== 'production';
 
 /**
  * Stylix context
  *
- * The <StylixProvider> wrapper represents an "instance" of Stylix - somewhat vaguely defined as a configuration,
- * set of plugins, and reference to the <style> element where css is output. All nodes contained within a
- * <StylixProvider> element will share this Stylix instance's configuration.
+ * The <StylixProvider> wrapper represents an "instance" of Stylix - a configuration, set of plugins, and reference to
+ * the <style> element where css is output. All nodes contained within a <StylixProvider> element will share this
+ * Stylix instance's configuration.
  *
- * A StylixProvider also contains a <StylixTheme>, so you can conveniently provide a theme object and media query array
- * with a single element.
+ * A StylixProvider internally contains a <StylixTheme>, so you can conveniently provide a theme object and media query
+ * array with a single element.
  *
  * See the README for more details.
  */
 
-// Props that are accepted by the <StylixProvider>
-export interface StylixContextProps {
+// StylixProvider component props
+type StylixProviderProps<Theme = any> = StylixThemeProps<Theme> & {
+  id?: string;
+  devMode?: boolean;
+  plugins?: StylixPlugin[] | StylixPlugin[][];
+  styleElement?: HTMLStyleElement;
+  children: any;
+};
+
+type StylixThemeProps<Theme = any> = {
+  theme?: Theme;
+  media?: string[];
+  children: any;
+};
+
+// StylixContext object interface
+export type StylixContext<Theme = any> = {
   id: string;
   devMode: boolean;
+  theme: Theme;
+  media: string[];
   plugins: StylixPlugin[];
-  stylixPluginSettings: { defaultUnit?: any; nested?: any };
-  styleElement: HTMLStyleElement;
-}
-
-type StylixPlugin = (ctx: StylixContext) => void;
-
-// StylixContext object type
-export interface StylixContext extends StylixContextProps {
   stylesheet: CSSStyleSheet;
-  defs: Map<any, string>;
-  hashRefs: { [key: string]: number };
+  styleElement: HTMLStyleElement;
   rules: {
-    [key: string]: { postcss: string; hash: string; rules: string[] };
+    [key: string]: {
+      hash: string;
+      rules: string[];
+      refs: number;
+    };
   };
-  postcssPlugins: any[];
-  customProps: Set<string>;
-  initialized: boolean;
-}
+  styleProps: Record<string, string>;
+  cleanupRequest: number;
+};
 
-// Creates a default empty StylixContext object
-function defaultStylixSheetContext() {
-  return {
-    id: undefined,
-    devMode: IS_DEV_ENV,
-    plugins: [],
-    styleElement: null,
-    stylesheet: null,
-    defs: new Map(),
-    hashRefs: {},
+export type StylixPublicContext = Pick<
+  StylixContext,
+  'id' | 'devMode' | 'theme' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'
+>;
+
+const defaultStyleProps = cssProps.reduce((memo, value) => {
+  memo[simplifyStylePropName(value)] = value;
+  return memo;
+}, {});
+
+function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
+  const ctx = {
+    id: userValues.id || Math.round(Math.random() * 10000).toString(10),
+    devMode: userValues.devMode ?? IS_DEV_ENV,
+    styleProps: defaultStyleProps,
+    theme: userValues.theme || null,
+    media: userValues.media || null,
+    styleElement: userValues.styleElement,
+    plugins: flatten<StylixPlugin>(Object.values(defaultPlugins)),
     rules: {},
-    postcssPlugins: [],
-    customProps: new Set(),
-    initialized: false,
+    cleanupRequest: undefined,
   } as StylixContext;
+
+  if (!ctx.styleElement) {
+    ctx.styleElement = document.createElement('style');
+    if (ctx.id) ctx.styleElement.id = 'stylix-' + ctx.id;
+    ctx.styleElement.className = 'stylix';
+    document.head.appendChild(ctx.styleElement);
+  }
+
+  ctx.stylesheet = ctx.styleElement.sheet as CSSStyleSheet;
+
+  if (userValues.plugins?.length) {
+    flatten<StylixPlugin>(userValues.plugins).forEach((plugin) => {
+      let pluginIndex = -1;
+      if (plugin.before && ctx.plugins.includes(plugin.before))
+        pluginIndex = ctx.plugins.indexOf(plugin.before);
+      if (plugin.after && ctx.plugins.includes(plugin.after))
+        pluginIndex = ctx.plugins.indexOf(plugin.after) + 1;
+      if ('atIndex' in plugin) pluginIndex = plugin.atIndex;
+      if (pluginIndex === -1) ctx.plugins.push(plugin);
+      else ctx.plugins.splice(pluginIndex, 0, plugin);
+    });
+  }
+  applyPlugins('initialize', null, null, ctx);
+
+  return ctx;
 }
 
 // The React context object
-const stylixSheetContext = React.createContext(defaultStylixSheetContext());
+const stylixContext = React.createContext(createStylixContext());
 
 // Convenience wrapper hook that returns the current Stylix context
-export function useStylixContext(): StylixContext {
-  return useContext(stylixSheetContext);
+export function useStylixContext<Theme = any>(): StylixContext<Theme> {
+  return useContext(stylixContext);
 }
 
-// <StylixProvider> component props
-type StylixProviderProps = Partial<StylixContextProps> &
-  Partial<StylixThemeProps> & { children: any };
+// Convenience wrapper hook that returns just the current Stylix theme
+export function useStylixTheme<Theme = any>(): Theme {
+  return useContext(stylixContext).theme;
+}
 
 export function StylixProvider({
   id,
   devMode,
-  plugins = [],
-  stylixPluginSettings = {},
+  plugins,
   styleElement,
   children,
-  ...other // `other` will be StylixTheme props
+  ...themeProps
 }: StylixProviderProps): React.ReactElement {
   const ctx = useRef<StylixContext>();
-
-  if (!ctx.current) ctx.current = defaultStylixSheetContext();
-
-  if (id) ctx.current.id = id;
-  if (devMode !== undefined) ctx.current.devMode = devMode;
-  if (styleElement) ctx.current.styleElement = styleElement;
-  if (stylixPluginSettings) ctx.current.stylixPluginSettings = stylixPluginSettings;
-
-  if (!ctx.current.styleElement) {
-    ctx.current.styleElement = document.createElement('style');
-    ctx.current.styleElement.id = 'stylix-styles' + (ctx.current.id ? '-' + ctx.current.id : '');
-    ctx.current.styleElement.className = 'stylix-styles';
-    document.head.appendChild(ctx.current.styleElement);
-  }
-  ctx.current.stylesheet = ctx.current.styleElement.sheet as CSSStyleSheet;
-
-  if (!ctx.current.initialized) {
-    plugins.forEach((plugin) => {
-      if ((plugin as any).postcss) {
-        ctx.current.postcssPlugins.push(plugin);
-      } else {
-        plugin(ctx.current);
-      }
-    });
-    ctx.current.postcssPlugins.push(
-      postcssNested(ctx.current.stylixPluginSettings.nested),
-      postcssInlineMedia,
-      postcssDefaultUnit(ctx.current.stylixPluginSettings.defaultUnit),
-    );
-    ctx.current.initialized = true;
-  }
+  if (!ctx.current) ctx.current = createStylixContext({ id, devMode, plugins, styleElement });
 
   return (
-    <stylixSheetContext.Provider value={ctx.current}>
-      <StylixTheme {...other}>{children}</StylixTheme>
-    </stylixSheetContext.Provider>
+    <stylixContext.Provider value={ctx.current}>
+      <StylixTheme {...themeProps}>{children}</StylixTheme>
+    </stylixContext.Provider>
   );
+}
+
+function mergeContexts(contextA: any, contextB: any) {
+  const obj = { ...contextA };
+  const themeB = contextB.theme;
+  if (contextB)
+    Object.entries(contextB).forEach(([key, value]) => {
+      if (typeof value !== 'undefined') obj[key] = value;
+    });
+  obj.theme = merge(contextA.theme || {}, themeB);
+  return obj;
+}
+
+export function StylixTheme({ children, media, theme }: StylixThemeProps) {
+  const parentCtx = useContext(stylixContext);
+  const [contextValue, setContextValue] = useState(() =>
+    mergeContexts(parentCtx, { media, theme }),
+  );
+
+  // contextValue should only update (and cause re-renders) when relevant properties change.
+  // `media` is treated as special because providing an array of strings is easier to do inline,
+  // but we don't want to cause descendent re-renders if the values don't change.
+
+  useLayoutEffect(() => {
+    setContextValue(mergeContexts(parentCtx, { media, theme }));
+  }, [parentCtx, media?.join('|') || '', theme]);
+
+  return <stylixContext.Provider value={contextValue}>{children}</stylixContext.Provider>;
 }

@@ -9,68 +9,94 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-import postcssDefaultUnit from 'postcss-default-unit';
-import postcssInlineMedia from 'postcss-inline-media';
-import postcssNested from 'postcss-nested';
-import React, { useContext, useRef } from 'react';
-import { StylixTheme } from './StylixTheme';
+import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
+import { simplifyStylePropName } from './classifyProps';
+import cssProps from './css-props.json';
+import { applyPlugins, defaultPlugins } from './plugins';
+import { flatten } from './util/flatten';
+import { merge } from './util/merge';
 const IS_DEV_ENV = process.env.NODE_ENV !== 'production';
-// Creates a default empty StylixContext object
-function defaultStylixSheetContext() {
-    return {
-        id: undefined,
-        devMode: IS_DEV_ENV,
-        plugins: [],
-        styleElement: null,
-        stylesheet: null,
-        defs: new Map(),
-        hashRefs: {},
+const defaultStyleProps = cssProps.reduce((memo, value) => {
+    memo[simplifyStylePropName(value)] = value;
+    return memo;
+}, {});
+function createStylixContext(userValues = {}) {
+    var _a, _b;
+    const ctx = {
+        id: userValues.id || Math.round(Math.random() * 10000).toString(10),
+        devMode: (_a = userValues.devMode) !== null && _a !== void 0 ? _a : IS_DEV_ENV,
+        styleProps: defaultStyleProps,
+        theme: userValues.theme || null,
+        media: userValues.media || null,
+        styleElement: userValues.styleElement,
+        plugins: flatten(Object.values(defaultPlugins)),
         rules: {},
-        postcssPlugins: [],
-        customProps: new Set(),
-        initialized: false,
+        cleanupRequest: undefined,
     };
+    if (!ctx.styleElement) {
+        ctx.styleElement = document.createElement('style');
+        if (ctx.id)
+            ctx.styleElement.id = 'stylix-' + ctx.id;
+        ctx.styleElement.className = 'stylix';
+        document.head.appendChild(ctx.styleElement);
+    }
+    ctx.stylesheet = ctx.styleElement.sheet;
+    if ((_b = userValues.plugins) === null || _b === void 0 ? void 0 : _b.length) {
+        flatten(userValues.plugins).forEach((plugin) => {
+            let pluginIndex = -1;
+            if (plugin.before && ctx.plugins.includes(plugin.before))
+                pluginIndex = ctx.plugins.indexOf(plugin.before);
+            if (plugin.after && ctx.plugins.includes(plugin.after))
+                pluginIndex = ctx.plugins.indexOf(plugin.after) + 1;
+            if ('atIndex' in plugin)
+                pluginIndex = plugin.atIndex;
+            if (pluginIndex === -1)
+                ctx.plugins.push(plugin);
+            else
+                ctx.plugins.splice(pluginIndex, 0, plugin);
+        });
+    }
+    applyPlugins('initialize', null, null, ctx);
+    return ctx;
 }
 // The React context object
-const stylixSheetContext = React.createContext(defaultStylixSheetContext());
+const stylixContext = React.createContext(createStylixContext());
 // Convenience wrapper hook that returns the current Stylix context
 export function useStylixContext() {
-    return useContext(stylixSheetContext);
+    return useContext(stylixContext);
+}
+// Convenience wrapper hook that returns just the current Stylix theme
+export function useStylixTheme() {
+    return useContext(stylixContext).theme;
 }
 export function StylixProvider(_a) {
-    var { id, devMode, plugins = [], stylixPluginSettings = {}, styleElement, children } = _a, other = __rest(_a, ["id", "devMode", "plugins", "stylixPluginSettings", "styleElement", "children"]) // `other` will be StylixTheme props
-    ;
+    var { id, devMode, plugins, styleElement, children } = _a, themeProps = __rest(_a, ["id", "devMode", "plugins", "styleElement", "children"]);
     const ctx = useRef();
     if (!ctx.current)
-        ctx.current = defaultStylixSheetContext();
-    if (id)
-        ctx.current.id = id;
-    if (devMode !== undefined)
-        ctx.current.devMode = devMode;
-    if (styleElement)
-        ctx.current.styleElement = styleElement;
-    if (stylixPluginSettings)
-        ctx.current.stylixPluginSettings = stylixPluginSettings;
-    if (!ctx.current.styleElement) {
-        ctx.current.styleElement = document.createElement('style');
-        ctx.current.styleElement.id = 'stylix-styles' + (ctx.current.id ? '-' + ctx.current.id : '');
-        ctx.current.styleElement.className = 'stylix-styles';
-        document.head.appendChild(ctx.current.styleElement);
-    }
-    ctx.current.stylesheet = ctx.current.styleElement.sheet;
-    if (!ctx.current.initialized) {
-        plugins.forEach((plugin) => {
-            if (plugin.postcss) {
-                ctx.current.postcssPlugins.push(plugin);
-            }
-            else {
-                plugin(ctx.current);
-            }
+        ctx.current = createStylixContext({ id, devMode, plugins, styleElement });
+    return (React.createElement(stylixContext.Provider, { value: ctx.current },
+        React.createElement(StylixTheme, Object.assign({}, themeProps), children)));
+}
+function mergeContexts(contextA, contextB) {
+    const obj = Object.assign({}, contextA);
+    const themeB = contextB.theme;
+    if (contextB)
+        Object.entries(contextB).forEach(([key, value]) => {
+            if (typeof value !== 'undefined')
+                obj[key] = value;
         });
-        ctx.current.postcssPlugins.push(postcssNested(ctx.current.stylixPluginSettings.nested), postcssInlineMedia, postcssDefaultUnit(ctx.current.stylixPluginSettings.defaultUnit));
-        ctx.current.initialized = true;
-    }
-    return (React.createElement(stylixSheetContext.Provider, { value: ctx.current },
-        React.createElement(StylixTheme, Object.assign({}, other), children)));
+    obj.theme = merge(contextA.theme || {}, themeB);
+    return obj;
+}
+export function StylixTheme({ children, media, theme }) {
+    const parentCtx = useContext(stylixContext);
+    const [contextValue, setContextValue] = useState(() => mergeContexts(parentCtx, { media, theme }));
+    // contextValue should only update (and cause re-renders) when relevant properties change.
+    // `media` is treated as special because providing an array of strings is easier to do inline,
+    // but we don't want to cause descendent re-renders if the values don't change.
+    useLayoutEffect(() => {
+        setContextValue(mergeContexts(parentCtx, { media, theme }));
+    }, [parentCtx, (media === null || media === void 0 ? void 0 : media.join('|')) || '', theme]);
+    return React.createElement(stylixContext.Provider, { value: contextValue }, children);
 }
 //# sourceMappingURL=StylixProvider.js.map

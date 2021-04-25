@@ -1,57 +1,71 @@
 import { useLayoutEffect } from 'react';
-import { throttle } from 'throttle-debounce';
 import applyRules from './applyRules';
-import postcssToRuleArray from './postcssToRuleArray';
-import serializeToPostcss from './serializeToPostcss';
+import { applyPlugins } from './plugins';
+import stylesToRuleArray from './stylesToRuleArray';
 import { useStylixContext } from './StylixProvider';
-import { useStylixTheme } from './StylixTheme';
-import { hashString } from './utils';
+import { hashString } from './util/hashString';
 function cleanup(ctx) {
-    let deleted = false;
-    Object.keys(ctx.hashRefs).forEach((hash) => {
-        if (!ctx.hashRefs[hash]) {
-            delete ctx.rules[hash];
-            delete ctx.hashRefs[hash];
-            deleted = true;
-        }
-    });
-    deleted && applyRules(ctx);
+    if (typeof ctx.cleanupRequest !== 'undefined')
+        return;
+    ctx.cleanupRequest = setTimeout(() => {
+        let deleted = false;
+        Object.values(ctx.rules).forEach((rule) => {
+            if (!rule.refs) {
+                delete ctx.rules[rule.hash];
+                deleted = true;
+            }
+        });
+        deleted && applyRules(ctx);
+        delete ctx.cleanupRequest;
+    }, 100);
 }
-const throttledCleanup = throttle(100, false, cleanup, false);
 /**
- * Accepts an object of postcss-compatible styles and returns a className based on the styles' hash.
- * If `global` is false, provided styles are contained within the generated classname.
+ * Accepts a Stylix CSS object and returns a unique className based on the styles' hash.
+ * The styles are registered with the Stylix context and will be applied to the document.
+ * If `global` is false, provided styles will be nested within the generated classname.
  * Returns the className hash if enabled, or an empty string.
  */
-export function useStyles(styles, global, enabled) {
+export function useStyles(styles, options = { global: false, disabled: false }) {
     const stylixCtx = useStylixContext();
-    const themeCtx = useStylixTheme();
-    const stylesRef = { postcss: '', hash: '', rules: [] }; // useRef<string>();
-    // Serialize value into postcss and generate hash
-    const json = enabled && styles && JSON.stringify(styles);
-    stylesRef.hash = json && json !== '{}' && json !== '[]' ? hashString(json) : '';
+    // Preprocess styles with plugins
+    if (!options.disabled && styles)
+        styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
+    // Serialize value and generate hash
+    const json = !options.disabled && styles && JSON.stringify(styles);
+    const hash = json && json !== '{}' && json !== '[]'
+        ? hashString(JSON.stringify(stylixCtx.media || []) + json)
+        : '';
     // When hash changes, add/remove ref count
     useLayoutEffect(() => {
-        if (!stylesRef.hash)
+        if (!hash)
             return;
-        stylixCtx.hashRefs[stylesRef.hash] = (stylixCtx.hashRefs[stylesRef.hash] || 0) + 1;
+        stylixCtx.rules[hash].refs++;
         return () => {
-            stylixCtx.hashRefs[stylesRef.hash]--;
-            throttledCleanup(stylixCtx);
+            stylixCtx.rules[hash].refs--;
+            cleanup(stylixCtx);
         };
-    }, [stylesRef.hash]);
-    if (!stylesRef.hash) {
+    }, [hash]);
+    if (!hash) {
         return '';
     }
-    // If css is not cached, process postcss to css and cache.
-    // Apply rules here, since this is the only way rules are changed
-    if (!stylixCtx.rules[stylesRef.hash]) {
+    // If css is not cached, process css and apply it.
+    if (!stylixCtx.rules[hash]) {
         // If not global styles, wrap original styles with classname
-        stylesRef.postcss = serializeToPostcss(global ? styles : { ['.' + stylesRef.hash]: styles }, stylixCtx, themeCtx);
-        stylesRef.rules = postcssToRuleArray(stylesRef.postcss, stylixCtx);
-        stylixCtx.rules[stylesRef.hash] = stylesRef;
+        if (!options.global)
+            styles = { ['.' + hash]: styles };
+        stylixCtx.rules[hash] = {
+            hash,
+            rules: stylesToRuleArray(styles, hash, stylixCtx),
+            refs: 0,
+        };
         applyRules(stylixCtx);
     }
-    return stylesRef.hash;
+    return hash;
+}
+export function useKeyframes(keyframes, disabled = false) {
+    return useStyles({ '@keyframes $$class': keyframes }, { global: true, disabled });
+}
+export function useGlobalStyles(styles, disabled = false) {
+    return useStyles(styles, { global: true, disabled });
 }
 //# sourceMappingURL=useStyles.js.map

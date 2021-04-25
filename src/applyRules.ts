@@ -4,17 +4,14 @@ import { StylixContext } from './StylixProvider';
  * Applies rules from given StylixContext to the <style> element.
  */
 export default function applyRules(ctx: StylixContext): void {
-  const flattenedRules = Object.values(ctx.rules).reduce((acc, val) => acc.concat(val.rules), []);
+  const flattenedRules = Object.values(ctx.rules).reduce(
+    (acc, val) => acc.concat(val.rules),
+    [] as string[],
+  );
 
   if (ctx.devMode) {
     const container = ctx.styleElement;
-    let cssbeautify: (...args: any[]) => any;
-    if (process.env.NODE_ENV !== 'production') {
-      cssbeautify = require('cssbeautify');
-    } else {
-      cssbeautify = (a) => a;
-    }
-    container.innerHTML = cssbeautify(flattenedRules.join(''), { indent: '  ' });
+    container.innerHTML = flattenedRules.join('\n');
   } else {
     const container = ctx.stylesheet;
     if (container.rules)

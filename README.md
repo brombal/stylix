@@ -141,7 +141,7 @@ The `<StylixProvider>` component accepts the following props (all of them are op
   be viewed in the browser's inspector. Otherwise, the more performant stylesheet API is used. By
   default, the value is false when `process.env.NODE_ENV === 'production'` and true otherwise.
 
-- `plugins: any[]` - An array of Stylix/PostCSS plugins. See **Plugins** below.
+- `plugins: any[]` - An array of Stylix plugins. See **Plugins** below.
 
 - `styleElement: HTMLStyleElement` - If you want to explicitly tell Stylix to use an existing
   `<style>` DOM node to write styles to, you can specify it here. By default, Stylix will create a

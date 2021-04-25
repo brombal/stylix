@@ -1,49 +1,30 @@
-import React, { CSSProperties, JSXElementConstructor } from 'react';
+import React, { CSSProperties } from 'react';
 
-interface Stylix$disabledProp {
-  $disabled?: boolean; // Pass true to disable applying styles
-}
+export type StylixValue<T> =
+  | T
+  | Array<T | '@'>
+  | ((theme: any, media: string[]) => T | Array<T | '@'>);
 
-interface Stylix$cssProp {
+/**
+ * All standard CSS properties, custom style props, and the $css prop.
+ */
+type StylixStyleProps = {
+  /**
+   * Additional styles.
+   */
   $css?: any;
-}
-
-/**
- * Props for main Stylix component (<$>)
- * The presence of `TComponent` is determined automatically by $el.
- * <$ $el={...}>...</$>
- */
-export type Stylix$Props<TComponent extends HasProps> = {
-  $el: TComponent;
-  $elProps?: Partial<React.ComponentPropsWithoutRef<TComponent>>;
-  children?: any;
-} & Stylix$disabledProp &
-  ComponentPropsWithoutCSS<TComponent> &
-  StylixStyleProperties &
-  Record<string, any>;
-// You can add any props in order to pass them through to $el. Stylix can't be too restrictive because some components
-// (like Material UI stuff) have weird generic props that don't work well with this.
-
-/**
- * Useful for users to define components that accept Stylix style props.
- * - $elProps (all props of T)
- * - $disabled prop
- * - All props of T that don't conflict with Stylix styles
- * - All Stylix properties
- */
-export type StylixProps<T extends HasProps = any> = Omit<Stylix$Props<T>, '$el'>;
-
-/**
- * All standard CSS properties plus the $css prop.
- */
-type StylixStyleProperties = Stylix$cssProp &
+  /**
+   * Disables Stylix for the current element.
+   */
+  $disabled?: boolean;
+} & {
+  [key in keyof CSSProperties]?: StylixValue<CSSProperties[key]>;
+} &
   {
-    [key in keyof CSSProperties]:
-      | CSSProperties[key]
-      | CSSProperties[key][]
-      | ((theme: any, media: string[]) => CSSProperties[key] | CSSProperties[key][]);
-  } &
-  StylixPropsExtensions;
+    [key in keyof StylixPropsExtensions]?: StylixValue<
+      key extends keyof StylixPropsExtensions ? StylixPropsExtensions[key] : never
+    >;
+  };
 
 /**
  * Allows users to add custom props to Stylix components:
@@ -57,198 +38,85 @@ type StylixStyleProperties = Stylix$cssProp &
 export interface StylixPropsExtensions {} // eslint-disable-line
 
 /**
- * Any kind of React component or DOM node.
+ * A component's props, without properties that conflict with style properties.
  */
-export type HasProps = keyof JSX.IntrinsicElements | JSXElementConstructor<any>;
+type ComponentPropsWithoutStyles<TComponent extends React.ElementType> = Omit<
+  React.ComponentPropsWithRef<TComponent>,
+  keyof StylixStyleProps
+>;
 
 /**
- * Any component's props without css properties (to avoid conflicts).
+ * Allows users to define components that accept Stylix style props.
  */
-type ComponentPropsWithoutCSS<TComponent extends HasProps> = Omit<
-  React.ComponentPropsWithRef<TComponent>,
-  keyof CSSProperties
->;
+export type StylixProps<
+  ElType extends React.ElementType = any
+> = ComponentPropsWithoutStyles<ElType> & StylixStyleProps;
 
 /**
  * Additional properties on Stylix component functions.
  */
-type StylixMetaProperties = {
+type StylixComponentMeta = {
   displayName?: string;
   __isStylix: true;
 };
+
+export type StylixWrappedComponentProps<
+  TComponent extends React.ElementType
+> = ComponentPropsWithoutStyles<TComponent> & StylixStyleProps;
+
+export type StylixWrappedComponent<
+  TComponent extends React.ElementType,
+  TAdditionalProps = unknown
+> = React.FunctionComponent<TAdditionalProps & StylixWrappedComponentProps<TComponent>> &
+  StylixComponentMeta;
+
+/**
+ * Props for main Stylix component (<$>)
+ * `TComponent` is determined automatically by the type of $el.
+ * <$ $el={...}>...</$>
+ */
+export type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> = {
+  /**
+   * Specifies the element to render.
+   */
+  $el: TComponent;
+} & ComponentPropsWithoutStyles<
+  TComponent extends React.ElementType
+    ? TComponent
+    : TComponent extends React.ReactElement<infer P>
+    ? P
+    : never
+> &
+  StylixStyleProps;
 
 /**
  * Type of main Stylix component ($)
  */
 export type Stylix$Component = {
-  <TComponent extends HasProps>(props: Stylix$Props<TComponent>, context?: any): React.ReactElement<
-    any,
-    any
-  > | null;
-} & StylixMetaProperties &
-  StylixHtmlTags;
+  /**
+   * This is equivalent to React.FunctionComponent, but must be specified explicitly this way to allow
+   * TComponent to be generic here and not directly on Stylix$Component, so that it can be inferred at the time
+   * the component is used.
+   */
+  <TComponent extends React.ElementType | React.ReactElement>(
+    props: Stylix$Props<TComponent>,
+    context?: any,
+  ): React.ReactElement<any, any> | null;
 
-/**
- * Type of Stylix html components ($.div, $.span, etc)
- */
-export type StylixHtmlComponent<ElType extends React.ElementType> = React.FunctionComponent<
-  StylixProps<ElType>
-> &
-  StylixMetaProperties;
-
-/**
- * Props for Stylix html components ($.div, $.span, etc)
- */
-export type StylixHtmlTags = {
-  a: StylixHtmlComponent<'a'>;
-  abbr: StylixHtmlComponent<'abbr'>;
-  address: StylixHtmlComponent<'address'>;
-  area: StylixHtmlComponent<'area'>;
-  article: StylixHtmlComponent<'article'>;
-  aside: StylixHtmlComponent<'aside'>;
-  audio: StylixHtmlComponent<'audio'>;
-  b: StylixHtmlComponent<'b'>;
-  base: StylixHtmlComponent<'base'>;
-  bdi: StylixHtmlComponent<'bdi'>;
-  bdo: StylixHtmlComponent<'bdo'>;
-  blockquote: StylixHtmlComponent<'blockquote'>;
-  body: StylixHtmlComponent<'body'>;
-  br: StylixHtmlComponent<'br'>;
-  button: StylixHtmlComponent<'button'>;
-  canvas: StylixHtmlComponent<'canvas'>;
-  caption: StylixHtmlComponent<'caption'>;
-  cite: StylixHtmlComponent<'cite'>;
-  code: StylixHtmlComponent<'code'>;
-  col: StylixHtmlComponent<'col'>;
-  colgroup: StylixHtmlComponent<'colgroup'>;
-  data: StylixHtmlComponent<'data'>;
-  datalist: StylixHtmlComponent<'datalist'>;
-  dd: StylixHtmlComponent<'dd'>;
-  del: StylixHtmlComponent<'del'>;
-  details: StylixHtmlComponent<'details'>;
-  dfn: StylixHtmlComponent<'dfn'>;
-  dialog: StylixHtmlComponent<'dialog'>;
-  div: StylixHtmlComponent<'div'>;
-  dl: StylixHtmlComponent<'dl'>;
-  dt: StylixHtmlComponent<'dt'>;
-  em: StylixHtmlComponent<'em'>;
-  embed: StylixHtmlComponent<'embed'>;
-  fieldset: StylixHtmlComponent<'fieldset'>;
-  figcaption: StylixHtmlComponent<'figcaption'>;
-  figure: StylixHtmlComponent<'figure'>;
-  footer: StylixHtmlComponent<'footer'>;
-  form: StylixHtmlComponent<'form'>;
-  h1: StylixHtmlComponent<'h1'>;
-  h2: StylixHtmlComponent<'h2'>;
-  h3: StylixHtmlComponent<'h3'>;
-  h4: StylixHtmlComponent<'h4'>;
-  h5: StylixHtmlComponent<'h5'>;
-  h6: StylixHtmlComponent<'h6'>;
-  head: StylixHtmlComponent<'head'>;
-  header: StylixHtmlComponent<'header'>;
-  hgroup: StylixHtmlComponent<'hgroup'>;
-  hr: StylixHtmlComponent<'hr'>;
-  html: StylixHtmlComponent<'html'>;
-  i: StylixHtmlComponent<'i'>;
-  iframe: StylixHtmlComponent<'iframe'>;
-  img: StylixHtmlComponent<'img'>;
-  input: StylixHtmlComponent<'input'>;
-  ins: StylixHtmlComponent<'ins'>;
-  kbd: StylixHtmlComponent<'kbd'>;
-  label: StylixHtmlComponent<'label'>;
-  legend: StylixHtmlComponent<'legend'>;
-  li: StylixHtmlComponent<'li'>;
-  link: StylixHtmlComponent<'link'>;
-  main: StylixHtmlComponent<'main'>;
-  map: StylixHtmlComponent<'map'>;
-  mark: StylixHtmlComponent<'mark'>;
-  menu: StylixHtmlComponent<'menu'>;
-  menuitem: StylixHtmlComponent<'menuitem'>;
-  meta: StylixHtmlComponent<'meta'>;
-  meter: StylixHtmlComponent<'meter'>;
-  nav: StylixHtmlComponent<'nav'>;
-  noscript: StylixHtmlComponent<'noscript'>;
-  object: StylixHtmlComponent<'object'>;
-  ol: StylixHtmlComponent<'ol'>;
-  optgroup: StylixHtmlComponent<'optgroup'>;
-  option: StylixHtmlComponent<'option'>;
-  output: StylixHtmlComponent<'output'>;
-  p: StylixHtmlComponent<'p'>;
-  param: StylixHtmlComponent<'param'>;
-  picture: StylixHtmlComponent<'picture'>;
-  pre: StylixHtmlComponent<'pre'>;
-  progress: StylixHtmlComponent<'progress'>;
-  q: StylixHtmlComponent<'q'>;
-  rp: StylixHtmlComponent<'rp'>;
-  rt: StylixHtmlComponent<'rt'>;
-  ruby: StylixHtmlComponent<'ruby'>;
-  s: StylixHtmlComponent<'s'>;
-  samp: StylixHtmlComponent<'samp'>;
-  script: StylixHtmlComponent<'script'>;
-  section: StylixHtmlComponent<'section'>;
-  select: StylixHtmlComponent<'select'>;
-  slot: StylixHtmlComponent<'slot'>;
-  small: StylixHtmlComponent<'small'>;
-  source: StylixHtmlComponent<'source'>;
-  span: StylixHtmlComponent<'span'>;
-  strong: StylixHtmlComponent<'strong'>;
-  style: StylixHtmlComponent<'style'>;
-  sub: StylixHtmlComponent<'sub'>;
-  summary: StylixHtmlComponent<'summary'>;
-  sup: StylixHtmlComponent<'sup'>;
-  svg: StylixHtmlComponent<'svg'>;
-  table: StylixHtmlComponent<'table'>;
-  tbody: StylixHtmlComponent<'tbody'>;
-  td: StylixHtmlComponent<'td'>;
-  template: StylixHtmlComponent<'template'>;
-  textarea: StylixHtmlComponent<'textarea'>;
-  tfoot: StylixHtmlComponent<'tfoot'>;
-  th: StylixHtmlComponent<'th'>;
-  thead: StylixHtmlComponent<'thead'>;
-  time: StylixHtmlComponent<'time'>;
-  title: StylixHtmlComponent<'title'>;
-  tr: StylixHtmlComponent<'tr'>;
-  track: StylixHtmlComponent<'track'>;
-  u: StylixHtmlComponent<'u'>;
-  ul: StylixHtmlComponent<'ul'>;
-  video: StylixHtmlComponent<'video'>;
-  wbr: StylixHtmlComponent<'wbr'>;
-};
-
-/**
-  inline?: boolean; // display="inline"
-  block?: boolean; // display="block"
-  inlineBlock?: boolean; // display="inline-block"
-  flex?: boolean; // display="flex"
-  inlineFlex?: boolean; // display="inline-flex"
-  flexMe?: CSS.FlexProperty<string | number>; // flex="...", needed because of 'flex' shorthand above
-  flexChildren?: CSS.FlexProperty<string | number>; // flex="..." on all immediate children
-  align?: CSS.AlignItemsProperty; // alignItems
-  justify?: CSS.JustifyContentProperty; // justifyContent
-  wrap?: CSS.FlexWrapProperty;
-  absolute?: boolean; // position="absolute"
-  relative?: boolean; // position="relative"
-  column?: boolean; // flexDirection="column"
-  bg?: CSS.BackgroundProperty<string | number>; // background
-  bgColor?: CSS.BackgroundColorProperty; // backgroundColor
-  m?: CSS.MarginProperty<string | number>; // margin
-  mt?: CSS.MarginTopProperty<string | number>; // marginTop, etc
-  mr?: CSS.MarginRightProperty<string | number>;
-  mb?: CSS.MarginBottomProperty<string | number>;
-  ml?: CSS.MarginLeftProperty<string | number>;
-  p?: CSS.PaddingProperty<string | number>; // padding
-  pt?: CSS.PaddingTopProperty<string | number>; // paddingTop, etc
-  pr?: CSS.PaddingRightProperty<string | number>;
-  pb?: CSS.PaddingBottomProperty<string | number>;
-  pl?: CSS.PaddingLeftProperty<string | number>;
-  size?: CSS.FontSizeProperty<string | number>; // fontSize
-  weight?: CSS.FontWeightProperty; // fontWeight
-  bold?: boolean; // weight="bold"
-  italic?: boolean; // fontStyle="italic"
-  vAlign?: CSS.VerticalAlignProperty<string | number>; // verticalAlign
-  alignCenter?: boolean; // textAlign="center"
-  alignRight?: boolean; // textAlign="right"
-  alignLeft?: boolean; // textAlign="left"
-  ellipsis?: boolean; // textOverflow="ellipsis" overflow="hidden" whiteSpace="nowrap"
-}
- */
+  /**
+   * Type for the $.styled() helper function.
+   */
+  styled: <
+    TComponent extends React.ElementType,
+    TPropMap extends Record<string, string> = Record<string, never>
+  >(
+    $el: TComponent,
+    conflictingPropMapping?: TPropMap,
+  ) => StylixWrappedComponent<TComponent, Record<keyof TPropMap, any>>;
+} & StylixComponentMeta &
+  {
+    /**
+     * Additional properties for Stylix html components ($.div, $.span, etc)
+     */
+    [key in keyof JSX.IntrinsicElements]: StylixWrappedComponent<key>;
+  };
