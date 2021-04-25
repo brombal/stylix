@@ -1,6 +1,6 @@
 {
   "name": "@stylix/core",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "React, with style. Add styles to your React apps with props: the easy, natural, and low learning curve approach.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,7 +42,7 @@
   },
   "lint-staged": {
     "**/*.{md,json}": [
-      "prettier --write"
+      "prettier --embedded-language-formatting off --write"
     ],
     "src/**/*.{js,jsx,ts,tsx}": [
       "eslint"

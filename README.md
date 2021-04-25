@@ -37,7 +37,11 @@ the root of your app:
 import { StylixProvider } from '@stylix/core';
 
 function App() {
-  return <StylixProvider>{/* your app */}</StylixProvider>;
+  return (
+    <StylixProvider>
+      {/* your app */}
+    </StylixProvider>
+  );
 }
 ```
 
@@ -51,7 +55,7 @@ options, can be customized.
 Import the default `$` object from `@stylix/core` and use it to render stylable HTML elements in
 place of the regular old tags:
 
-```tsx-render
+```tsx
 import $ from '@stylix/core';
 
 <$.div
