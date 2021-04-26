@@ -62,10 +62,10 @@ export function useStyles(styles, options = { global: false, disabled: false }) 
     }
     return hash;
 }
-export function useKeyframes(keyframes, disabled = false) {
-    return useStyles({ '@keyframes $$class': keyframes }, { global: true, disabled });
+export function useKeyframes(keyframes, options = { disabled: false }) {
+    return useStyles({ '@keyframes $$class': keyframes }, Object.assign({ global: true }, options));
 }
-export function useGlobalStyles(styles, disabled = false) {
-    return useStyles(styles, { global: true, disabled });
+export function useGlobalStyles(styles, options = { disabled: false }) {
+    return useStyles(styles, Object.assign(Object.assign({}, options), { global: true }));
 }
 //# sourceMappingURL=useStyles.js.map

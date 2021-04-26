@@ -78,10 +78,16 @@ export function useStyles(
   return hash;
 }
 
-export function useKeyframes(keyframes: any, disabled = false) {
-  return useStyles({ '@keyframes $$class': keyframes }, { global: true, disabled });
+export function useKeyframes(
+  keyframes: any,
+  options: { disabled?: boolean } = { disabled: false },
+) {
+  return useStyles({ '@keyframes $$class': keyframes }, { global: true, ...options });
 }
 
-export function useGlobalStyles(styles: any, disabled = false) {
-  return useStyles(styles, { global: true, disabled });
+export function useGlobalStyles(
+  styles: any,
+  options: { disabled?: boolean } = { disabled: false },
+) {
+  return useStyles(styles, { ...options, global: true });
 }

@@ -8,5 +8,9 @@ export declare function useStyles(styles: any, options?: {
     global?: boolean;
     disabled?: boolean;
 }): string;
-export declare function useKeyframes(keyframes: any, disabled?: boolean): string;
-export declare function useGlobalStyles(styles: any, disabled?: boolean): string;
+export declare function useKeyframes(keyframes: any, options?: {
+    disabled?: boolean;
+}): string;
+export declare function useGlobalStyles(styles: any, options?: {
+    disabled?: boolean;
+}): string;

@@ -4,4 +4,5 @@ export { useStylixContext, useStylixTheme, StylixProvider, StylixPublicContext a
 export { useStyles, useKeyframes, useGlobalStyles } from './useStyles';
 export { defaultPlugins, customProps, StylixPlugin, StylixPluginFunctionContext } from './plugins';
 export { mapObjectRecursive } from './util/mapObjectRecursive';
+export { walkRecursive } from './util/walkRecursive';
 export default $;
