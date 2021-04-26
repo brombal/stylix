@@ -1,7 +1,15 @@
 {
   "name": "@stylix/core",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "React, with style. Add styles to your React apps with props: the easy, natural, and low learning curve approach.",
+  "keywords": [
+    "react",
+    "styles",
+    "css",
+    "css-in-js",
+    "emotion",
+    "styled-components"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
