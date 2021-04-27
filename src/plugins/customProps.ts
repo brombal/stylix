@@ -21,7 +21,7 @@ export const customProps = (customProps: Record<string, any>): StylixPlugin[] =>
     {
       name: 'customPropsProcess',
       type: 'processStyles',
-      after: mediaArrays,
+      before: mediaArrays,
       plugin(ctx: StylixPluginFunctionContext, styles: any) {
         return walkRecursive(styles, (key, value, object) => {
           if (!isValidJSXProp(key)) return;

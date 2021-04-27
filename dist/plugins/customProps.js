@@ -17,7 +17,7 @@ export const customProps = (customProps) => {
         {
             name: 'customPropsProcess',
             type: 'processStyles',
-            after: mediaArrays,
+            before: mediaArrays,
             plugin(ctx, styles) {
                 return walkRecursive(styles, (key, value, object) => {
                     if (!isValidJSXProp(key))
