@@ -1,9 +1,1 @@
 node_modules/
-
-# Ignore the Stylix build files for the UMD module in the docs folder
-docs/public/stylix/
-
-# Ignore the docs site build files; these are created on the gh-pages branch by the npm script
-docs/build/
-
-docs/.env

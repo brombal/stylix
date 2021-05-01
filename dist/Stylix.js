@@ -28,14 +28,7 @@ function _Stylix(props, ref) {
         delete $elProps.className;
         return React.cloneElement($el, Object.assign(Object.assign({}, allProps), $elProps), ...(children || []));
     }
-    else {
-        if (typeof $el === 'function') {
-            return $el(Object.assign(Object.assign({}, allProps), { children }));
-        }
-        else {
-            return React.createElement($el, Object.assign({}, allProps), children);
-        }
-    }
+    return React.createElement($el, Object.assign({}, allProps), children);
 }
 const Stylix = React.forwardRef(_Stylix);
 Stylix.styled = ($el, conflictingPropMapping) => {

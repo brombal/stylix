@@ -1,4 +1,3 @@
-console.log(process.env);
 const IS_GIT = Object.keys(process.env).some(env => env.startsWith('GIT_'));
 
 const rules = {

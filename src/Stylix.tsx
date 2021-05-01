@@ -28,13 +28,9 @@ function _Stylix<ElType extends React.ElementType>(
     allProps.className += ' ' + $elProps.className;
     delete $elProps.className;
     return React.cloneElement($el, { ...allProps, ...$elProps }, ...(children || []));
-  } else {
-    if (typeof $el === 'function') {
-      return $el({ ...allProps, children });
-    } else {
-      return <$el {...allProps}>{children}</$el>;
-    }
   }
+
+  return <$el {...allProps}>{children}</$el>;
 }
 
 const Stylix: Stylix$Component = React.forwardRef(_Stylix) as any;
