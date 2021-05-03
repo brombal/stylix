@@ -1,6 +1,6 @@
 {
   "name": "@stylix/core",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "React, with style. Add styles to your React apps with props: the easy, natural, and low learning curve approach.",
   "keywords": [
     "react",
@@ -24,6 +24,9 @@
   },
   "author": "Alex Brombal",
   "license": "MIT",
+  "homepage": "https://stylix.dev/",
+  "bugs": "https://github.com/brombal/stylix/issues",
+  "repository": "https://github.com/brombal/stylix",
   "devDependencies": {
     "@types/jest": "^26.0.22",
     "@types/node": "^14.14.20",
