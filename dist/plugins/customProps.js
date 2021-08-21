@@ -25,21 +25,28 @@ export const customProps = (customProps) => {
                     const simpleKey = simplifyStylePropName(key);
                     if (!(simpleKey in customProps))
                         return;
-                    const customValue = customProps[simpleKey];
-                    if (typeof customValue === 'object') {
-                        const enabled = !!value;
-                        delete object[key];
-                        if (enabled)
-                            Object.assign(object, customValue);
+                    const propValue = customProps[simpleKey];
+                    const objectClone = Object.assign({}, object);
+                    const keys = Object.keys(object);
+                    const afterKeys = keys.slice(keys.indexOf(key) + 1);
+                    const newStyles = {};
+                    if (typeof propValue === 'object') {
+                        if (value)
+                            Object.assign(newStyles, propValue);
                     }
-                    else if (typeof customValue === 'string') {
-                        delete object[key];
-                        object[customValue] = value;
+                    else if (typeof propValue === 'string') {
+                        newStyles[propValue] = value;
                     }
-                    else if (typeof customValue === 'function') {
-                        delete object[key];
-                        Object.assign(object, customValue(value));
+                    else if (typeof propValue === 'function') {
+                        Object.assign(newStyles, propValue(value));
                     }
+                    delete object[key];
+                    Object.assign(object, newStyles);
+                    afterKeys.forEach((k) => {
+                        const val = objectClone[k];
+                        delete object[k];
+                        object[k] = val;
+                    });
                 });
             },
         },

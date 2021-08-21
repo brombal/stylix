@@ -27,7 +27,11 @@ function _Stylix<ElType extends React.ElementType>(
     const $elProps = { ...($el.props as any) };
     allProps.className += ' ' + ($elProps.className || '');
     delete $elProps.className;
-    return React.cloneElement($el, { ...allProps, ...$elProps }, ...(children || []));
+    return React.cloneElement(
+      $el,
+      { ...allProps, ...$elProps },
+      ...(React.Children.toArray(children) || []),
+    );
   }
 
   return <$el {...allProps}>{children}</$el>;

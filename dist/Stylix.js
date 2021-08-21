@@ -26,7 +26,7 @@ function _Stylix(props, ref) {
         const $elProps = Object.assign({}, $el.props);
         allProps.className += ' ' + ($elProps.className || '');
         delete $elProps.className;
-        return React.cloneElement($el, Object.assign(Object.assign({}, allProps), $elProps), ...(children || []));
+        return React.cloneElement($el, Object.assign(Object.assign({}, allProps), $elProps), ...(React.Children.toArray(children) || []));
     }
     return React.createElement($el, Object.assign({}, allProps), children);
 }
