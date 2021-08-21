@@ -25,7 +25,7 @@ function _Stylix<ElType extends React.ElementType>(
 
   if (React.isValidElement($el)) {
     const $elProps = { ...($el.props as any) };
-    allProps.className += ' ' + $elProps.className;
+    allProps.className += ' ' + ($elProps.className || '');
     delete $elProps.className;
     return React.cloneElement($el, { ...allProps, ...$elProps }, ...(children || []));
   }

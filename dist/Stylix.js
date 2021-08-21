@@ -24,7 +24,7 @@ function _Stylix(props, ref) {
     const allProps = Object.assign({ className: `${hash} ${className || ''}`.trim(), ref: ref }, otherProps);
     if (React.isValidElement($el)) {
         const $elProps = Object.assign({}, $el.props);
-        allProps.className += ' ' + $elProps.className;
+        allProps.className += ' ' + ($elProps.className || '');
         delete $elProps.className;
         return React.cloneElement($el, Object.assign(Object.assign({}, allProps), $elProps), ...(children || []));
     }
