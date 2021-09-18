@@ -1,8 +1,13 @@
-import { isPlainObject } from './isPlainObject';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.cloneDeep = void 0;
+const isPlainObject_1 = require("./isPlainObject");
 /**
  * Deeply clones a value.
  */
-export function cloneDeep(value) {
+function cloneDeep(value) {
+    if (!value || typeof value !== 'object')
+        return value;
     if (Array.isArray(value)) {
         const clone = [];
         for (let index = 0; index < value.length; ++index) {
@@ -10,14 +15,14 @@ export function cloneDeep(value) {
         }
         return clone;
     }
-    else if (isPlainObject(value)) {
+    if (isPlainObject_1.isPlainObject(value)) {
         const clone = {};
         for (const key in value) {
             clone[key] = cloneDeep(value[key]);
         }
         return clone;
     }
-    else
-        return value;
+    return value;
 }
+exports.cloneDeep = cloneDeep;
 //# sourceMappingURL=cloneDeep.js.map

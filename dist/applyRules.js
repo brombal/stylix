@@ -1,11 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Applies rules from given StylixContext to the <style> element.
  */
-export default function applyRules(ctx) {
-    const flattenedRules = Object.values(ctx.rules).reduce((acc, val) => acc.concat(val.rules), []);
+function applyRules(ctx) {
+    const flattenedRules = [];
+    for (const key in ctx.rules) {
+        const val = ctx.rules[key];
+        flattenedRules.push(...val.rules);
+    }
+    if (ctx.styleCollector) {
+        ctx.styleCollector.length = 0;
+        ctx.styleCollector.push(...flattenedRules);
+        return;
+    }
     if (ctx.devMode) {
-        const container = ctx.styleElement;
-        container.innerHTML = flattenedRules.join('\n');
+        ctx.styleElement.innerHTML = flattenedRules.join('\n');
     }
     else {
         const container = ctx.stylesheet;
@@ -13,7 +23,9 @@ export default function applyRules(ctx) {
             while (container.rules.length) {
                 container.deleteRule(0);
             }
-        flattenedRules.forEach((rule, i) => container.insertRule(rule, i));
+        for (const i in flattenedRules)
+            container.insertRule(flattenedRules[i], +i);
     }
 }
+exports.default = applyRules;
 //# sourceMappingURL=applyRules.js.map

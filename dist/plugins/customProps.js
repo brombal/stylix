@@ -1,31 +1,36 @@
-import { isValidJSXProp, simplifyStylePropName } from '../classifyProps';
-import { walkRecursive } from '../util/walkRecursive';
-import { mediaArrays } from './mediaArrays';
-export const customProps = (customProps) => {
-    customProps = Object.keys(customProps).reduce((memo, key) => {
-        memo[simplifyStylePropName(key)] = customProps[key];
-        return memo;
-    }, {});
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.customProps = void 0;
+const classifyProps_1 = require("../classifyProps");
+const isPlainObject_1 = require("../util/isPlainObject");
+const walkRecursive_1 = require("../util/walkRecursive");
+const mediaArrays_1 = require("./mediaArrays");
+const customProps = (customProps) => {
+    for (const key in customProps) {
+        customProps[classifyProps_1.simplifyStylePropName(key)] = customProps[key];
+    }
     return [
         {
             name: 'customPropsInit',
             type: 'initialize',
             plugin(ctx) {
-                Object.keys(customProps).forEach((key) => (ctx.styleProps[simplifyStylePropName(key)] = key));
+                for (const key in customProps) {
+                    ctx.styleProps[classifyProps_1.simplifyStylePropName(key)] = key;
+                }
             },
         },
         {
             name: 'customPropsProcess',
             type: 'processStyles',
-            before: mediaArrays,
+            before: mediaArrays_1.mediaArrays,
             plugin(ctx, styles) {
-                return walkRecursive(styles, (key, value, object) => {
-                    if (!isValidJSXProp(key))
+                return walkRecursive_1.walkRecursive(styles, (key, value, object) => {
+                    if (!classifyProps_1.isValidJSXProp(key) || isPlainObject_1.isPlainObject(value))
                         return;
-                    const simpleKey = simplifyStylePropName(key);
-                    if (!(simpleKey in customProps))
-                        return;
+                    const simpleKey = classifyProps_1.simplifyStylePropName(key);
                     const propValue = customProps[simpleKey];
+                    if (!propValue)
+                        return;
                     const objectClone = Object.assign({}, object);
                     const keys = Object.keys(object);
                     const afterKeys = keys.slice(keys.indexOf(key) + 1);
@@ -42,14 +47,15 @@ export const customProps = (customProps) => {
                     }
                     delete object[key];
                     Object.assign(object, newStyles);
-                    afterKeys.forEach((k) => {
+                    for (const k of afterKeys) {
                         const val = objectClone[k];
                         delete object[k];
                         object[k] = val;
-                    });
+                    }
                 });
             },
         },
     ];
 };
+exports.customProps = customProps;
 //# sourceMappingURL=customProps.js.map

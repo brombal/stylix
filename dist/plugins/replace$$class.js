@@ -1,16 +1,20 @@
-import { mapObjectRecursive } from '../util/mapObjectRecursive';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.replace$$class = void 0;
+const mapObjectRecursive_1 = require("../util/mapObjectRecursive");
 /**
  * Replaces $$class with hash in string values
  */
-export const replace$$class = {
+exports.replace$$class = {
     name: 'replace$$class',
     type: 'processStyles',
     plugin(ctx, styles) {
-        return mapObjectRecursive(styles, (key, value) => {
-            value = typeof value === 'string' ? value.replace('$$class', ctx.hash) : value;
-            key = typeof key === 'string' ? key.replace('$$class', ctx.hash) : key;
-            return { [key]: value };
-        });
+        return mapObjectRecursive_1.mapObjectRecursive(styles, replace$$classMap, { ctx });
     },
+};
+const replace$$classMap = (key, value, object, context) => {
+    value = typeof value === 'string' ? value.replace('$$class', context.ctx.hash) : value;
+    key = typeof key === 'string' ? key.replace('$$class', context.ctx.hash) : key;
+    return { [key]: value };
 };
 //# sourceMappingURL=replace$$class.js.map

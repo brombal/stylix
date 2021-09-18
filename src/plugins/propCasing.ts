@@ -9,10 +9,12 @@ export const propCasing: StylixPlugin = {
   name: 'normalizeStyleProps',
   type: 'processStyles',
   plugin(ctx: StylixPluginFunctionContext, styles: any) {
-    return mapObjectRecursive(styles, (key, value) => {
-      if (typeof key === 'string' && ctx.styleProps[simplifyStylePropName(key)]) {
-        return { [ctx.styleProps[simplifyStylePropName(key)]]: value };
-      }
-    });
+    return mapObjectRecursive(styles, propCasingMap, { ctx });
   },
 };
+
+function propCasingMap(key, value, object, context) {
+  if (typeof key === 'string' && context.ctx.styleProps[simplifyStylePropName(key)]) {
+    return { [context.ctx.styleProps[simplifyStylePropName(key)]]: value };
+  }
+}

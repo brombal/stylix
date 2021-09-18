@@ -1,11 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.flatten = void 0;
 /**
  * Flatten an array recursively.
  */
-export function flatten(array) {
+function flatten(array) {
     const result = [];
     _flatten(array, result);
     return result;
 }
+exports.flatten = flatten;
 function _flatten(array, result) {
     for (let i = 0; i < array.length; i++) {
         const value = array[i];

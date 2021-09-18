@@ -10,40 +10,45 @@ export const mediaArrays: StylixPlugin = {
   type: 'processStyles',
   plugin(ctx: StylixPluginFunctionContext, styles: any) {
     // Fill out ditto values
-    styles = mapObjectRecursive(styles, (key, value) => {
-      if (Array.isArray(value)) {
-        value.forEach((v, i) => {
-          if (v === '@') value[i] = value[i - 1];
-        });
-        return { [key]: value };
-      }
-    });
+    styles = mapObjectRecursive(styles, mapDittoValues);
     const mediaStyles = {};
     let nonMediaStyles = styles;
-    ctx.media?.forEach((mediaQuery, i) => {
+    for (const i in ctx.media) {
+      const mediaQuery = ctx.media[i];
       if (!mediaQuery) {
-        nonMediaStyles = mapObjectRecursive(styles, (key, value) => {
-          if (Array.isArray(value)) {
-            return { [key]: value[i] };
-          }
-        });
+        nonMediaStyles = mapObjectRecursive(styles, mapNonMedia, { i });
       } else {
-        mediaStyles[`@media ${mediaQuery}`] = mapObjectRecursive(
-          styles,
-          (key: string, value, object, context) => {
-            if (key.startsWith('@keyframes')) context.keyframes = true;
-            if (Array.isArray(value)) {
-              return { [key]: value[i] };
-            }
-            if (isPlainObject(value) || context.keyframes) {
-              return;
-            }
-            // delete key/value pair if primitive
-            return { [key]: undefined };
-          },
-        );
+        mediaStyles[`@media ${mediaQuery}`] = mapObjectRecursive(styles, mapMediaStyles, { i });
       }
-    });
+    }
     return { ...nonMediaStyles, ...mediaStyles };
   },
 };
+
+function mapDittoValues(key, value) {
+  if (Array.isArray(value)) {
+    for (const i in value) {
+      const v = value[i];
+      if (v === '@') value[i] = value[+i - 1];
+    }
+    return { [key]: value };
+  }
+}
+
+function mapNonMedia(key, value, object, context) {
+  if (Array.isArray(value)) {
+    return { [key]: value[context.i] };
+  }
+}
+
+function mapMediaStyles(key: string, value, object, context) {
+  if (key.startsWith('@keyframes')) context.keyframes = true;
+  if (Array.isArray(value)) {
+    return { [key]: value[context.i] };
+  }
+  if (isPlainObject(value) || context.keyframes) {
+    return;
+  }
+  // delete key/value pair if primitive
+  return { [key]: undefined };
+}

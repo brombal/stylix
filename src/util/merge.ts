@@ -21,16 +21,15 @@ export function merge(...items: any[] | undefined) {
     );
   }
 
-  return items.reduce(
-    (merged, item) => {
-      if (!Array.isArray(item) && !isPlainObject(item)) return merged;
+  const merged = Array.isArray(items[0]) ? [] : {};
+  for (const item of items) {
+    if (!Array.isArray(item) && !isPlainObject(item)) return merged;
 
-      [...Object.keys(item), ...Object.getOwnPropertySymbols(item)].forEach((key: any) => {
-        const result = merge(merged[key], item[key]);
-        if (typeof result !== 'undefined') merged[key] = result;
-      });
-      return merged;
-    },
-    Array.isArray(items[0]) ? [] : {},
-  );
+    const keys = [...Object.keys(item), ...Object.getOwnPropertySymbols(item)];
+    for (const key of keys) {
+      const result = merge(merged[key], item[key]);
+      if (typeof result !== 'undefined') merged[key] = result;
+    }
+  }
+  return merged;
 }

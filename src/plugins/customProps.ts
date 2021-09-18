@@ -1,21 +1,22 @@
 import { isValidJSXProp, simplifyStylePropName } from '../classifyProps';
+import { isPlainObject } from '../util/isPlainObject';
 import { walkRecursive } from '../util/walkRecursive';
 import { StylixPlugin, StylixPluginFunctionContext } from './index';
 import { mediaArrays } from './mediaArrays';
 
 export const customProps = (customProps: Record<string, any>): StylixPlugin[] => {
-  customProps = Object.keys(customProps).reduce((memo: any, key: string) => {
-    memo[simplifyStylePropName(key)] = customProps[key];
-    return memo;
-  }, {});
+  for (const key in customProps) {
+    customProps[simplifyStylePropName(key)] = customProps[key];
+  }
+
   return [
     {
       name: 'customPropsInit',
       type: 'initialize',
       plugin(ctx: StylixPluginFunctionContext) {
-        Object.keys(customProps).forEach(
-          (key) => (ctx.styleProps[simplifyStylePropName(key)] = key),
-        );
+        for (const key in customProps) {
+          ctx.styleProps[simplifyStylePropName(key)] = key;
+        }
       },
     },
     {
@@ -24,10 +25,11 @@ export const customProps = (customProps: Record<string, any>): StylixPlugin[] =>
       before: mediaArrays,
       plugin(ctx: StylixPluginFunctionContext, styles: any) {
         return walkRecursive(styles, (key, value, object) => {
-          if (!isValidJSXProp(key)) return;
+          if (!isValidJSXProp(key) || isPlainObject(value)) return;
+
           const simpleKey = simplifyStylePropName(key);
-          if (!(simpleKey in customProps)) return;
           const propValue = customProps[simpleKey];
+          if (!propValue) return;
 
           const objectClone = { ...object };
           const keys = Object.keys(object);
@@ -43,11 +45,11 @@ export const customProps = (customProps: Record<string, any>): StylixPlugin[] =>
           }
           delete object[key];
           Object.assign(object, newStyles);
-          afterKeys.forEach((k) => {
+          for (const k of afterKeys) {
             const val = objectClone[k];
             delete object[k];
             object[k] = val;
-          });
+          }
         });
       },
     },

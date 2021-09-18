@@ -1,10 +1,9 @@
-import { useLayoutEffect } from 'react';
-
 import applyRules from './applyRules';
 import { applyPlugins } from './plugins';
 import stylesToRuleArray from './stylesToRuleArray';
 import { StylixContext, useStylixContext } from './StylixProvider';
 import { hashString } from './util/hashString';
+import useIsoLayoutEffect from './util/useIsoLayoutEffect';
 
 function cleanup(ctx: StylixContext): void {
   if (typeof ctx.cleanupRequest !== 'undefined') return;
@@ -12,12 +11,13 @@ function cleanup(ctx: StylixContext): void {
   ctx.cleanupRequest = setTimeout(() => {
     let deleted = false;
 
-    Object.values(ctx.rules).forEach((rule) => {
+    for (const i in ctx.rules) {
+      const rule = ctx.rules[i];
       if (!rule.refs) {
         delete ctx.rules[rule.hash];
         deleted = true;
       }
-    });
+    }
     deleted && applyRules(ctx);
 
     delete ctx.cleanupRequest;
@@ -48,7 +48,7 @@ export function useStyles(
       : '';
 
   // When hash changes, add/remove ref count
-  useLayoutEffect(() => {
+  useIsoLayoutEffect(() => {
     if (!hash) return;
 
     stylixCtx.rules[hash].refs++;

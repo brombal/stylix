@@ -32,6 +32,7 @@ export declare type StylixContext<Theme = any> = {
     plugins: StylixPlugin[];
     stylesheet: CSSStyleSheet;
     styleElement: HTMLStyleElement;
+    styleCollector?: string[];
     rules: {
         [key: string]: {
             hash: string;

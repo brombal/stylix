@@ -1,23 +1,31 @@
-import { applyPlugins } from './plugins';
-import { isPlainObject } from './util/isPlainObject';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const plugins_1 = require("./plugins");
+const isPlainObject_1 = require("./util/isPlainObject");
 /**
  * Converts a Stylix CSS object to an array of rules, suitable for passing to StyleSheet#insertRule.
  */
-export default function stylesToRuleArray(styles, hash, context) {
+function stylesToRuleArray(styles, hash, context) {
     try {
-        const processedStyles = applyPlugins('processStyles', styles, hash, context);
+        const processedStyles = plugins_1.applyPlugins('processStyles', styles, hash, context);
         // serialize to css rules array
         const serialize = function serialize(selector, styles) {
-            const block = Object.entries(styles)
-                .map(([key, value]) => {
-                if (isPlainObject(value))
-                    return serialize(key, value);
-                return `  ${key}: ${value};`;
-            })
-                .join('\n');
-            return `${selector} {\n${block} }`;
+            const lines = [];
+            for (const key in styles) {
+                const value = styles[key];
+                if (isPlainObject_1.isPlainObject(value))
+                    lines.push(serialize(key, value));
+                else
+                    lines.push(`  ${key}: ${value};`);
+            }
+            return `${selector} {\n${lines.join('\n')} }`;
         };
-        return Object.entries(processedStyles).map(([key, value]) => serialize(key, value));
+        const result = [];
+        for (const key in processedStyles) {
+            const value = processedStyles[key];
+            result.push(serialize(key, value));
+        }
+        return result;
     }
     catch (e) {
         if (e.name && e.reason) {
@@ -29,4 +37,5 @@ export default function stylesToRuleArray(styles, hash, context) {
         return [];
     }
 }
+exports.default = stylesToRuleArray;
 //# sourceMappingURL=stylesToRuleArray.js.map

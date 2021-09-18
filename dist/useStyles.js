@@ -1,21 +1,28 @@
-import { useLayoutEffect } from 'react';
-import applyRules from './applyRules';
-import { applyPlugins } from './plugins';
-import stylesToRuleArray from './stylesToRuleArray';
-import { useStylixContext } from './StylixProvider';
-import { hashString } from './util/hashString';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.useGlobalStyles = exports.useKeyframes = exports.useStyles = void 0;
+const applyRules_1 = __importDefault(require("./applyRules"));
+const plugins_1 = require("./plugins");
+const stylesToRuleArray_1 = __importDefault(require("./stylesToRuleArray"));
+const StylixProvider_1 = require("./StylixProvider");
+const hashString_1 = require("./util/hashString");
+const useIsoLayoutEffect_1 = __importDefault(require("./util/useIsoLayoutEffect"));
 function cleanup(ctx) {
     if (typeof ctx.cleanupRequest !== 'undefined')
         return;
     ctx.cleanupRequest = setTimeout(() => {
         let deleted = false;
-        Object.values(ctx.rules).forEach((rule) => {
+        for (const i in ctx.rules) {
+            const rule = ctx.rules[i];
             if (!rule.refs) {
                 delete ctx.rules[rule.hash];
                 deleted = true;
             }
-        });
-        deleted && applyRules(ctx);
+        }
+        deleted && applyRules_1.default(ctx);
         delete ctx.cleanupRequest;
     }, 100);
 }
@@ -25,18 +32,18 @@ function cleanup(ctx) {
  * If `global` is false, provided styles will be nested within the generated classname.
  * Returns the className hash if enabled, or an empty string.
  */
-export function useStyles(styles, options = { global: false, disabled: false }) {
-    const stylixCtx = useStylixContext();
+function useStyles(styles, options = { global: false, disabled: false }) {
+    const stylixCtx = StylixProvider_1.useStylixContext();
     // Preprocess styles with plugins
     if (!options.disabled && styles)
-        styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
+        styles = plugins_1.applyPlugins('preprocessStyles', styles, null, stylixCtx);
     // Serialize value and generate hash
     const json = !options.disabled && styles && JSON.stringify(styles);
     const hash = json && json !== '{}' && json !== '[]'
-        ? hashString(JSON.stringify(stylixCtx.media || []) + json)
+        ? hashString_1.hashString(JSON.stringify(stylixCtx.media || []) + json)
         : '';
     // When hash changes, add/remove ref count
-    useLayoutEffect(() => {
+    useIsoLayoutEffect_1.default(() => {
         if (!hash)
             return;
         stylixCtx.rules[hash].refs++;
@@ -55,17 +62,20 @@ export function useStyles(styles, options = { global: false, disabled: false }) 
             styles = { ['.' + hash]: styles };
         stylixCtx.rules[hash] = {
             hash,
-            rules: stylesToRuleArray(styles, hash, stylixCtx),
+            rules: stylesToRuleArray_1.default(styles, hash, stylixCtx),
             refs: 0,
         };
-        applyRules(stylixCtx);
+        applyRules_1.default(stylixCtx);
     }
     return hash;
 }
-export function useKeyframes(keyframes, options = { disabled: false }) {
+exports.useStyles = useStyles;
+function useKeyframes(keyframes, options = { disabled: false }) {
     return useStyles({ '@keyframes $$class': keyframes }, Object.assign({ global: true }, options));
 }
-export function useGlobalStyles(styles, options = { disabled: false }) {
+exports.useKeyframes = useKeyframes;
+function useGlobalStyles(styles, options = { disabled: false }) {
     return useStyles(styles, Object.assign(Object.assign({}, options), { global: true }));
 }
+exports.useGlobalStyles = useGlobalStyles;
 //# sourceMappingURL=useStyles.js.map

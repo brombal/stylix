@@ -13,12 +13,14 @@ export function walkRecursive<T = any>(
   cb: (key: string, value: any, currentObject: any, context: any) => void,
   context?: any,
 ): T {
-  Object.entries(object).forEach(([key, value]) => {
+  const keys = Object.keys(object);
+  for (const key of keys) {
+    const value = object[key];
     cb(key, value, object, context);
     if (Array.isArray(value) || isPlainObject(value)) {
       const contextClone = cloneDeep(context);
       walkRecursive(value, cb, contextClone);
     }
-  });
+  }
   return object;
 }

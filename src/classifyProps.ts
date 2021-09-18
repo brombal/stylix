@@ -2,14 +2,14 @@ export function classifyProps(props: any, knownProps: Record<string, string>): [
   const styles = {} as any;
   const other = {} as any;
 
-  Object.keys(props).forEach((key) => {
+  for (const key in props) {
     // If prop is not a valid JSX prop, it must be a CSS selector
     if (!isValidJSXProp(key) || isStyleProp(key, knownProps)) {
       styles[key] = props[key];
     } else {
       other[key] = props[key];
     }
-  });
+  }
 
   return [styles, other];
 }

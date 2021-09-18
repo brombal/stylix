@@ -1,15 +1,19 @@
-import { flatten } from '../util/flatten';
-import { isPlainObject } from '../util/isPlainObject';
-export function _merge$css(obj, ctx) {
-    if (!isPlainObject(obj))
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.merge$css = exports._merge$css = void 0;
+const flatten_1 = require("../util/flatten");
+const isPlainObject_1 = require("../util/isPlainObject");
+function _merge$css(obj, ctx) {
+    if (!isPlainObject_1.isPlainObject(obj))
         return;
-    Object.keys(obj).forEach((key) => {
+    for (const key in obj) {
         if (key === '$css') {
             const $css = obj[key];
             if (Array.isArray($css)) {
-                flatten($css).forEach((val) => {
+                const flat$css = flatten_1.flatten($css);
+                for (const val of flat$css) {
                     _merge$css(val, ctx);
-                });
+                }
             }
             else {
                 _merge$css($css, ctx);
@@ -17,18 +21,19 @@ export function _merge$css(obj, ctx) {
         }
         else {
             let value = obj[key];
-            if (isPlainObject(value)) {
+            if (isPlainObject_1.isPlainObject(value)) {
                 value = ctx[key] || {};
                 _merge$css(obj[key], value);
             }
             ctx[key] = value;
         }
-    });
+    }
 }
+exports._merge$css = _merge$css;
 /**
  * Merges $css property into parent styles
  */
-export const merge$css = {
+exports.merge$css = {
     name: 'merge$css',
     type: 'processStyles',
     plugin(ctx, styles) {

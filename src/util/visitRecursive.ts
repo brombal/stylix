@@ -7,9 +7,10 @@ import { isPlainObject } from './isPlainObject';
 export function visitRecursive(object: any, cb: (object: any, key: string) => void): void {
   const _visitRecursive = function _visitRecursive(object: any, key: string) {
     cb(object, key);
-    Object.entries(object).forEach(([key, value]) => {
+    for (const key in object) {
+      const value = object[key];
       if (Array.isArray(value) || isPlainObject(value)) _visitRecursive(value, key);
-    });
+    }
   };
   _visitRecursive(object, null);
 }

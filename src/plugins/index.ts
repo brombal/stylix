@@ -1,5 +1,4 @@
 import { StylixContext, StylixPublicContext } from '../StylixProvider';
-import { cloneDeep } from '../util/cloneDeep';
 import { cleanStyles } from './cleanStyles';
 import { defaultPixelUnits } from './defaultUnits';
 import { flattenNestedStyles } from './flattenNestedStyles';
@@ -44,11 +43,10 @@ export function applyPlugins(
   };
 
   let processedStyles = styles;
-  context.plugins
-    .filter((plugin) => plugin.type === type)
-    .forEach((plugin: StylixPlugin) => {
-      processedStyles = plugin.plugin(pluginContext, cloneDeep(processedStyles));
-    });
+  for (const i in context.plugins) {
+    const plugin = context.plugins[i];
+    if (plugin.type === type) processedStyles = plugin.plugin(pluginContext, processedStyles);
+  }
   return processedStyles;
 }
 

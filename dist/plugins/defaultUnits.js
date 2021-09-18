@@ -1,5 +1,8 @@
-import { mapObjectRecursive } from '../util/mapObjectRecursive';
-export const defaultIgnoreUnits = [
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultPixelUnits = exports.defaultUnits = exports.defaultIgnoreUnits = void 0;
+const mapObjectRecursive_1 = require("../util/mapObjectRecursive");
+exports.defaultIgnoreUnits = [
     'columns',
     'column-count',
     'fill-opacity',
@@ -19,18 +22,20 @@ export const defaultIgnoreUnits = [
 /**
  * Adds unit (px, em, etc) to numeric values for any style properties not included in `ignoreProps`..
  */
-export const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits) => {
+const defaultUnits = (unit = 'px', ignoreProps = exports.defaultIgnoreUnits) => {
     return {
         name: 'defaultUnits',
         type: 'processStyles',
         plugin(ctx, styles) {
-            return mapObjectRecursive(styles, (key, value) => {
-                if (typeof value === 'number' && !ignoreProps.includes(key)) {
-                    return { [key]: String(value) + unit };
-                }
-            });
+            return mapObjectRecursive_1.mapObjectRecursive(styles, defaultUnitsMap, { unit, ignoreProps });
         },
     };
 };
-export const defaultPixelUnits = defaultUnits();
+exports.defaultUnits = defaultUnits;
+const defaultUnitsMap = (key, value, object, ctx) => {
+    if (typeof value === 'number' && !ctx.ignoreProps.includes(key)) {
+        return { [key]: String(value) + ctx.unit };
+    }
+};
+exports.defaultPixelUnits = exports.defaultUnits();
 //# sourceMappingURL=defaultUnits.js.map

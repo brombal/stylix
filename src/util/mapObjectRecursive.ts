@@ -1,4 +1,3 @@
-import { cloneDeep } from './cloneDeep';
 import { isPlainObject } from './isPlainObject';
 
 /**
@@ -16,36 +15,31 @@ export function mapObjectRecursive(
     object: any,
     context: any,
   ) => Record<string | number, any>,
-): any {
-  const _mapObjectRecursive = function _mapObjectRecursive(
-    object: any,
-    map: (
-      key: string | number,
-      value: any,
-      object: any,
-      context: any,
-    ) => Record<string | number, any>,
-    context: any,
-  ) {
-    const clone = Array.isArray(object) ? [] : {};
-    Object.entries(object).forEach(([key, value]: [number | string, any]) => {
-      if (Array.isArray(object)) key = +key;
-      const contextClone = cloneDeep(context);
-      let result = map(key, value, object, contextClone);
-      if (typeof result !== 'undefined' && typeof result !== 'object' && !Array.isArray(result))
-        throw new Error(
-          'mapObjectRecursive: return value of map function must be undefined, object, or array!',
-        );
-      if (typeof result === 'undefined') {
-        result = { [key]: value };
-      }
-      Object.entries(result).forEach(([key, value]: [number | string, any]) => {
-        if (isPlainObject(value) || Array.isArray(value))
-          value = _mapObjectRecursive(value, map, contextClone);
-        if (typeof value !== 'undefined') clone[key] = value;
-      });
-    });
-    return clone;
-  };
-  return _mapObjectRecursive(object, map, {});
+  context: any = {},
+) {
+  const clone = Array.isArray(object) ? [] : {};
+
+  for (const k of Object.keys(object)) {
+    let key: string | number = k;
+    const value = object[key];
+
+    if (Array.isArray(object)) key = +key;
+    const contextClone = { ...context };
+    let result = map(key, value, object, contextClone);
+    if (typeof result !== 'undefined' && typeof result !== 'object' && !Array.isArray(result))
+      throw new Error(
+        'mapObjectRecursive: return value of map function must be undefined, object, or array!',
+      );
+    if (typeof result === 'undefined') {
+      result = { [key]: value };
+    }
+    for (const kk in result) {
+      let value = result[kk];
+      if (isPlainObject(value) || Array.isArray(value))
+        value = mapObjectRecursive(value, map, contextClone);
+      if (typeof value !== 'undefined') clone[kk] = value;
+    }
+  }
+
+  return clone;
 }

@@ -27,13 +27,15 @@ export const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits): Sty
     name: 'defaultUnits',
     type: 'processStyles',
     plugin(ctx, styles: any) {
-      return mapObjectRecursive(styles, (key: string | number, value: any) => {
-        if (typeof value === 'number' && !ignoreProps.includes(key as string)) {
-          return { [key]: String(value) + unit };
-        }
-      });
+      return mapObjectRecursive(styles, defaultUnitsMap, { unit, ignoreProps });
     },
   };
+};
+
+const defaultUnitsMap = (key: string | number, value: any, object, ctx) => {
+  if (typeof value === 'number' && !ctx.ignoreProps.includes(key as string)) {
+    return { [key]: String(value) + ctx.unit };
+  }
 };
 
 export const defaultPixelUnits = defaultUnits();

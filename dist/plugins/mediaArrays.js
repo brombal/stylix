@@ -1,48 +1,55 @@
-import { isPlainObject } from '../util/isPlainObject';
-import { mapObjectRecursive } from '../util/mapObjectRecursive';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mediaArrays = void 0;
+const isPlainObject_1 = require("../util/isPlainObject");
+const mapObjectRecursive_1 = require("../util/mapObjectRecursive");
+const mapDittoValues = (key, value) => {
+    if (Array.isArray(value)) {
+        for (const i in value) {
+            const v = value[i];
+            if (v === '@')
+                value[i] = value[+i - 1];
+        }
+        return { [key]: value };
+    }
+};
+const mapNonMedia = (key, value, object, context) => {
+    if (Array.isArray(value)) {
+        return { [key]: value[context.i] };
+    }
+};
+const mapMediaStyles = (key, value, object, context) => {
+    if (key.startsWith('@keyframes'))
+        context.keyframes = true;
+    if (Array.isArray(value)) {
+        return { [key]: value[context.i] };
+    }
+    if (isPlainObject_1.isPlainObject(value) || context.keyframes) {
+        return;
+    }
+    // delete key/value pair if primitive
+    return { [key]: undefined };
+};
 /**
  * Expands arrays as media queries.
  */
-export const mediaArrays = {
+exports.mediaArrays = {
     name: 'mediaArrays',
     type: 'processStyles',
     plugin(ctx, styles) {
-        var _a;
         // Fill out ditto values
-        styles = mapObjectRecursive(styles, (key, value) => {
-            if (Array.isArray(value)) {
-                value.forEach((v, i) => {
-                    if (v === '@')
-                        value[i] = value[i - 1];
-                });
-                return { [key]: value };
-            }
-        });
+        styles = mapObjectRecursive_1.mapObjectRecursive(styles, mapDittoValues);
         const mediaStyles = {};
         let nonMediaStyles = styles;
-        (_a = ctx.media) === null || _a === void 0 ? void 0 : _a.forEach((mediaQuery, i) => {
+        for (const i in ctx.media) {
+            const mediaQuery = ctx.media[i];
             if (!mediaQuery) {
-                nonMediaStyles = mapObjectRecursive(styles, (key, value) => {
-                    if (Array.isArray(value)) {
-                        return { [key]: value[i] };
-                    }
-                });
+                nonMediaStyles = mapObjectRecursive_1.mapObjectRecursive(styles, mapNonMedia, { i });
             }
             else {
-                mediaStyles[`@media ${mediaQuery}`] = mapObjectRecursive(styles, (key, value, object, context) => {
-                    if (key.startsWith('@keyframes'))
-                        context.keyframes = true;
-                    if (Array.isArray(value)) {
-                        return { [key]: value[i] };
-                    }
-                    if (isPlainObject(value) || context.keyframes) {
-                        return;
-                    }
-                    // delete key/value pair if primitive
-                    return { [key]: undefined };
-                });
+                mediaStyles[`@media ${mediaQuery}`] = mapObjectRecursive_1.mapObjectRecursive(styles, mapMediaStyles, { i });
             }
-        });
+        }
         return Object.assign(Object.assign({}, nonMediaStyles), mediaStyles);
     },
 };
