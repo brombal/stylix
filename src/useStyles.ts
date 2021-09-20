@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+
 import applyRules from './applyRules';
 import { applyPlugins } from './plugins';
 import stylesToRuleArray from './stylesToRuleArray';
@@ -24,6 +26,19 @@ function cleanup(ctx: StylixContext): void {
   }, 100) as any;
 }
 
+function compare(a: any, b: any): any {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (typeof a === 'object') {
+    if (Array.isArray(a) && Array.isArray(b) && a.length !== b.length) return false;
+    else if (Object.keys(a).length !== Object.keys(b).length) return false;
+    for (const key in b) {
+      if (!compare(a[key], b[key])) return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Accepts a Stylix CSS object and returns a unique className based on the styles' hash.
  * The styles are registered with the Stylix context and will be applied to the document.
@@ -36,44 +51,54 @@ export function useStyles(
 ): string {
   const stylixCtx = useStylixContext();
 
-  // Preprocess styles with plugins
-  if (!options.disabled && styles)
-    styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
+  const prevRef = useRef({ styles: {}, hash: '' } as any);
 
-  // Serialize value and generate hash
-  const json = !options.disabled && styles && JSON.stringify(styles);
-  const hash =
-    json && json !== '{}' && json !== '[]'
-      ? hashString(JSON.stringify(stylixCtx.media || []) + json)
-      : '';
+  const changed = !compare(styles, prevRef.current.styles);
+
+  prevRef.current.styles = styles;
+
+  if (changed) {
+    // Preprocess styles with plugins
+    if (!options.disabled && styles)
+      styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
+
+    // Serialize value and generate hash
+    const json = !options.disabled && styles && JSON.stringify(styles);
+    prevRef.current.hash =
+      json && json !== '{}' && json !== '[]'
+        ? hashString(JSON.stringify(stylixCtx.media || []) + json)
+        : '';
+  }
+
+  const { hash } = prevRef.current;
 
   // When hash changes, add/remove ref count
-  useIsoLayoutEffect(() => {
-    if (!hash) return;
+  useIsoLayoutEffect(
+    () => {
+      if (!hash || !changed) return;
 
-    stylixCtx.rules[hash].refs++;
+      // If css is not cached, process css and apply it.
+      if (!stylixCtx.rules[hash]) {
+        // If not global styles, wrap original styles with classname
+        if (!options.global) styles = { ['.' + hash]: styles };
+        stylixCtx.rules[hash] = {
+          hash,
+          rules: stylesToRuleArray(styles, hash, stylixCtx),
+          refs: 1,
+        };
+        applyRules(stylixCtx);
+      } else {
+        stylixCtx.rules[hash].refs++;
+      }
 
-    return () => {
-      stylixCtx.rules[hash].refs--;
-      cleanup(stylixCtx);
-    };
-  }, [hash]);
-
-  if (!hash) {
-    return '';
-  }
-
-  // If css is not cached, process css and apply it.
-  if (!stylixCtx.rules[hash]) {
-    // If not global styles, wrap original styles with classname
-    if (!options.global) styles = { ['.' + hash]: styles };
-    stylixCtx.rules[hash] = {
-      hash,
-      rules: stylesToRuleArray(styles, hash, stylixCtx),
-      refs: 0, // Immediately increased in useLayoutEffect above
-    };
-    applyRules(stylixCtx);
-  }
+      return () => {
+        stylixCtx.rules[hash].refs--;
+        cleanup(stylixCtx);
+      };
+    },
+    [hash],
+    true,
+  );
 
   return hash;
 }

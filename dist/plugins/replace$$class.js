@@ -12,9 +12,9 @@ exports.replace$$class = {
         return mapObjectRecursive_1.mapObjectRecursive(styles, replace$$classMap, { ctx });
     },
 };
-const replace$$classMap = (key, value, object, context) => {
+function replace$$classMap(key, value, object, context) {
     value = typeof value === 'string' ? value.replace('$$class', context.ctx.hash) : value;
     key = typeof key === 'string' ? key.replace('$$class', context.ctx.hash) : key;
     return { [key]: value };
-};
+}
 //# sourceMappingURL=replace$$class.js.map

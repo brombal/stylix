@@ -12,9 +12,9 @@ exports.themeFunctions = {
         return mapObjectRecursive_1.mapObjectRecursive(styles, themeFunctionsMap, { ctx });
     },
 };
-const themeFunctionsMap = (key, value, object, context) => {
+function themeFunctionsMap(key, value, object, context) {
     if (typeof value === 'function') {
         return { [key]: value(context.ctx.theme, context.ctx) };
     }
-};
+}
 //# sourceMappingURL=themeFunctions.js.map

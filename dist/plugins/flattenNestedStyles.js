@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.flattenNestedStyles = void 0;
 const isPlainObject_1 = require("../util/isPlainObject");
-const flatten = function flatten(styles, parent, selector, root, mediaRoot) {
+function flatten(styles, parent, selector, root, mediaRoot) {
     for (let key in styles) {
         const value = styles[key];
         if (key.startsWith('@media')) {
@@ -31,7 +31,7 @@ const flatten = function flatten(styles, parent, selector, root, mediaRoot) {
             parent[selector][key] = styles[key];
         }
     }
-};
+}
 /**
  * Flattens nested style objects that use `&` to reference parent class.
  */

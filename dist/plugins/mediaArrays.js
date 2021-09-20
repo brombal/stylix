@@ -3,33 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.mediaArrays = void 0;
 const isPlainObject_1 = require("../util/isPlainObject");
 const mapObjectRecursive_1 = require("../util/mapObjectRecursive");
-const mapDittoValues = (key, value) => {
-    if (Array.isArray(value)) {
-        for (const i in value) {
-            const v = value[i];
-            if (v === '@')
-                value[i] = value[+i - 1];
-        }
-        return { [key]: value };
-    }
-};
-const mapNonMedia = (key, value, object, context) => {
-    if (Array.isArray(value)) {
-        return { [key]: value[context.i] };
-    }
-};
-const mapMediaStyles = (key, value, object, context) => {
-    if (key.startsWith('@keyframes'))
-        context.keyframes = true;
-    if (Array.isArray(value)) {
-        return { [key]: value[context.i] };
-    }
-    if (isPlainObject_1.isPlainObject(value) || context.keyframes) {
-        return;
-    }
-    // delete key/value pair if primitive
-    return { [key]: undefined };
-};
 /**
  * Expands arrays as media queries.
  */
@@ -53,4 +26,31 @@ exports.mediaArrays = {
         return Object.assign(Object.assign({}, nonMediaStyles), mediaStyles);
     },
 };
+function mapDittoValues(key, value) {
+    if (Array.isArray(value)) {
+        for (const i in value) {
+            const v = value[i];
+            if (v === '@')
+                value[i] = value[+i - 1];
+        }
+        return { [key]: value };
+    }
+}
+function mapNonMedia(key, value, object, context) {
+    if (Array.isArray(value)) {
+        return { [key]: value[context.i] };
+    }
+}
+function mapMediaStyles(key, value, object, context) {
+    if (key.startsWith('@keyframes'))
+        context.keyframes = true;
+    if (Array.isArray(value)) {
+        return { [key]: value[context.i] };
+    }
+    if (isPlainObject_1.isPlainObject(value) || context.keyframes) {
+        return;
+    }
+    // delete key/value pair if primitive
+    return { [key]: undefined };
+}
 //# sourceMappingURL=mediaArrays.js.map

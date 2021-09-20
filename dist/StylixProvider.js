@@ -132,7 +132,7 @@ function StylixTheme({ children, media, theme }) {
     // but we don't want to cause descendent re-renders if the values don't change.
     useIsoLayoutEffect_1.default(() => {
         setContextValue(mergeContexts(parentCtx, { media, theme }));
-    }, [parentCtx, (media === null || media === void 0 ? void 0 : media.join('|')) || '', theme]);
+    }, [parentCtx, (media === null || media === void 0 ? void 0 : media.join('|')) || '', theme], false);
     return react_1.default.createElement(stylixContext.Provider, { value: contextValue }, children);
 }
 exports.StylixTheme = StylixTheme;

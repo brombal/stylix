@@ -1,3 +1,2 @@
-import { useLayoutEffect } from 'react';
-declare const useIsoLayoutEffect: typeof useLayoutEffect;
+declare const useIsoLayoutEffect: (fn: () => void | (() => void), deps: any[], runOnSsr: boolean) => void;
 export default useIsoLayoutEffect;

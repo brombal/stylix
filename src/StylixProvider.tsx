@@ -166,9 +166,13 @@ export function StylixTheme({ children, media, theme }: StylixThemeProps) {
   // `media` is treated as special because providing an array of strings is easier to do inline,
   // but we don't want to cause descendent re-renders if the values don't change.
 
-  useIsoLayoutEffect(() => {
-    setContextValue(mergeContexts(parentCtx, { media, theme }));
-  }, [parentCtx, media?.join('|') || '', theme]);
+  useIsoLayoutEffect(
+    () => {
+      setContextValue(mergeContexts(parentCtx, { media, theme }));
+    },
+    [parentCtx, media?.join('|') || '', theme],
+    false,
+  );
 
   return <stylixContext.Provider value={contextValue}>{children}</stylixContext.Provider>;
 }
