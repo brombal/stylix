@@ -15,7 +15,7 @@ export const merge$css: StylixPlugin = {
   },
 };
 
-function _merge$css(obj: any, ctx: any) {
+export function _merge$css(obj: any, ctx: any) {
   if (!isPlainObject(obj)) return;
   for (const key in obj) {
     if (key === '$css') {

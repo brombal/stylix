@@ -36,7 +36,7 @@ function compare(a: any, b: any): any {
       if (!compare(a[key], b[key])) return false;
     }
   }
-  return true;
+  return a === b;
 }
 
 /**
