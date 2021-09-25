@@ -42,7 +42,7 @@ function compare(a, b) {
                 return false;
         }
     }
-    return true;
+    return a === b;
 }
 /**
  * Accepts a Stylix CSS object and returns a unique className based on the styles' hash.
@@ -67,30 +67,29 @@ function useStyles(styles, options = { global: false, disabled: false }) {
                 : '';
     }
     const { hash } = prevRef.current;
+    if (hash && changed && !stylixCtx.rules[hash]) {
+        // If not global styles, wrap original styles with classname
+        if (!options.global)
+            styles = { ['.' + hash]: styles };
+        stylixCtx.rules[hash] = {
+            hash,
+            rules: stylesToRuleArray_1.default(styles, hash, stylixCtx),
+            refs: 1,
+        };
+        applyRules_1.default(stylixCtx);
+    }
     // When hash changes, add/remove ref count
     useIsoLayoutEffect_1.default(() => {
         if (!hash || !changed)
             return;
-        // If css is not cached, process css and apply it.
-        if (!stylixCtx.rules[hash]) {
-            // If not global styles, wrap original styles with classname
-            if (!options.global)
-                styles = { ['.' + hash]: styles };
-            stylixCtx.rules[hash] = {
-                hash,
-                rules: stylesToRuleArray_1.default(styles, hash, stylixCtx),
-                refs: 1,
-            };
-            applyRules_1.default(stylixCtx);
-        }
-        else {
+        if (stylixCtx.rules[hash]) {
             stylixCtx.rules[hash].refs++;
         }
         return () => {
             stylixCtx.rules[hash].refs--;
             cleanup(stylixCtx);
         };
-    }, [hash], true);
+    }, [hash], false);
     return hash;
 }
 exports.useStyles = useStyles;

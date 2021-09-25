@@ -72,22 +72,23 @@ export function useStyles(
 
   const { hash } = prevRef.current;
 
+  if (hash && changed && !stylixCtx.rules[hash]) {
+    // If not global styles, wrap original styles with classname
+    if (!options.global) styles = { ['.' + hash]: styles };
+    stylixCtx.rules[hash] = {
+      hash,
+      rules: stylesToRuleArray(styles, hash, stylixCtx),
+      refs: 1,
+    };
+    applyRules(stylixCtx);
+  }
+
   // When hash changes, add/remove ref count
   useIsoLayoutEffect(
     () => {
       if (!hash || !changed) return;
 
-      // If css is not cached, process css and apply it.
-      if (!stylixCtx.rules[hash]) {
-        // If not global styles, wrap original styles with classname
-        if (!options.global) styles = { ['.' + hash]: styles };
-        stylixCtx.rules[hash] = {
-          hash,
-          rules: stylesToRuleArray(styles, hash, stylixCtx),
-          refs: 1,
-        };
-        applyRules(stylixCtx);
-      } else {
+      if (stylixCtx.rules[hash]) {
         stylixCtx.rules[hash].refs++;
       }
 
@@ -97,7 +98,7 @@ export function useStyles(
       };
     },
     [hash],
-    true,
+    false,
   );
 
   return hash;
