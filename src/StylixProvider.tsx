@@ -57,6 +57,7 @@ export type StylixContext<Theme = any> = {
   };
   styleProps: Record<string, string>;
   cleanupRequest: number;
+  requestApply: boolean;
 };
 
 export type StylixPublicContext = Pick<

@@ -76,8 +76,19 @@ function useStyles(styles, options = { global: false, disabled: false }) {
             rules: stylesToRuleArray_1.default(styles, hash, stylixCtx),
             refs: 1,
         };
-        applyRules_1.default(stylixCtx);
+        stylixCtx.requestApply = true;
     }
+    // Apply styles if requested.
+    // This runs on every render. We utilize useLayoutEffect so that it runs *after* all the other
+    // renders have completed. stylixCtx.requestApply guards against multiple runs. This reduces the number of calls
+    // to applyRules(), but prevents styles potentially being added to the DOM after other components force the
+    // browser to compute styles.
+    useIsoLayoutEffect_1.default(() => {
+        if (!stylixCtx.requestApply)
+            return;
+        stylixCtx.requestApply = false;
+        applyRules_1.default(stylixCtx);
+    }, undefined, true);
     // When hash changes, add/remove ref count
     useIsoLayoutEffect_1.default(() => {
         if (!hash || !changed)

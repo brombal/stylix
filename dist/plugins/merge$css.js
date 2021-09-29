@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.merge$css = void 0;
+exports._merge$css = exports.merge$css = void 0;
 const flatten_1 = require("../util/flatten");
 const isPlainObject_1 = require("../util/isPlainObject");
 /**
@@ -41,4 +41,5 @@ function _merge$css(obj, ctx) {
         }
     }
 }
+exports._merge$css = _merge$css;
 //# sourceMappingURL=merge$css.js.map

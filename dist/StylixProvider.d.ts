@@ -42,6 +42,7 @@ export declare type StylixContext<Theme = any> = {
     };
     styleProps: Record<string, string>;
     cleanupRequest: number;
+    requestApply: boolean;
 };
 export declare type StylixPublicContext = Pick<StylixContext, 'id' | 'devMode' | 'theme' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'>;
 export declare function useStylixContext<Theme = any>(): StylixContext<Theme>;
