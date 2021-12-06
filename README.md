@@ -12,7 +12,7 @@ patterns and organizational best practices that have made React so popular.
 If you still aren't convinced, read the [Why Stylix?](https://stylix.dev) documentation page to see
 why we created Stylix, and why we think you'll love it.
 
-**[Ready the full documentation](https://stylix.dev)** for more guides and API reference.
+**[Read the full documentation](https://stylix.dev)** for more guides and the API reference.
 
 ## Installation
 
