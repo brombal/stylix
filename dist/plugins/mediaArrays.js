@@ -11,16 +11,16 @@ exports.mediaArrays = {
     type: 'processStyles',
     plugin(ctx, styles) {
         // Fill out ditto values
-        styles = mapObjectRecursive_1.mapObjectRecursive(styles, mapDittoValues);
+        styles = (0, mapObjectRecursive_1.mapObjectRecursive)(styles, mapDittoValues);
         const mediaStyles = {};
         let nonMediaStyles = styles;
         for (const i in ctx.media) {
             const mediaQuery = ctx.media[i];
             if (!mediaQuery) {
-                nonMediaStyles = mapObjectRecursive_1.mapObjectRecursive(styles, mapNonMedia, { i });
+                nonMediaStyles = (0, mapObjectRecursive_1.mapObjectRecursive)(styles, mapNonMedia, { i });
             }
             else {
-                mediaStyles[`@media ${mediaQuery}`] = mapObjectRecursive_1.mapObjectRecursive(styles, mapMediaStyles, { i });
+                mediaStyles[`@media ${mediaQuery}`] = (0, mapObjectRecursive_1.mapObjectRecursive)(styles, mapMediaStyles, { i });
             }
         }
         return Object.assign(Object.assign({}, nonMediaStyles), mediaStyles);
@@ -47,7 +47,7 @@ function mapMediaStyles(key, value, object, context) {
     if (Array.isArray(value)) {
         return { [key]: value[context.i] };
     }
-    if (isPlainObject_1.isPlainObject(value) || context.keyframes) {
+    if ((0, isPlainObject_1.isPlainObject)(value) || context.keyframes) {
         return;
     }
     // delete key/value pair if primitive

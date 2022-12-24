@@ -10,12 +10,12 @@ exports.propCasing = {
     name: 'normalizeStyleProps',
     type: 'processStyles',
     plugin(ctx, styles) {
-        return mapObjectRecursive_1.mapObjectRecursive(styles, propCasingMap, { ctx });
+        return (0, mapObjectRecursive_1.mapObjectRecursive)(styles, propCasingMap, { ctx });
     },
 };
 function propCasingMap(key, value, object, context) {
-    if (typeof key === 'string' && context.ctx.styleProps[classifyProps_1.simplifyStylePropName(key)]) {
-        return { [context.ctx.styleProps[classifyProps_1.simplifyStylePropName(key)]]: value };
+    if (typeof key === 'string' && context.ctx.styleProps[(0, classifyProps_1.simplifyStylePropName)(key)]) {
+        return { [context.ctx.styleProps[(0, classifyProps_1.simplifyStylePropName)(key)]]: value };
     }
 }
 //# sourceMappingURL=propCasing.js.map

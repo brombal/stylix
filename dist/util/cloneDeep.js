@@ -15,7 +15,7 @@ function cloneDeep(value) {
         }
         return clone;
     }
-    if (isPlainObject_1.isPlainObject(value)) {
+    if ((0, isPlainObject_1.isPlainObject)(value)) {
         const clone = {};
         for (const key in value) {
             clone[key] = cloneDeep(value[key]);

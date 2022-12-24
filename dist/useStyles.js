@@ -23,7 +23,7 @@ function cleanup(ctx) {
                 deleted = true;
             }
         }
-        deleted && applyRules_1.default(ctx);
+        deleted && (0, applyRules_1.default)(ctx);
         delete ctx.cleanupRequest;
     }, 100);
 }
@@ -51,19 +51,19 @@ function compare(a, b) {
  * Returns the className hash if enabled, or an empty string.
  */
 function useStyles(styles, options = { global: false, disabled: false }) {
-    const stylixCtx = StylixProvider_1.useStylixContext();
-    const prevRef = react_1.useRef({ styles: {}, hash: '' });
+    const stylixCtx = (0, StylixProvider_1.useStylixContext)();
+    const prevRef = (0, react_1.useRef)({ styles: {}, hash: '' });
     const changed = !compare(styles, prevRef.current.styles);
     prevRef.current.styles = styles;
     if (changed) {
         // Preprocess styles with plugins
         if (!options.disabled && styles)
-            styles = plugins_1.applyPlugins('preprocessStyles', styles, null, stylixCtx);
+            styles = (0, plugins_1.applyPlugins)('preprocessStyles', styles, null, stylixCtx);
         // Serialize value and generate hash
         const json = !options.disabled && styles && JSON.stringify(styles);
         prevRef.current.hash =
             json && json !== '{}' && json !== '[]'
-                ? hashString_1.hashString(JSON.stringify(stylixCtx.media || []) + json)
+                ? (0, hashString_1.hashString)(JSON.stringify(stylixCtx.media || []) + json)
                 : '';
     }
     const { hash } = prevRef.current;
@@ -73,7 +73,7 @@ function useStyles(styles, options = { global: false, disabled: false }) {
             styles = { ['.' + hash]: styles };
         stylixCtx.rules[hash] = {
             hash,
-            rules: stylesToRuleArray_1.default(styles, hash, stylixCtx),
+            rules: (0, stylesToRuleArray_1.default)(styles, hash, stylixCtx),
             refs: 1,
         };
         stylixCtx.requestApply = true;
@@ -83,14 +83,14 @@ function useStyles(styles, options = { global: false, disabled: false }) {
     // renders have completed. stylixCtx.requestApply guards against multiple runs. This reduces the number of calls
     // to applyRules(), but prevents styles potentially being added to the DOM after other components force the
     // browser to compute styles.
-    useIsoLayoutEffect_1.default(() => {
+    (0, useIsoLayoutEffect_1.default)(() => {
         if (!stylixCtx.requestApply)
             return;
         stylixCtx.requestApply = false;
-        applyRules_1.default(stylixCtx);
+        (0, applyRules_1.default)(stylixCtx);
     }, undefined, true);
     // When hash changes, add/remove ref count
-    useIsoLayoutEffect_1.default(() => {
+    (0, useIsoLayoutEffect_1.default)(() => {
         if (!hash || !changed)
             return;
         if (stylixCtx.rules[hash]) {

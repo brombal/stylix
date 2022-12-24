@@ -14,7 +14,7 @@ function flatten(styles, parent, selector, root, mediaRoot) {
             // Add keyframe rules as-is directly to mediaRoot object
             mediaRoot[key] = value;
         }
-        else if (isPlainObject_1.isPlainObject(styles[key])) {
+        else if ((0, isPlainObject_1.isPlainObject)(styles[key])) {
             // Concatenate or replace & in selectors and then continue flattening styles
             if (key.includes('&')) {
                 key = key.replace(/&/g, selector);

@@ -7,7 +7,7 @@ function cleanObject(object) {
         const value = object[key];
         if (value === null || value === undefined || value === '')
             delete object[key];
-        else if (isPlainObject_1.isPlainObject(value) || Array.isArray(value)) {
+        else if ((0, isPlainObject_1.isPlainObject)(value) || Array.isArray(value)) {
             cleanObject(value);
             if (!Object.keys(value).length)
                 delete object[key];

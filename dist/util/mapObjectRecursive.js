@@ -25,7 +25,7 @@ function mapObjectRecursive(object, map, context = {}) {
         }
         for (const kk in result) {
             let value = result[kk];
-            if (isPlainObject_1.isPlainObject(value) || Array.isArray(value))
+            if ((0, isPlainObject_1.isPlainObject)(value) || Array.isArray(value))
                 value = mapObjectRecursive(value, map, contextClone);
             if (typeof value !== 'undefined')
                 clone[kk] = value;

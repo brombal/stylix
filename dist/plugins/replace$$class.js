@@ -9,7 +9,7 @@ exports.replace$$class = {
     name: 'replace$$class',
     type: 'processStyles',
     plugin(ctx, styles) {
-        return mapObjectRecursive_1.mapObjectRecursive(styles, replace$$classMap, { ctx });
+        return (0, mapObjectRecursive_1.mapObjectRecursive)(styles, replace$$classMap, { ctx });
     },
 };
 function replace$$classMap(key, value, object, context) {

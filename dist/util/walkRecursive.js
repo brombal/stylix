@@ -15,8 +15,8 @@ function walkRecursive(object, cb, context) {
     for (const key of keys) {
         const value = object[key];
         cb(key, value, object, context);
-        if (Array.isArray(value) || isPlainObject_1.isPlainObject(value)) {
-            const contextClone = cloneDeep_1.cloneDeep(context);
+        if (Array.isArray(value) || (0, isPlainObject_1.isPlainObject)(value)) {
+            const contextClone = (0, cloneDeep_1.cloneDeep)(context);
             walkRecursive(value, cb, contextClone);
         }
     }

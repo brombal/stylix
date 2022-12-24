@@ -1,9 +1,9 @@
 import React, { CSSProperties } from 'react';
-export declare type StylixValue<T> = T | Array<T | '@'> | ((theme: any, media: string[]) => T | Array<T | '@'>);
+export type StylixValue<T> = T | Array<T | '@'> | ((theme: any, media: string[]) => T | Array<T | '@'>);
 /**
  * All standard CSS properties, custom style props, and the $css prop.
  */
-declare type StylixStyleProps = {
+type StylixStyleProps = {
     /**
      * Additional styles.
      */
@@ -31,26 +31,26 @@ export interface StylixPropsExtensions {
 /**
  * A component's props, without properties that conflict with style properties.
  */
-declare type ComponentPropsWithoutStyles<TComponent extends React.ElementType> = Omit<React.ComponentPropsWithRef<TComponent>, keyof StylixStyleProps>;
+type ComponentPropsWithoutStyles<TComponent extends React.ElementType> = Omit<React.ComponentPropsWithRef<TComponent>, keyof StylixStyleProps>;
 /**
  * Allows users to define components that accept Stylix style props.
  */
-export declare type StylixProps<ElType extends React.ElementType = any> = ComponentPropsWithoutStyles<ElType> & StylixStyleProps;
+export type StylixProps<ElType extends React.ElementType = any> = ComponentPropsWithoutStyles<ElType> & StylixStyleProps;
 /**
  * Additional properties on Stylix component functions.
  */
-declare type StylixComponentMeta = {
+type StylixComponentMeta = {
     displayName?: string;
     __isStylix: true;
 };
-export declare type StylixWrappedComponentProps<TComponent extends React.ElementType> = ComponentPropsWithoutStyles<TComponent> & StylixStyleProps;
-export declare type StylixWrappedComponent<TComponent extends React.ElementType, TAdditionalProps = unknown> = React.FunctionComponent<TAdditionalProps & StylixWrappedComponentProps<TComponent>> & StylixComponentMeta;
+export type StylixWrappedComponentProps<TComponent extends React.ElementType> = ComponentPropsWithoutStyles<TComponent> & StylixStyleProps;
+export type StylixWrappedComponent<TComponent extends React.ElementType, TAdditionalProps = unknown> = React.FunctionComponent<TAdditionalProps & StylixWrappedComponentProps<TComponent>> & StylixComponentMeta;
 /**
  * Props for main Stylix component (<$>)
  * `TComponent` is determined automatically by the type of $el.
  * <$ $el={...}>...</$>
  */
-export declare type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> = {
+export type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> = {
     /**
      * Specifies the element to render.
      */
@@ -59,7 +59,7 @@ export declare type Stylix$Props<TComponent extends React.ElementType | React.Re
 /**
  * Type of main Stylix component ($)
  */
-export declare type Stylix$Component = {
+export type Stylix$Component = {
     /**
      * This is equivalent to React.FunctionComponent, but must be specified explicitly this way to allow
      * TComponent to be generic here and not directly on Stylix$Component, so that it can be inferred at the time

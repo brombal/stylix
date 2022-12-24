@@ -2,7 +2,7 @@ import { StylixContext, StylixPublicContext } from '../StylixProvider';
 /**
  * Stylix plugin function context object
  */
-export declare type StylixPluginFunctionContext = StylixPublicContext & {
+export type StylixPluginFunctionContext = StylixPublicContext & {
     hash: string;
 };
 /**

@@ -7,7 +7,7 @@ const walkRecursive_1 = require("../util/walkRecursive");
 const mediaArrays_1 = require("./mediaArrays");
 const customProps = (customProps) => {
     for (const key in customProps) {
-        customProps[classifyProps_1.simplifyStylePropName(key)] = customProps[key];
+        customProps[(0, classifyProps_1.simplifyStylePropName)(key)] = customProps[key];
     }
     return [
         {
@@ -15,7 +15,7 @@ const customProps = (customProps) => {
             type: 'initialize',
             plugin(ctx) {
                 for (const key in customProps) {
-                    ctx.styleProps[classifyProps_1.simplifyStylePropName(key)] = key;
+                    ctx.styleProps[(0, classifyProps_1.simplifyStylePropName)(key)] = key;
                 }
             },
         },
@@ -24,10 +24,10 @@ const customProps = (customProps) => {
             type: 'processStyles',
             before: mediaArrays_1.mediaArrays,
             plugin(ctx, styles) {
-                return walkRecursive_1.walkRecursive(styles, (key, value, object) => {
-                    if (!classifyProps_1.isValidJSXProp(key) || isPlainObject_1.isPlainObject(value))
+                return (0, walkRecursive_1.walkRecursive)(styles, (key, value, object) => {
+                    if (!(0, classifyProps_1.isValidJSXProp)(key) || (0, isPlainObject_1.isPlainObject)(value))
                         return;
-                    const simpleKey = classifyProps_1.simplifyStylePropName(key);
+                    const simpleKey = (0, classifyProps_1.simplifyStylePropName)(key);
                     const propValue = customProps[simpleKey];
                     if (!propValue)
                         return;

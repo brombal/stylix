@@ -12,19 +12,19 @@ import { StylixPlugin } from './plugins';
  *
  * See the README for more details.
  */
-declare type StylixProviderProps<Theme = any> = StylixThemeProps<Theme> & {
+type StylixProviderProps<Theme = any> = StylixThemeProps<Theme> & {
     id?: string;
     devMode?: boolean;
     plugins?: StylixPlugin[] | StylixPlugin[][];
     styleElement?: HTMLStyleElement;
     children: any;
 };
-declare type StylixThemeProps<Theme = any> = {
+type StylixThemeProps<Theme = any> = {
     theme?: Theme;
     media?: string[];
     children: any;
 };
-export declare type StylixContext<Theme = any> = {
+export type StylixContext<Theme = any> = {
     id: string;
     devMode: boolean;
     theme: Theme;
@@ -44,7 +44,7 @@ export declare type StylixContext<Theme = any> = {
     cleanupRequest: number;
     requestApply: boolean;
 };
-export declare type StylixPublicContext = Pick<StylixContext, 'id' | 'devMode' | 'theme' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'>;
+export type StylixPublicContext = Pick<StylixContext, 'id' | 'devMode' | 'theme' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'>;
 export declare function useStylixContext<Theme = any>(): StylixContext<Theme>;
 export declare function useStylixTheme<Theme = any>(): Theme;
 export declare function StylixProvider({ id, devMode, plugins, styleElement, children, ...themeProps }: StylixProviderProps): React.ReactElement;

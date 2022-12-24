@@ -9,7 +9,7 @@ exports.themeFunctions = {
     name: 'themeFunctions',
     type: 'preprocessStyles',
     plugin(ctx, styles) {
-        return mapObjectRecursive_1.mapObjectRecursive(styles, themeFunctionsMap, { ctx });
+        return (0, mapObjectRecursive_1.mapObjectRecursive)(styles, themeFunctionsMap, { ctx });
     },
 };
 function themeFunctionsMap(key, value, object, context) {

@@ -16,13 +16,13 @@ exports.merge$css = {
     },
 };
 function _merge$css(obj, ctx) {
-    if (!isPlainObject_1.isPlainObject(obj))
+    if (!(0, isPlainObject_1.isPlainObject)(obj))
         return;
     for (const key in obj) {
         if (key === '$css') {
             const $css = obj[key];
             if (Array.isArray($css)) {
-                const flat$css = flatten_1.flatten($css);
+                const flat$css = (0, flatten_1.flatten)($css);
                 for (const val of flat$css) {
                     _merge$css(val, ctx);
                 }
@@ -33,7 +33,7 @@ function _merge$css(obj, ctx) {
         }
         else {
             let value = obj[key];
-            if (isPlainObject_1.isPlainObject(value)) {
+            if ((0, isPlainObject_1.isPlainObject)(value)) {
                 value = ctx[key] || {};
                 _merge$css(obj[key], value);
             }

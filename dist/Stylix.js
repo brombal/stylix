@@ -21,11 +21,11 @@ const StylixProvider_1 = require("./StylixProvider");
 const useStyles_1 = require("./useStyles");
 function _Stylix(props, ref) {
     const _a = props, { $el, $css, $disabled, className, children } = _a, rest = __rest(_a, ["$el", "$css", "$disabled", "className", "children"]);
-    const ctx = StylixProvider_1.useStylixContext();
-    const [styleProps, otherProps] = classifyProps_1.classifyProps(rest, ctx.styleProps);
+    const ctx = (0, StylixProvider_1.useStylixContext)();
+    const [styleProps, otherProps] = (0, classifyProps_1.classifyProps)(rest, ctx.styleProps);
     if ($css)
         styleProps.$css = $css;
-    const hash = useStyles_1.useStyles(styleProps, { disabled: $disabled });
+    const hash = (0, useStyles_1.useStyles)(styleProps, { disabled: $disabled });
     const allProps = Object.assign({ className: `${hash} ${className || ''}`.trim(), ref: ref }, otherProps);
     if (react_1.default.isValidElement($el)) {
         const $elProps = Object.assign({}, $el.props);

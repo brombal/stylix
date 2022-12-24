@@ -27,7 +27,7 @@ const defaultUnits = (unit = 'px', ignoreProps = exports.defaultIgnoreUnits) => 
         name: 'defaultUnits',
         type: 'processStyles',
         plugin(ctx, styles) {
-            return mapObjectRecursive_1.mapObjectRecursive(styles, defaultUnitsMap, { unit, ignoreProps });
+            return (0, mapObjectRecursive_1.mapObjectRecursive)(styles, defaultUnitsMap, { unit, ignoreProps });
         },
     };
 };
@@ -37,5 +37,5 @@ const defaultUnitsMap = (key, value, object, ctx) => {
         return { [key]: String(value) + ctx.unit };
     }
 };
-exports.defaultPixelUnits = exports.defaultUnits();
+exports.defaultPixelUnits = (0, exports.defaultUnits)();
 //# sourceMappingURL=defaultUnits.js.map

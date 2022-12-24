@@ -9,14 +9,14 @@ function merge(...items) {
     if (items.length === 1)
         return items[0];
     // If items are not all objects/arrays, return the last object/array if possible, otherwise last non-undefined value
-    if (!items.every((item) => Array.isArray(item) || isPlainObject_1.isPlainObject(item))) {
+    if (!items.every((item) => Array.isArray(item) || (0, isPlainObject_1.isPlainObject)(item))) {
         items.reverse();
-        return (items.find((item) => Array.isArray(item) || isPlainObject_1.isPlainObject(item)) ||
+        return (items.find((item) => Array.isArray(item) || (0, isPlainObject_1.isPlainObject)(item)) ||
             items.find((item) => typeof item !== 'undefined'));
     }
     const merged = Array.isArray(items[0]) ? [] : {};
     for (const item of items) {
-        if (!Array.isArray(item) && !isPlainObject_1.isPlainObject(item))
+        if (!Array.isArray(item) && !(0, isPlainObject_1.isPlainObject)(item))
             return merged;
         const keys = [...Object.keys(item), ...Object.getOwnPropertySymbols(item)];
         for (const key of keys) {

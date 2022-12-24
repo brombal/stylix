@@ -7,13 +7,13 @@ const isPlainObject_1 = require("./util/isPlainObject");
  */
 function stylesToRuleArray(styles, hash, context) {
     try {
-        const processedStyles = plugins_1.applyPlugins('processStyles', styles, hash, context);
+        const processedStyles = (0, plugins_1.applyPlugins)('processStyles', styles, hash, context);
         // serialize to css rules array
         const serialize = function serialize(selector, styles) {
             const lines = [];
             for (const key in styles) {
                 const value = styles[key];
-                if (isPlainObject_1.isPlainObject(value))
+                if ((0, isPlainObject_1.isPlainObject)(value))
                     lines.push(serialize(key, value));
                 else
                     lines.push(`  ${key}: ${value};`);
