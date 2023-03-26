@@ -1,4 +1,4 @@
-import { isPlainObject } from './isPlainObject';
+import { isPlainObject } from './isPlainObject.ts';
 
 /**
  * Deeply clones a value.

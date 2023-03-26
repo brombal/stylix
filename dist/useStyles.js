@@ -1,16 +1,13 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useGlobalStyles = exports.useKeyframes = exports.useStyles = void 0;
 const react_1 = require("react");
-const applyRules_1 = __importDefault(require("./applyRules"));
+const applyRules_1 = require("./applyRules");
 const plugins_1 = require("./plugins");
-const stylesToRuleArray_1 = __importDefault(require("./stylesToRuleArray"));
+const stylesToRuleArray_1 = require("./stylesToRuleArray");
 const StylixProvider_1 = require("./StylixProvider");
 const hashString_1 = require("./util/hashString");
-const useIsoLayoutEffect_1 = __importDefault(require("./util/useIsoLayoutEffect"));
+const useIsoLayoutEffect_1 = require("./util/useIsoLayoutEffect");
 function cleanup(ctx) {
     if (typeof ctx.cleanupRequest !== 'undefined')
         return;

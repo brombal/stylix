@@ -1,5 +1,5 @@
-import { isPlainObject } from '../util/isPlainObject';
-import { StylixPlugin, StylixPluginFunctionContext } from './index';
+import { isPlainObject } from '../util/isPlainObject.ts';
+import { StylixPlugin, StylixPluginFunctionContext } from './index.ts';
 
 function flatten(styles: any, parent: any, selector: string, root: any, mediaRoot: any) {
   for (let key in styles) {

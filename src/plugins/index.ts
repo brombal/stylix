@@ -1,17 +1,17 @@
-import { StylixContext, StylixPublicContext } from '../StylixProvider';
-import { cleanStyles } from './cleanStyles';
-import { defaultPixelUnits } from './defaultUnits';
-import { flattenNestedStyles } from './flattenNestedStyles';
-import { mediaArrays } from './mediaArrays';
-import { merge$css } from './merge$css';
-import { propCasing } from './propCasing';
-import { replace$$class } from './replace$$class';
-import { themeFunctions } from './themeFunctions';
+import { StylixContext, StylixPublicContext } from '../StylixProvider.tsx';
+import { cleanStyles } from './cleanStyles.ts';
+import { defaultPixelUnits } from './defaultUnits.ts';
+import { flattenNestedStyles } from './flattenNestedStyles.ts';
+import { mediaArrays } from './mediaArrays.ts';
+import { merge$css } from './merge$css.ts';
+import { propCasing } from './propCasing.ts';
+import { replace$$class } from './replace$$class.ts';
+import { themeFunctions } from './themeFunctions.ts';
 
 /**
  * Stylix plugin function context object
  */
-export type StylixPluginFunctionContext = StylixPublicContext & { hash: string };
+export type StylixPluginFunctionContext = StylixPublicContext & { hash: string | null };
 
 /**
  * Stylix plugin interface
@@ -28,7 +28,7 @@ export interface StylixPlugin {
 export function applyPlugins(
   type: StylixPlugin['type'],
   styles: any,
-  hash: string,
+  hash: string | null,
   context: StylixContext,
 ) {
   const pluginContext = {
@@ -50,7 +50,7 @@ export function applyPlugins(
   return processedStyles;
 }
 
-export { customProps } from './customProps';
+export { customProps } from './customProps.ts';
 
 export const defaultPlugins = {
   themeFunctions,

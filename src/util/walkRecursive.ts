@@ -1,5 +1,5 @@
-import { cloneDeep } from './cloneDeep';
-import { isPlainObject } from './isPlainObject';
+import { cloneDeep } from './cloneDeep.ts';
+import { isPlainObject } from './isPlainObject.ts';
 
 /**
  * Invokes a callback for each key/value pair in `object`, and continues recursively on each value that is an array or a
@@ -8,7 +8,7 @@ import { isPlainObject } from './isPlainObject';
  * The context object is a plain object that you can modify as needed. The value will persist to subsequent calls to
  * `map` on child properties of `value`.
  */
-export function walkRecursive<T = any>(
+export function walkRecursive<T extends Record<string, any> = any>(
   object: T,
   cb: (key: string, value: any, currentObject: any, context: any) => void,
   context?: any,

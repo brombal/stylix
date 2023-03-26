@@ -1,11 +1,12 @@
-import { useRef } from 'react';
+import { useRef } from 'npm:react';
 
-import applyRules from './applyRules';
-import { applyPlugins } from './plugins';
-import stylesToRuleArray from './stylesToRuleArray';
-import { StylixContext, useStylixContext } from './StylixProvider';
-import { hashString } from './util/hashString';
-import useIsoLayoutEffect from './util/useIsoLayoutEffect';
+import applyRules from './applyRules.ts';
+import { applyPlugins } from './plugins/index.ts';
+import stylesToRuleArray from './stylesToRuleArray.ts';
+import { StylixContext, useStylixContext } from './StylixProvider.tsx';
+import { hashString } from './util/hashString.ts';
+import useIsoLayoutEffect from './util/useIsoLayoutEffect.ts';
+import { StylixStyles } from "./types.ts";
 
 function cleanup(ctx: StylixContext): void {
   if (typeof ctx.cleanupRequest !== 'undefined') return;
@@ -46,7 +47,7 @@ function compare(a: any, b: any): any {
  * Returns the className hash if enabled, or an empty string.
  */
 export function useStyles(
-  styles: any,
+  styles: Record<string, any>,
   options: { global?: boolean; disabled?: boolean } = { global: false, disabled: false },
 ): string {
   const stylixCtx = useStylixContext();
@@ -127,7 +128,7 @@ export function useKeyframes(
 }
 
 export function useGlobalStyles(
-  styles: any,
+  styles: StylixStyles,
   options: { disabled?: boolean } = { disabled: false },
 ) {
   return useStyles(styles, { ...options, global: true });

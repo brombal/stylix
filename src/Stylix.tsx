@@ -1,12 +1,11 @@
-import React from 'react';
+import React from 'npm:react';
 
-import { classifyProps } from './classifyProps';
-import htmlTags from './html-tags.json';
-import { useStylixContext } from './StylixProvider';
-import { Stylix$Component, Stylix$Props } from './types';
-import { useStyles } from './useStyles';
+import { classifyProps } from './classifyProps.ts';
+import { useStylixContext } from './StylixProvider.tsx';
+import { Stylix$Component, Stylix$Props } from './types.ts';
+import { useStyles } from './useStyles.ts';
 
-function _Stylix<ElType extends React.ElementType>(
+export function _Stylix<ElType extends React.ElementType>(
   props: Stylix$Props<ElType>,
   ref: React.Ref<ElType>,
 ) {
@@ -37,36 +36,8 @@ function _Stylix<ElType extends React.ElementType>(
   return <$el {...allProps}>{children}</$el>;
 }
 
-const Stylix: Stylix$Component = React.forwardRef(_Stylix) as any;
-
-Stylix.styled = ($el, conflictingPropMapping?) => {
-  // We could go through the mental gymnastics to figure out the correct type here, but it really doesn't matter,
-  // as the return type specified in types.ts is correct.
-  const r: any = React.forwardRef((props, ref) => {
-    let el = $el as React.ElementType | React.ReactElement;
-    if (conflictingPropMapping) {
-      const newProps = {} as any;
-      for (const k in conflictingPropMapping) {
-        newProps[conflictingPropMapping[k]] = (props as any)[k];
-      }
-      el = <$el {...newProps} />;
-    }
-    return _Stylix({ $el: el as any, ...props }, ref as any);
-  });
-  r.displayName = `$.${
-    ($el as any).displayName || ($el as any).name || $el.toString?.() || 'Unnamed'
-  }`;
-  r.__isStylix = true;
-  return r;
-};
-
+const Stylix = React.forwardRef(_Stylix) as unknown as Stylix$Component;
 Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
-
-for (const i in htmlTags) {
-  const tag = htmlTags[i] as keyof JSX.IntrinsicElements;
-  const htmlComponent = Stylix.styled(tag);
-  Stylix[tag] = htmlComponent as any;
-}
 
 export default Stylix;

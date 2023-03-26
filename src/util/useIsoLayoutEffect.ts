@@ -1,8 +1,8 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'npm:react';
 
 const useIsoLayoutEffect =
-  typeof window !== 'undefined'
-    ? (fn: () => void | (() => void), deps: any[], runOnSsr: boolean) => useLayoutEffect(fn, deps)
-    : (fn: () => () => void, deps: any[], runOnSsr: boolean) => (runOnSsr ? fn() : null);
+  typeof window !== 'undefined' && 'document' in window
+    ? (fn: () => void | (() => void), deps?: unknown[], _runOnSsr?: boolean) => useLayoutEffect(fn, deps)
+    : (fn: () => void | (() => void), _deps?: unknown[], runOnSsr?: boolean) => (runOnSsr ? fn() : null);
 
 export default useIsoLayoutEffect;

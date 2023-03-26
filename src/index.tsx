@@ -1,14 +1,24 @@
-export { StylixProps, StylixPropsExtensions } from './types';
+export {
+  type StylixProps,
+  type StylixPropsExtensions,
+  type Stylix$Component,
+  type Stylix$elProp,
+  type Stylix$elPropOptional,
+  type Extends,
+} from './types.ts';
 export {
   useStylixContext,
   useStylixTheme,
   StylixProvider,
-  StylixPublicContext as StylixContext,
+  type StylixPublicContext as StylixContext,
   StylixTheme,
-} from './StylixProvider';
-export { useStyles, useKeyframes, useGlobalStyles } from './useStyles';
-export { defaultPlugins, customProps, StylixPlugin, StylixPluginFunctionContext } from './plugins';
-export { mapObjectRecursive } from './util/mapObjectRecursive';
-export { walkRecursive } from './util/walkRecursive';
-export { createStyleCollector, styleCollectorContext, StyleCollector } from './styleCollector';
-export { default } from './Stylix';
+} from './StylixProvider.tsx';
+export { useStyles, useKeyframes, useGlobalStyles } from './useStyles.ts';
+export { defaultPlugins, customProps, type StylixPlugin, type StylixPluginFunctionContext } from './plugins/index.ts';
+export { mapObjectRecursive } from './util/mapObjectRecursive.ts';
+export { walkRecursive } from './util/walkRecursive.ts';
+export { createStyleCollector, styleCollectorContext, type StyleCollector } from './styleCollector.tsx';
+export { classifyProps, useClassifyProps } from './classifyProps.ts';
+export { styled } from './styled.tsx';
+import './elements.ts';
+export { default } from './Stylix.tsx';

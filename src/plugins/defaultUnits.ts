@@ -1,5 +1,5 @@
-import { mapObjectRecursive } from '../util/mapObjectRecursive';
-import { StylixPlugin } from './index';
+import { mapObjectRecursive } from '../util/mapObjectRecursive.ts';
+import { StylixPlugin } from './index.ts';
 
 export const defaultIgnoreUnits = [
   'columns',
@@ -32,7 +32,7 @@ export const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits): Sty
   };
 };
 
-const defaultUnitsMap = (key: string | number, value: any, object, ctx) => {
+const defaultUnitsMap = (key: string | number, value: any, object :any, ctx:any) => {
   if (typeof value === 'number' && !ctx.ignoreProps.includes(key as string)) {
     return { [key]: String(value) + ctx.unit };
   }

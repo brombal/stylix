@@ -1,12 +1,13 @@
-import { applyPlugins } from './plugins';
-import { StylixContext } from './StylixProvider';
-import { isPlainObject } from './util/isPlainObject';
+import { applyPlugins } from './plugins/index.ts';
+import { StylixContext } from './StylixProvider.tsx';
+import { isPlainObject } from './util/isPlainObject.ts';
+import { StylixObject } from "./types.ts";
 
 /**
  * Converts a Stylix CSS object to an array of rules, suitable for passing to StyleSheet#insertRule.
  */
 export default function stylesToRuleArray(
-  styles: any,
+  styles: StylixObject,
   hash: string,
   context: StylixContext,
 ): string[] {
@@ -14,7 +15,7 @@ export default function stylesToRuleArray(
     const processedStyles = applyPlugins('processStyles', styles, hash, context);
 
     // serialize to css rules array
-    const serialize = function serialize(selector, styles) {
+    const serialize = function serialize(selector: string, styles: StylixObject) {
       const lines: string[] = [];
       for (const key in styles) {
         const value = styles[key];

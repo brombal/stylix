@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "jsx": "react",
-    "jsxFactory": "",
     "resolveJsonModule": true,
     "baseUrl": "./src",
     "module": "commonjs",
@@ -12,10 +9,7 @@
     "declaration": true,
     "outDir": "dist",
     "sourceMap": true,
-    "lib": [
-      "dom",
-      "es6",
-    ]
+    "lib": ["dom", "es6"]
   },
   "files": ["src/index.tsx"]
 }

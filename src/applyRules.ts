@@ -1,4 +1,4 @@
-import { StylixContext } from './StylixProvider';
+import { StylixContext } from './StylixProvider.tsx';
 
 /**
  * Applies rules from given StylixContext to the <style> element.

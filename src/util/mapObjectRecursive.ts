@@ -1,4 +1,4 @@
-import { isPlainObject } from './isPlainObject';
+import { isPlainObject } from './isPlainObject.ts';
 
 /**
  * Invokes `map` on each key/value pair in `object`. The key/value pair is deleted from the object and replaced by
@@ -14,10 +14,10 @@ export function mapObjectRecursive(
     value: any,
     object: any,
     context: any,
-  ) => Record<string | number, any>,
+  ) => Record<string | number, any> | undefined,
   context: any = {},
 ) {
-  const clone = Array.isArray(object) ? [] : {};
+  const clone: any = Array.isArray(object) ? [] : {};
 
   for (const k of Object.keys(object)) {
     let key: string | number = k;

@@ -1,6 +1,6 @@
-import { simplifyStylePropName } from '../classifyProps';
-import { mapObjectRecursive } from '../util/mapObjectRecursive';
-import { StylixPlugin, StylixPluginFunctionContext } from './index';
+import { simplifyStylePropName } from '../classifyProps.ts';
+import { mapObjectRecursive } from '../util/mapObjectRecursive.ts';
+import { StylixPlugin, StylixPluginFunctionContext } from './index.ts';
 
 /**
  * Fixes casing and hyphenation on known style props
@@ -13,7 +13,7 @@ export const propCasing: StylixPlugin = {
   },
 };
 
-function propCasingMap(key, value, object, context) {
+function propCasingMap(key: string | number, value: any, object: any, context: any) {
   if (typeof key === 'string' && context.ctx.styleProps[simplifyStylePropName(key)]) {
     return { [context.ctx.styleProps[simplifyStylePropName(key)]]: value };
   }

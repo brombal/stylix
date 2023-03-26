@@ -1,5 +1,5 @@
-import { mapObjectRecursive } from '../util/mapObjectRecursive';
-import { StylixPlugin, StylixPluginFunctionContext } from './index';
+import { mapObjectRecursive } from '../util/mapObjectRecursive.ts';
+import { StylixPlugin, StylixPluginFunctionContext } from './index.ts';
 
 /**
  * Replaces $$class with hash in string values
@@ -12,7 +12,7 @@ export const replace$$class: StylixPlugin = {
   },
 };
 
-function replace$$classMap(key, value, object, context) {
+function replace$$classMap(key: string | number, value: any, object: any, context: any) {
   value = typeof value === 'string' ? value.replace('$$class', context.ctx.hash) : value;
   key = typeof key === 'string' ? key.replace('$$class', context.ctx.hash) : key;
   return { [key]: value };

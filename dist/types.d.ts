@@ -1,9 +1,14 @@
-import React, { CSSProperties } from 'react';
+import * as React from 'react';
+import { CSSProperties } from 'react';
+/**
+ * Utility type that extends T with U, overriding any properties that are already defined in T.
+ */
+export type Extends<T, U> = Omit<T, keyof U> & U;
 export type StylixValue<T> = T | Array<T | '@'> | ((theme: any, media: string[]) => T | Array<T | '@'>);
 /**
  * All standard CSS properties, custom style props, and the $css prop.
  */
-type StylixStyleProps = {
+export type StylixStyleProps = {
     /**
      * Additional styles.
      */
@@ -29,48 +34,49 @@ type StylixStyleProps = {
 export interface StylixPropsExtensions {
 }
 /**
- * A component's props, without properties that conflict with style properties.
+ * Props for a custom component that accepts Stylix style props.
+ *
+ * `TComponent` is the type of the component that styles will be forwarded to. This could an html element (e.g. 'div')
+ * or a React component (e.g. MyComponent).
+ *
+ * Example:
+ * function MyStyledComponent(props: StylixProps<'div'>) {
+ *   return <$.div {...props} />;
+ * }
  */
-type ComponentPropsWithoutStyles<TComponent extends React.ElementType> = Omit<React.ComponentPropsWithRef<TComponent>, keyof StylixStyleProps>;
+export type StylixProps<TComponent extends React.ElementType = any, TExtends = object> = Extends<Extends<StylixStyleProps, React.ComponentPropsWithRef<TComponent>>, TExtends>;
 /**
- * Allows users to define components that accept Stylix style props.
+ * Additional properties on the Stylix ($) component and its built-in html components.
  */
-export type StylixProps<ElType extends React.ElementType = any> = ComponentPropsWithoutStyles<ElType> & StylixStyleProps;
-/**
- * Additional properties on Stylix component functions.
- */
-type StylixComponentMeta = {
+export type StylixComponentMeta = {
     displayName?: string;
     __isStylix: true;
 };
-export type StylixWrappedComponentProps<TComponent extends React.ElementType> = ComponentPropsWithoutStyles<TComponent> & StylixStyleProps;
-export type StylixWrappedComponent<TComponent extends React.ElementType, TAdditionalProps = unknown> = React.FunctionComponent<TAdditionalProps & StylixWrappedComponentProps<TComponent>> & StylixComponentMeta;
+export type Stylix$elProp<TComponent extends React.ElementType | React.ReactElement> = {
+    /**
+     * Specifies the element to render.
+     */
+    $el: TComponent;
+};
+export type Stylix$elPropOptional<TComponent extends React.ElementType | React.ReactElement> = Partial<Stylix$elProp<TComponent>>;
 /**
  * Props for main Stylix component (<$>)
  * `TComponent` is determined automatically by the type of $el.
  * <$ $el={...}>...</$>
  */
-export type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> = {
-    /**
-     * Specifies the element to render.
-     */
-    $el: TComponent;
-} & ComponentPropsWithoutStyles<TComponent extends React.ElementType ? TComponent : TComponent extends React.ReactElement<infer P> ? P : never> & StylixStyleProps;
+export type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> = Stylix$elProp<TComponent> & (TComponent extends React.ElementType<infer P> ? Extends<StylixStyleProps, P> : StylixStyleProps & Record<string, any>);
+type Stylix$ComponentExtras = StylixComponentMeta & {
+    [key in keyof JSX.IntrinsicElements]: React.FC<StylixProps<key>>;
+};
 /**
  * Type of main Stylix component ($)
  */
-export type Stylix$Component = {
+export interface Stylix$Component extends Stylix$ComponentExtras {
     /**
      * This is equivalent to React.FunctionComponent, but must be specified explicitly this way to allow
-     * TComponent to be generic here and not directly on Stylix$Component, so that it can be inferred at the time
+     * TComponent to be generic here and not directly on the Stylix$Component type, so that it can be inferred at the time
      * the component is used.
      */
     <TComponent extends React.ElementType | React.ReactElement>(props: Stylix$Props<TComponent>, context?: any): React.ReactElement<any, any> | null;
-    /**
-     * Type for the $.styled() helper function.
-     */
-    styled: <TComponent extends React.ElementType, TPropMap extends Record<string, string> = Record<string, never>>($el: TComponent, conflictingPropMapping?: TPropMap) => StylixWrappedComponent<TComponent, Record<keyof TPropMap, any>>;
-} & StylixComponentMeta & {
-    [key in keyof JSX.IntrinsicElements]: StylixWrappedComponent<key>;
-};
+}
 export {};

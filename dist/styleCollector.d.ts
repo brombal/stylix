@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 export interface StyleCollector {
     collect: (element: React.ReactElement) => React.ReactElement;
     render: React.FC<React.ComponentProps<'style'>>;

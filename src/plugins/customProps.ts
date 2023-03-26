@@ -1,8 +1,8 @@
-import { isValidJSXProp, simplifyStylePropName } from '../classifyProps';
-import { isPlainObject } from '../util/isPlainObject';
-import { walkRecursive } from '../util/walkRecursive';
-import { StylixPlugin, StylixPluginFunctionContext } from './index';
-import { mediaArrays } from './mediaArrays';
+import { isValidJSXProp, simplifyStylePropName } from '../classifyProps.ts';
+import { isPlainObject } from '../util/isPlainObject.ts';
+import { walkRecursive } from '../util/walkRecursive.ts';
+import { StylixPlugin, StylixPluginFunctionContext } from './index.ts';
+import { mediaArrays } from './mediaArrays.ts';
 
 export const customProps = (customProps: Record<string, any>): StylixPlugin[] => {
   for (const key in customProps) {
@@ -35,7 +35,7 @@ export const customProps = (customProps: Record<string, any>): StylixPlugin[] =>
           const keys = Object.keys(object);
           const afterKeys = keys.slice(keys.indexOf(key) + 1);
 
-          const newStyles = {};
+          const newStyles: any = {};
           if (typeof propValue === 'object') {
             if (value) Object.assign(newStyles, propValue);
           } else if (typeof propValue === 'string') {

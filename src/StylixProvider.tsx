@@ -1,14 +1,13 @@
-import React, { useContext, useRef, useState } from 'react';
+import React from 'npm:react';
+import { useContext, useRef, useState } from 'npm:react';
 
-import { simplifyStylePropName } from './classifyProps';
-import cssProps from './css-props.json';
-import { applyPlugins, defaultPlugins, StylixPlugin } from './plugins';
-import { styleCollectorContext } from './styleCollector';
-import { flatten } from './util/flatten';
-import { merge } from './util/merge';
-import useIsoLayoutEffect from './util/useIsoLayoutEffect';
-
-const IS_DEV_ENV = process.env.NODE_ENV !== 'production';
+import { simplifyStylePropName } from './classifyProps.ts';
+import cssProps from './css-props.json' assert { type: "json"};
+import { applyPlugins, defaultPlugins, StylixPlugin } from './plugins/index.ts';
+import { styleCollectorContext } from './styleCollector.tsx';
+import { flatten } from './util/flatten.ts';
+import { merge } from './util/merge.ts';
+import useIsoLayoutEffect from './util/useIsoLayoutEffect.ts';
 
 /**
  * Stylix context
@@ -56,7 +55,7 @@ export type StylixContext<Theme = any> = {
     };
   };
   styleProps: Record<string, string>;
-  cleanupRequest: number;
+  cleanupRequest?: number;
   requestApply: boolean;
 };
 
@@ -65,7 +64,7 @@ export type StylixPublicContext = Pick<
   'id' | 'devMode' | 'theme' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'
 >;
 
-const defaultStyleProps = {};
+const defaultStyleProps: Record<string, string> = {};
 for (const value of cssProps) {
   defaultStyleProps[simplifyStylePropName(value)] = value;
 }
@@ -73,7 +72,7 @@ for (const value of cssProps) {
 function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
   const ctx = {
     id: userValues.id || Math.round(Math.random() * 10000).toString(10),
-    devMode: userValues.devMode ?? IS_DEV_ENV,
+    devMode: userValues.devMode,
     styleProps: defaultStyleProps,
     theme: userValues.theme || null,
     media: userValues.media || null,
@@ -101,7 +100,7 @@ function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
         pluginIndex = ctx.plugins.indexOf(plugin.before);
       if (plugin.after && ctx.plugins.includes(plugin.after))
         pluginIndex = ctx.plugins.indexOf(plugin.after) + 1;
-      if ('atIndex' in plugin) pluginIndex = plugin.atIndex;
+      if (plugin.atIndex !== undefined) pluginIndex = plugin.atIndex;
       if (pluginIndex === -1) ctx.plugins.push(plugin);
       else ctx.plugins.splice(pluginIndex, 0, plugin);
     }

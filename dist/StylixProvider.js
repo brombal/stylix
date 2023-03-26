@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __rest = (this && this.__rest) || function (s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -33,22 +10,20 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StylixTheme = exports.StylixProvider = exports.useStylixTheme = exports.useStylixContext = void 0;
-const react_1 = __importStar(require("react"));
+const React = require("react");
+const react_1 = require("react");
 const classifyProps_1 = require("./classifyProps");
-const css_props_json_1 = __importDefault(require("./css-props.json"));
+const cssProps = require("./css-props.json");
 const plugins_1 = require("./plugins");
 const styleCollector_1 = require("./styleCollector");
 const flatten_1 = require("./util/flatten");
 const merge_1 = require("./util/merge");
-const useIsoLayoutEffect_1 = __importDefault(require("./util/useIsoLayoutEffect"));
+const useIsoLayoutEffect_1 = require("./util/useIsoLayoutEffect");
 const IS_DEV_ENV = process.env.NODE_ENV !== 'production';
 const defaultStyleProps = {};
-for (const value of css_props_json_1.default) {
+for (const value of cssProps) {
     defaultStyleProps[(0, classifyProps_1.simplifyStylePropName)(value)] = value;
 }
 function createStylixContext(userValues = {}) {
@@ -94,7 +69,7 @@ function createStylixContext(userValues = {}) {
     return ctx;
 }
 // The React context object
-const stylixContext = react_1.default.createContext(createStylixContext());
+const stylixContext = React.createContext(createStylixContext());
 // Convenience wrapper hook that returns the current Stylix context
 function useStylixContext() {
     return (0, react_1.useContext)(stylixContext);
@@ -111,8 +86,8 @@ function StylixProvider(_a) {
     if (!ctx.current)
         ctx.current = createStylixContext({ id, devMode, plugins, styleElement });
     ctx.current.styleCollector = (0, react_1.useContext)(styleCollector_1.styleCollectorContext);
-    return (react_1.default.createElement(stylixContext.Provider, { value: ctx.current },
-        react_1.default.createElement(StylixTheme, Object.assign({}, themeProps), children)));
+    return (React.createElement(stylixContext.Provider, { value: ctx.current },
+        React.createElement(StylixTheme, Object.assign({}, themeProps), children)));
 }
 exports.StylixProvider = StylixProvider;
 function mergeContexts(contextA, contextB) {
@@ -137,7 +112,7 @@ function StylixTheme({ children, media, theme }) {
     (0, useIsoLayoutEffect_1.default)(() => {
         setContextValue(mergeContexts(parentCtx, { media, theme }));
     }, [parentCtx, (media === null || media === void 0 ? void 0 : media.join('|')) || '', theme], false);
-    return react_1.default.createElement(stylixContext.Provider, { value: contextValue }, children);
+    return React.createElement(stylixContext.Provider, { value: contextValue }, children);
 }
 exports.StylixTheme = StylixTheme;
 //# sourceMappingURL=StylixProvider.js.map

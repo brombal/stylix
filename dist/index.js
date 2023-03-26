@@ -1,9 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = exports.styleCollectorContext = exports.createStyleCollector = exports.walkRecursive = exports.mapObjectRecursive = exports.customProps = exports.defaultPlugins = exports.useGlobalStyles = exports.useKeyframes = exports.useStyles = exports.StylixTheme = exports.StylixProvider = exports.useStylixTheme = exports.useStylixContext = void 0;
+exports.default = exports.styled = exports.useClassifyProps = exports.classifyProps = exports.styleCollectorContext = exports.createStyleCollector = exports.walkRecursive = exports.mapObjectRecursive = exports.customProps = exports.defaultPlugins = exports.useGlobalStyles = exports.useKeyframes = exports.useStyles = exports.StylixTheme = exports.StylixProvider = exports.useStylixTheme = exports.useStylixContext = void 0;
 var StylixProvider_1 = require("./StylixProvider");
 Object.defineProperty(exports, "useStylixContext", { enumerable: true, get: function () { return StylixProvider_1.useStylixContext; } });
 Object.defineProperty(exports, "useStylixTheme", { enumerable: true, get: function () { return StylixProvider_1.useStylixTheme; } });
@@ -23,6 +20,12 @@ Object.defineProperty(exports, "walkRecursive", { enumerable: true, get: functio
 var styleCollector_1 = require("./styleCollector");
 Object.defineProperty(exports, "createStyleCollector", { enumerable: true, get: function () { return styleCollector_1.createStyleCollector; } });
 Object.defineProperty(exports, "styleCollectorContext", { enumerable: true, get: function () { return styleCollector_1.styleCollectorContext; } });
+var classifyProps_1 = require("./classifyProps");
+Object.defineProperty(exports, "classifyProps", { enumerable: true, get: function () { return classifyProps_1.classifyProps; } });
+Object.defineProperty(exports, "useClassifyProps", { enumerable: true, get: function () { return classifyProps_1.useClassifyProps; } });
+var styled_1 = require("./styled");
+Object.defineProperty(exports, "styled", { enumerable: true, get: function () { return styled_1.styled; } });
+require("./elements");
 var Stylix_1 = require("./Stylix");
-Object.defineProperty(exports, "default", { enumerable: true, get: function () { return __importDefault(Stylix_1).default; } });
+Object.defineProperty(exports, "default", { enumerable: true, get: function () { return Stylix_1.default; } });
 //# sourceMappingURL=index.js.map

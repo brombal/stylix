@@ -1,11 +1,11 @@
-import { isPlainObject } from './isPlainObject';
+import { isPlainObject } from './isPlainObject.ts';
 
 /**
  * Invokes a callback on `object`, and on every property of `object` that is a plain object, and continues recursively.
  * `cb` will receive the key as the second argument (it will be `null` on the first call).
  */
-export function visitRecursive(object: any, cb: (object: any, key: string) => void): void {
-  const _visitRecursive = function _visitRecursive(object: any, key: string) {
+export function visitRecursive(object: any, cb: (object: any, key: string | null) => void): void {
+  const _visitRecursive = function _visitRecursive(object: any, key: string | null) {
     cb(object, key);
     for (const key in object) {
       const value = object[key];

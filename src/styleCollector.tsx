@@ -1,4 +1,4 @@
-import React, { createContext } from 'react';
+import React, { createContext } from 'npm:react';
 
 export interface StyleCollector {
   collect: (element: React.ReactElement) => React.ReactElement;
@@ -9,12 +9,12 @@ export interface StyleCollector {
 export const styleCollectorContext = createContext<string[]>(null);
 
 export function createStyleCollector() {
-  const styles = [];
+  const styles: string[] = [];
   const collector: StyleCollector = {
     collect: (element) => (
       <styleCollectorContext.Provider value={styles}>{element}</styleCollectorContext.Provider>
     ),
-    render: (props) => (
+    render: (props: React.ComponentProps<'style'>) => (
       <style
         type="text/css"
         key={props.id || 'stylix'}

@@ -1,6 +1,6 @@
-import { flatten } from '../util/flatten';
-import { isPlainObject } from '../util/isPlainObject';
-import { StylixPlugin, StylixPluginFunctionContext } from './index';
+import { flatten } from '../util/flatten.ts';
+import { isPlainObject } from '../util/isPlainObject.ts';
+import { StylixPlugin, StylixPluginFunctionContext } from './index.ts';
 
 /**
  * Merges $css property into parent styles

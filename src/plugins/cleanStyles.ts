@@ -1,5 +1,5 @@
-import { isPlainObject } from '../util/isPlainObject';
-import { StylixPlugin, StylixPluginFunctionContext } from './index';
+import { isPlainObject } from '../util/isPlainObject.ts';
+import { StylixPlugin, StylixPluginFunctionContext } from './index.ts';
 
 function cleanObject(object: any): any {
   for (const key in object) {
