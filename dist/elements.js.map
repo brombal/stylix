@@ -1,1 +1,0 @@
-{"version":3,"file":"elements.js","sourceRoot":"","sources":["../src/elements.ts"],"names":[],"mappings":";;AAAA,qCAAkC;AAClC,qCAA8B;AAC9B,6CAA8C;AAE9C,KAAK,MAAM,CAAC,IAAI,QAAQ,EAAE;IACxB,MAAM,GAAG,GAAG,QAAQ,CAAC,CAAC,CAAgC,CAAC;IACvD,MAAM,aAAa,GAAG,IAAA,eAAM,EAAC,GAAG,CAAC,CAAC;IAClC,gBAAM,CAAC,GAAG,CAAC,GAAG,aAAoB,CAAC;CACpC"}

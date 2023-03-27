@@ -1,1 +1,0 @@
-{"version":3,"file":"isPlainObject.js","sourceRoot":"","sources":["../../src/util/isPlainObject.ts"],"names":[],"mappings":";;;AAAA;;GAEG;AACH,SAAgB,aAAa,CAAC,GAAQ;IACpC,OAAO,OAAO,GAAG,KAAK,QAAQ,IAAI,CAAA,GAAG,aAAH,GAAG,uBAAH,GAAG,CAAE,SAAS,MAAK,MAAM,CAAC,SAAS,CAAC;AACxE,CAAC;AAFD,sCAEC"}
