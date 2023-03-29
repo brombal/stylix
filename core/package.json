@@ -1,6 +1,6 @@
 {
   "name": "@stylix/core",
-  "version": "4.0.0b1",
+  "version": "4.0.0-beta2",
   "description": "React, with style. Add styles to your React apps with props: the easy, natural, and low learning curve approach.",
   "keywords": [
     "react",
@@ -14,6 +14,13 @@
   "main": "./dist/index.js",
   "module": "./dist/module.mjs",
   "types": "./dist/types.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/module.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
   "scripts": {
     "build": "npm run clean && parcel build",
     "start": "tsc --watch",
