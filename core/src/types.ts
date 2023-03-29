@@ -1,5 +1,9 @@
+import * as CSS from 'csstype';
 import type React from 'react';
-import { type CSSProperties } from 'react';
+// import React, { CSSProperties } from "react";
+
+type CSSProperties = CSS.StandardProperties<number | string> &
+  CSS.VendorProperties<number | string>;
 
 /**
  * Utility type that extends T with U, overriding any properties that are already defined in T.
@@ -56,8 +60,12 @@ export interface StylixPropsExtensions {} // eslint-disable-line
  *   return <$.div {...props} />;
  * }
  */
-export type StylixProps<TComponent extends React.ElementType = any, TExtends = object> = Extends<
-  Extends<StylixStyleProps, React.ComponentPropsWithRef<TComponent>>,
+export type StylixProps<
+  TComponent extends React.ElementType = any,
+  TExtends = object,
+  TForceStyles extends keyof CSSProperties = never,
+> = Extends<
+  Extends<StylixStyleProps, Omit<React.ComponentPropsWithRef<TComponent>, TForceStyles>>,
   TExtends
 >;
 
@@ -87,7 +95,7 @@ export type Stylix$elPropOptional<TComponent extends React.ElementType | React.R
 export type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> =
   Stylix$elProp<TComponent> &
     (TComponent extends React.ElementType<infer P>
-      ? Extends<StylixStyleProps, P>
+      ? Extends<P, StylixStyleProps>
       : StylixStyleProps & Record<string, any>);
 
 type Stylix$ComponentExtras = StylixComponentMeta & {

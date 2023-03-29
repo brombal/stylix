@@ -1,4 +1,6 @@
-import React, { CSSProperties } from "react";
+import * as CSS from "csstype";
+import React from "react";
+type CSSProperties = CSS.StandardProperties<number | string> & CSS.VendorProperties<number | string>;
 /**
  * Utility type that extends T with U, overriding any properties that are already defined in T.
  */
@@ -9,7 +11,7 @@ type StylixValue<T> = T | Array<T | '@'> | ((theme: any, media: string[]) => T |
 /**
  * All standard CSS properties, custom style props, and the $css prop.
  */
-type StylixStyleProps = {
+export type StylixStyleProps = {
     /**
      * Additional styles.
      */
@@ -45,7 +47,7 @@ export interface StylixPropsExtensions {
  *   return <$.div {...props} />;
  * }
  */
-export type StylixProps<TComponent extends React.ElementType = any, TExtends = object> = Extends<Extends<StylixStyleProps, React.ComponentPropsWithRef<TComponent>>, TExtends>;
+export type StylixProps<TComponent extends React.ElementType = any, TExtends = object, TForceStyles extends keyof CSSProperties = never> = Extends<Extends<StylixStyleProps, Omit<React.ComponentPropsWithRef<TComponent>, TForceStyles>>, TExtends>;
 /**
  * Additional properties on the Stylix ($) component and its built-in html components.
  */
@@ -65,7 +67,7 @@ export type Stylix$elPropOptional<TComponent extends React.ElementType | React.R
  * `TComponent` is determined automatically by the type of $el.
  * <$ $el={...}>...</$>
  */
-type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> = Stylix$elProp<TComponent> & (TComponent extends React.ElementType<infer P> ? Extends<StylixStyleProps, P> : StylixStyleProps & Record<string, any>);
+type Stylix$Props<TComponent extends React.ElementType | React.ReactElement> = Stylix$elProp<TComponent> & (TComponent extends React.ElementType<infer P> ? Extends<P, StylixStyleProps> : StylixStyleProps & Record<string, any>);
 type Stylix$ComponentExtras = StylixComponentMeta & {
     [key in keyof JSX.IntrinsicElements]: React.FC<StylixProps<key>>;
 };
@@ -188,7 +190,7 @@ export function StylixTheme({ children, media, theme }: StylixThemeProps): JSX.E
  * If `global` is false, provided styles will be nested within the generated classname.
  * Returns the className hash if enabled, or an empty string.
  */
-export function useStyles(styles: Record<string, any>, options?: {
+export function useStyles(styles: Record<string, any> | undefined, options?: {
     global?: boolean;
     disabled?: boolean;
 }): string;
@@ -200,10 +202,11 @@ export function useGlobalStyles(styles: StylixStyles, options?: {
 }): string;
 declare const Stylix: Stylix$Component;
 export default Stylix;
-type StylixStyledComponent<TProps> = React.FC<Extends<StylixStyleProps, TProps>> & StylixComponentMeta;
+export type StylixStyledComponentWithProps<TProps> = React.FC<Extends<TProps, StylixStyleProps>> & StylixComponentMeta;
+export type StylixStyledComponent<TComponent extends HtmlOrComponent> = StylixStyledComponentWithProps<HtmlOrComponentProps<TComponent>>;
 type HtmlOrComponent = keyof JSX.IntrinsicElements | React.ForwardRefRenderFunction<any, any>;
 type HtmlOrComponentProps<TComponent extends HtmlOrComponent> = TComponent extends keyof JSX.IntrinsicElements ? React.ComponentPropsWithRef<TComponent> : TComponent extends React.ForwardRefRenderFunction<infer R, infer P> ? P & React.RefAttributes<R> : never;
-export function styled<TComponent extends HtmlOrComponent, TPropMap extends Record<string, string> = Record<string, never>>($el: TComponent, addProps?: Partial<HtmlOrComponentProps<TComponent>>, conflictingPropMapping?: TPropMap): StylixStyledComponent<HtmlOrComponentProps<TComponent>>;
+export function styled<TComponent extends HtmlOrComponent, TPropMap extends Record<string, string> = Record<string, never>>($el: TComponent, addProps?: Extends<StylixStyleProps, Partial<HtmlOrComponentProps<TComponent>>>, conflictingPropMapping?: TPropMap): StylixStyledComponent<TComponent>;
 export type StylixContext = StylixPublicContext;
 
 //# sourceMappingURL=types.d.ts.map

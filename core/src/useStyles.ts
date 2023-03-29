@@ -47,7 +47,7 @@ function compare(a: any, b: any): any {
  * Returns the className hash if enabled, or an empty string.
  */
 export function useStyles(
-  styles: Record<string, any>,
+  styles: Record<string, any> | undefined,
   options: { global?: boolean; disabled?: boolean } = { global: false, disabled: false },
 ): string {
   const stylixCtx = useStylixContext();

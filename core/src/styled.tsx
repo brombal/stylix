@@ -3,8 +3,11 @@ import React from 'react';
 import { _Stylix } from './Stylix';
 import { Extends, StylixComponentMeta, StylixStyleProps } from './types';
 
-export type StylixStyledComponent<TProps> = React.FC<Extends<StylixStyleProps, TProps>> &
+export type StylixStyledComponentWithProps<TProps> = React.FC<Extends<TProps, StylixStyleProps>> &
   StylixComponentMeta;
+
+export type StylixStyledComponent<TComponent extends HtmlOrComponent> =
+  StylixStyledComponentWithProps<HtmlOrComponentProps<TComponent>>;
 
 export type HtmlOrComponent =
   | keyof JSX.IntrinsicElements
@@ -22,9 +25,9 @@ export function styled<
   TPropMap extends Record<string, string> = Record<string, never>,
 >(
   $el: TComponent,
-  addProps?: Partial<HtmlOrComponentProps<TComponent>>,
+  addProps?: Extends<StylixStyleProps, Partial<HtmlOrComponentProps<TComponent>>>,
   conflictingPropMapping?: TPropMap,
-): StylixStyledComponent<HtmlOrComponentProps<TComponent>> {
+): StylixStyledComponent<TComponent> {
   const Element: any = typeof $el === 'string' ? ($el as any) : React.forwardRef($el);
   const r: any = React.forwardRef((props: Record<string, any>, ref: React.Ref<unknown>) => {
     if (conflictingPropMapping) {

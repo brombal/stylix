@@ -5,6 +5,7 @@ export {
   type Stylix$elProp,
   type Stylix$elPropOptional,
   type Extends,
+  type StylixStyleProps,
 } from './types';
 export { useStylixContext, useStylixTheme, StylixProvider, StylixTheme } from './StylixProvider';
 import { StylixPublicContext } from './StylixProvider';
@@ -20,6 +21,6 @@ export { mapObjectRecursive } from './util/mapObjectRecursive';
 export { walkRecursive } from './util/walkRecursive';
 export { createStyleCollector, styleCollectorContext, type StyleCollector } from './styleCollector';
 export { classifyProps, useClassifyProps } from './classifyProps';
-export { styled } from './styled';
+export { styled, type StylixStyledComponentWithProps, type StylixStyledComponent } from './styled';
 import './elements';
 export { default } from './Stylix';

@@ -7,5 +7,6 @@
     "moduleResolution": "node",
     "lib": ["dom", "es2017"]
   },
-  "files": ["src/index.ts"]
+  // Include src/index.ts and all ts and tsx files in tests/
+  "include": ["src/index.ts", "tests/**/*"]
 }
