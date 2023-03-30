@@ -193,6 +193,7 @@ export function StylixTheme({ children, media, theme }: StylixThemeProps): JSX.E
 export function useStyles(styles: Record<string, any> | undefined, options?: {
     global?: boolean;
     disabled?: boolean;
+    debugLabel?: string;
 }): string;
 export function useKeyframes(keyframes: any, options?: {
     disabled?: boolean;

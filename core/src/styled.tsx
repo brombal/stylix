@@ -41,7 +41,9 @@ export function styled<
         $el: Element,
         ...addProps,
         ...props,
-        $css: [addProps?.$css, props?.$css],
+        ...(addProps?.$css || props?.$css
+          ? { $css: [addProps?.$css, props?.$css].filter(Boolean) }
+          : {}),
       },
       ref as any,
     );

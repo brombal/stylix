@@ -82,11 +82,11 @@ function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
   } as StylixContext;
 
   if (!ctx.styleElement && typeof document !== 'undefined') {
-    if ('adoptedStyleSheets' in document) {
+    if (!ctx.devMode && 'adoptedStyleSheets' in document) {
       ctx.stylesheet = new CSSStyleSheet();
       document.adoptedStyleSheets.push(ctx.stylesheet);
     } else {
-      // Legacy method
+      // Legacy/devMode method
       // TS assumes window.document is 'never', so we need to explicitly cast it to Document
       const doc = document as Document;
       ctx.styleElement = doc.createElement('style');

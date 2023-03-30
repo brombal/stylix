@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 
 import applyRules from './applyRules';
+import { getParentComponentName } from './getParentComponentName';
 import { applyPlugins } from './plugins';
 import stylesToRuleArray from './stylesToRuleArray';
 import { StylixContext, useStylixContext } from './StylixProvider';
@@ -48,7 +49,10 @@ function compare(a: any, b: any): any {
  */
 export function useStyles(
   styles: Record<string, any> | undefined,
-  options: { global?: boolean; disabled?: boolean } = { global: false, disabled: false },
+  options: { global?: boolean; disabled?: boolean; debugLabel?: string } = {
+    global: false,
+    disabled: false,
+  },
 ): string {
   const stylixCtx = useStylixContext();
 
@@ -56,6 +60,7 @@ export function useStyles(
 
   const changed = !compare(styles, prevRef.current.styles);
 
+  options.debugLabel ||= !!stylixCtx.devMode && getParentComponentName();
   prevRef.current.styles = styles;
 
   if (changed) {
@@ -67,7 +72,8 @@ export function useStyles(
     const json = !options.disabled && styles && JSON.stringify(styles);
     prevRef.current.hash =
       json && json !== '{}' && json !== '[]'
-        ? hashString(JSON.stringify(stylixCtx.media || []) + json)
+        ? hashString(JSON.stringify(stylixCtx.media || []) + json) +
+          (options.debugLabel ? '-' + options.debugLabel : '')
         : '';
   }
 

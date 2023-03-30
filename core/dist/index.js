@@ -295,7 +295,7 @@ function $bf0e5f2ae2622b0c$export$f9e25e3471fd9b77(obj, ctx) {
 
 
 const $2244b5cf9ed91939$export$d85214c343312efe = {
-    name: "normalizeStyleProps",
+    name: "propCasing",
     type: "processStyles",
     plugin (ctx, styles) {
         return (0, $1ae3b31df309d474$export$72ae87c5302f282e)(styles, $2244b5cf9ed91939$var$propCasingMap, {
@@ -304,8 +304,10 @@ const $2244b5cf9ed91939$export$d85214c343312efe = {
     }
 };
 function $2244b5cf9ed91939$var$propCasingMap(key, value, object, context) {
-    if (typeof key === "string" && context.ctx.styleProps[(0, $d4abddb46f405b94$export$2eda63d9f5a68c09)(key)]) return {
-        [context.ctx.styleProps[(0, $d4abddb46f405b94$export$2eda63d9f5a68c09)(key)]]: value
+    if (typeof key !== "string") return;
+    const simpleKey = (0, $d4abddb46f405b94$export$2eda63d9f5a68c09)(key);
+    if (simpleKey in context.ctx.styleProps) return {
+        [context.ctx.styleProps[simpleKey]]: value
     };
 }
 
@@ -525,11 +527,11 @@ function $918367b4cbc7189f$var$createStylixContext(userValues = {}) {
         cleanupRequest: undefined
     };
     if (!ctx.styleElement && typeof document !== "undefined") {
-        if ("adoptedStyleSheets" in document) {
+        if (!ctx.devMode && "adoptedStyleSheets" in document) {
             ctx.stylesheet = new CSSStyleSheet();
             document.adoptedStyleSheets.push(ctx.stylesheet);
         } else {
-            // Legacy method
+            // Legacy/devMode method
             // TS assumes window.document is 'never', so we need to explicitly cast it to Document
             const doc = document;
             ctx.styleElement = doc.createElement("style");
@@ -648,6 +650,16 @@ function $3cb141540b096e82$export$2e2bcd8739ae039(ctx) {
 
 
 
+function $c9948cbb03d86ace$export$e2d100a3f83db87c() {
+    return (0, ($parcel$interopDefault($cPdmE$react)))["__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED"]?.ReactDebugCurrentFrame?.getStackAddendum?.()?.split("\n")?.map((line)=>{
+        // Look for a component name like "Component$123", either at the start of the line (Firefox) or after "at " (Safari/Chrome)
+        const m = line.match(/^([A-Z][A-Za-z0-9$]*)|^\s*at ([A-Z][A-Za-z0-9$]*)/);
+        return m?.[1] || m?.[2];
+    }).filter(Boolean).reverse().slice(-1)[0];
+}
+
+
+
 
 
 function $d7b71dffbc028505$export$2e2bcd8739ae039(styles, hash, context) {
@@ -726,13 +738,14 @@ function $b7bb7699b24ef4bd$export$28e6b9b82ee883c(styles, options = {
         hash: ""
     });
     const changed = !$b7bb7699b24ef4bd$var$compare(styles, prevRef.current.styles);
+    options.debugLabel ||= !!stylixCtx.devMode && (0, $c9948cbb03d86ace$export$e2d100a3f83db87c)();
     prevRef.current.styles = styles;
     if (changed) {
         // Preprocess styles with plugins
         if (!options.disabled && styles) styles = (0, $cb46c37cd304d3d0$export$dd20d84ec8823bbf)("preprocessStyles", styles, null, stylixCtx);
         // Serialize value and generate hash
         const json = !options.disabled && styles && JSON.stringify(styles);
-        prevRef.current.hash = json && json !== "{}" && json !== "[]" ? (0, $472b80d0b3855b37$export$9169be2e06c9c165)(JSON.stringify(stylixCtx.media || []) + json) : "";
+        prevRef.current.hash = json && json !== "{}" && json !== "[]" ? (0, $472b80d0b3855b37$export$9169be2e06c9c165)(JSON.stringify(stylixCtx.media || []) + json) + (options.debugLabel ? "-" + options.debugLabel : "") : "";
     }
     const { hash: hash  } = prevRef.current;
     if (hash && changed && !stylixCtx.rules[hash]) {
@@ -844,10 +857,12 @@ function $f7963c5fb85d4dcf$export$3817b7a54a07cec7($el, addProps, conflictingPro
             $el: Element,
             ...addProps,
             ...props,
-            $css: [
-                addProps?.$css,
-                props?.$css
-            ]
+            ...addProps?.$css || props?.$css ? {
+                $css: [
+                    addProps?.$css,
+                    props?.$css
+                ].filter(Boolean)
+            } : {}
         }, ref);
     });
     r.displayName = `$.${$el.displayName || $el.name || $el.toString?.() || "Unnamed"}`;
