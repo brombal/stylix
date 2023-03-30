@@ -628,12 +628,12 @@ function $3cb141540b096e82$export$2e2bcd8739ae039(ctx) {
     else {
         const stylesheet = ctx.stylesheet;
         if (stylesheet.cssRules) try {
-            stylesheet.replace(flattenedRules.join("\n"));
+            stylesheet.replaceSync(flattenedRules.join("\n"));
         } catch (e) {
             // Errors are ignored, this just means that a browser doesn't support a certain CSS feature.
             console.warn(e);
         }
-        else if (stylesheet.rules) {
+        else {
             // Legacy method
             while(stylesheet.rules.length)stylesheet.deleteRule(0);
             for(const i in flattenedRules)try {

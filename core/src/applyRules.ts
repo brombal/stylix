@@ -23,12 +23,12 @@ export default function applyRules(ctx: StylixContext): void {
     const stylesheet = ctx.stylesheet;
     if (stylesheet.cssRules) {
       try {
-        stylesheet.replace(flattenedRules.join('\n'));
+        stylesheet.replaceSync(flattenedRules.join('\n'));
       } catch (e) {
         // Errors are ignored, this just means that a browser doesn't support a certain CSS feature.
         console.warn(e);
       }
-    } else if (stylesheet.rules) {
+    } else {
       // Legacy method
       while (stylesheet.rules.length) {
         stylesheet.deleteRule(0);
