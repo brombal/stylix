@@ -82,10 +82,18 @@ function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
   } as StylixContext;
 
   if (!ctx.styleElement && typeof document !== 'undefined') {
-    ctx.styleElement = document.createElement('style');
-    if (ctx.id) ctx.styleElement.id = 'stylix-' + ctx.id;
-    ctx.styleElement.className = 'stylix';
-    document.head.appendChild(ctx.styleElement);
+    if ('adoptedStyleSheets' in document) {
+      ctx.stylesheet = new CSSStyleSheet();
+      document.adoptedStyleSheets.push(ctx.stylesheet);
+    } else {
+      // Legacy method
+      // TS assumes window.document is 'never', so we need to explicitly cast it to Document
+      const doc = document as Document;
+      ctx.styleElement = doc.createElement('style');
+      ctx.styleElement.className = 'stylix';
+      if (ctx.id) ctx.styleElement.id = 'stylix-' + ctx.id;
+      doc.head.appendChild(ctx.styleElement);
+    }
   }
 
   if (ctx.styleElement) ctx.stylesheet = ctx.styleElement.sheet as CSSStyleSheet;

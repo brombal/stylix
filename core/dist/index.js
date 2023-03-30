@@ -525,10 +525,18 @@ function $918367b4cbc7189f$var$createStylixContext(userValues = {}) {
         cleanupRequest: undefined
     };
     if (!ctx.styleElement && typeof document !== "undefined") {
-        ctx.styleElement = document.createElement("style");
-        if (ctx.id) ctx.styleElement.id = "stylix-" + ctx.id;
-        ctx.styleElement.className = "stylix";
-        document.head.appendChild(ctx.styleElement);
+        if ("adoptedStyleSheets" in document) {
+            ctx.stylesheet = new CSSStyleSheet();
+            document.adoptedStyleSheets.push(ctx.stylesheet);
+        } else {
+            // Legacy method
+            // TS assumes window.document is 'never', so we need to explicitly cast it to Document
+            const doc = document;
+            ctx.styleElement = doc.createElement("style");
+            ctx.styleElement.className = "stylix";
+            if (ctx.id) ctx.styleElement.id = "stylix-" + ctx.id;
+            doc.head.appendChild(ctx.styleElement);
+        }
     }
     if (ctx.styleElement) ctx.stylesheet = ctx.styleElement.sheet;
     if (userValues.plugins?.length) {
@@ -618,9 +626,23 @@ function $3cb141540b096e82$export$2e2bcd8739ae039(ctx) {
     }
     if (ctx.devMode) ctx.styleElement.innerHTML = flattenedRules.join("\n");
     else {
-        const container = ctx.stylesheet;
-        if (container.cssRules) while(container.cssRules.length)container.deleteRule(0);
-        for(const i in flattenedRules)container.insertRule(flattenedRules[i], +i);
+        const stylesheet = ctx.stylesheet;
+        if (stylesheet.cssRules) try {
+            stylesheet.replace(flattenedRules.join("\n"));
+        } catch (e) {
+            // Errors are ignored, this just means that a browser doesn't support a certain CSS feature.
+            console.warn(e);
+        }
+        else if (stylesheet.rules) {
+            // Legacy method
+            while(stylesheet.rules.length)stylesheet.deleteRule(0);
+            for(const i in flattenedRules)try {
+                stylesheet.insertRule(flattenedRules[i], +i);
+            } catch (e) {
+                // Errors are ignored, this just means that a browser doesn't support a certain CSS feature.
+                console.warn(e);
+            }
+        }
     }
 }
 
