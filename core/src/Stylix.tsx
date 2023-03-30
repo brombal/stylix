@@ -19,18 +19,21 @@ export function _Stylix<ElType extends React.ElementType>(
   const allProps = {
     className: `${hash} ${className || ''}`.trim(),
     ref: ref,
-    ...otherProps,
+    ...otherProps, // All other non-style props passed to <$> element
   };
 
   if (React.isValidElement($el)) {
-    const $elProps = { ...($el.props as any) };
-    allProps.className += ' ' + ($elProps.className || '');
-    delete $elProps.className;
-    return React.cloneElement(
-      $el,
-      { ...allProps, ...$elProps },
-      ...(React.Children.toArray(children) || []),
-    );
+    const $elProps = {
+      ...($el.props as any),
+      /**
+       * `allProps` must override `$el.props` because the latter may contain default prop values provided by defaultProps.
+       * The expectation is that for <$ $el={<SomeComponent />} someComponentProp="my value" />,
+       * the `someComponentProp` prop would override any default value specified by SomeComponent.defaultProps.
+       */
+      ...allProps,
+      className: ((($el.props as any).className || '') + ' ' + allProps.className).trim(),
+    };
+    return React.cloneElement($el, $elProps, ...(React.Children.toArray(children) || []));
   }
 
   return <$el {...allProps}>{children}</$el>;

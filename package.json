@@ -7,7 +7,7 @@
   "scripts": {
     "prettier": "prettier --write .",
     "eslint": "eslint --fix --ext=.ts,.tsx,.js,.jsx ./src",
-    "prepare": "husky install && rm -rf .git/hooks && ln -s ../.husky .git/hooks"
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@parcel/packager-ts": "^2.8.3",

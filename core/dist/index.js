@@ -815,14 +815,15 @@ function $a4e8092b68236a62$export$7204462c24cfcb17(props, ref) {
     };
     if (/*#__PURE__*/ (0, ($parcel$interopDefault($cPdmE$react))).isValidElement($el)) {
         const $elProps = {
-            ...$el.props
+            ...$el.props,
+            /**
+       * `allProps` must override `$el.props` because the latter may contain default prop values provided by defaultProps.
+       * The expectation is that for <$ $el={<SomeComponent />} someComponentProp="my value" />,
+       * the `someComponentProp` prop would override any default value specified by SomeComponent.defaultProps.
+       */ ...allProps,
+            className: (($el.props.className || "") + " " + allProps.className).trim()
         };
-        allProps.className += " " + ($elProps.className || "");
-        delete $elProps.className;
-        return /*#__PURE__*/ (0, ($parcel$interopDefault($cPdmE$react))).cloneElement($el, {
-            ...allProps,
-            ...$elProps
-        }, ...(0, ($parcel$interopDefault($cPdmE$react))).Children.toArray(children) || []);
+        return /*#__PURE__*/ (0, ($parcel$interopDefault($cPdmE$react))).cloneElement($el, $elProps, ...(0, ($parcel$interopDefault($cPdmE$react))).Children.toArray(children) || []);
     }
     return /*#__PURE__*/ (0, ($parcel$interopDefault($cPdmE$react))).createElement($el, allProps, children);
 }
