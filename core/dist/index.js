@@ -61,7 +61,7 @@ function $d4abddb46f405b94$export$2eda63d9f5a68c09(value) {
     return value.toLowerCase().replace(/[^a-z]/gi, "");
 }
 function $d4abddb46f405b94$export$bd35f4abe4dfe31c(value) {
-    return typeof value === "function" || typeof value === "string" || typeof value === "number" || typeof value === "boolean" || typeof value === "undefined" || Array.isArray(value) || // Check for plain objects, and make sure it doesn't have the $$typeof property (react elements are never valid as style values)
+    return typeof value === "function" || typeof value === "string" || typeof value === "number" || typeof value === "boolean" || typeof value === "undefined" || Array.isArray(value) || value === null || // Check for plain objects, and make sure it doesn't have the $$typeof property (react elements are never valid as style values)
     typeof value === "object" && value.constructor === Object && !("$$typeof" in value);
 }
 

@@ -53,6 +53,7 @@ export function isStyleValue(value: any): boolean {
     typeof value === 'boolean' ||
     typeof value === 'undefined' ||
     Array.isArray(value) ||
+    value === null ||
     // Check for plain objects, and make sure it doesn't have the $$typeof property (react elements are never valid as style values)
     (typeof value === 'object' && value.constructor === Object && !('$$typeof' in value))
   );
