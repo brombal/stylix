@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`styled() should forward htmlContent prop to content 1`] = `
+<div
+  className="stylix-1qyv9b0"
+  content="html content"
+/>
+`;
+
+exports[`styled() should forward htmlContent prop to content 2`] = `
+[
+  ".stylix-1qyv9b0 {
+  content: css content; }",
+]
+`;
+
+exports[`styled() should forward htmlTranslate prop to translate 1`] = `
+<div
+  className="stylix-1eaidkj"
+  translate="yes"
+/>
+`;
+
+exports[`styled() should forward htmlTranslate prop to translate 2`] = `
+[
+  ".stylix-1eaidkj {
+  translate: css content; }",
+]
+`;
+
+exports[`styled() should map props to different name with same type 1`] = `
+<div
+  className=""
+  otherProp=""
+>
+  must be this value
+</div>
+`;
+
+exports[`styled() should map props to different name with same type 2`] = `[]`;
+
+exports[`styled() should map props to same name with different type 1`] = `
+<div
+  className="stylix-1lntnqv"
+  otherProp="foo"
+/>
+`;
+
+exports[`styled() should map props to same name with different type 2`] = `
+[
+  ".stylix-1lntnqv {
+  color: must be this value; }",
+]
+`;
+
+exports[`styled() should work with basic styles 1`] = `
+<div
+  className="stylix-ik0txt"
+  data-otherProp="foo"
+/>
+`;
+
+exports[`styled() should work with basic styles 2`] = `
+[
+  ".stylix-ik0txt {
+  color: red; }",
+]
+`;

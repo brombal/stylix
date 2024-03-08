@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RenderServerStyles should not render anything on client 1`] = `
+[
+  <div
+    className="stylix-ik0txt"
+  >
+    red
+  </div>,
+  <div
+    className="stylix-kos2mx"
+  >
+    green
+  </div>,
+  <style
+    dangerouslySetInnerHTML={
+      {
+        "__html": "",
+      }
+    }
+    type="text/css"
+  />,
+]
+`;
+
+exports[`RenderServerStyles should work with basic styles 1`] = `
+[
+  <div
+    className="stylix-ik0txt"
+  >
+    red
+  </div>,
+  <div
+    className="stylix-kos2mx"
+  >
+    green
+  </div>,
+  <style
+    dangerouslySetInnerHTML={
+      {
+        "__html": ".stylix-ik0txt {
+  color: red; }
+.stylix-kos2mx {
+  color: green; }",
+      }
+    }
+    type="text/css"
+  />,
+]
+`;

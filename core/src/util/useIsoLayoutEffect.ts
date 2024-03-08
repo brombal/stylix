@@ -1,8 +1,16 @@
 import { useLayoutEffect } from 'react';
 
-const useIsoLayoutEffect =
-  typeof window !== 'undefined' && 'document' in window
-    ? (fn: () => void | (() => void), deps?: unknown[], _runOnSsr?: boolean) => useLayoutEffect(fn, deps)
-    : (fn: () => void | (() => void), _deps?: unknown[], runOnSsr?: boolean) => (runOnSsr ? fn() : null);
+export const detectSSR = () => !(typeof window !== 'undefined' && window.document?.head?.appendChild);
 
-export default useIsoLayoutEffect;
+export default function useIsoLayoutEffect(
+  fn: () => void | (() => void),
+  deps?: unknown[],
+  runOnSsr?: boolean,
+  isSsr = detectSSR(),
+) {
+  if (isSsr) {
+    if (runOnSsr) return fn();
+  } else {
+    useLayoutEffect(fn, deps);
+  }
+}

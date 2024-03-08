@@ -108,7 +108,7 @@ describe('mapObjectRecursive', () => {
       deleteMe: 1,
       array: [1, 2, 3, 4],
     };
-    const result = mapObjectRecursive(value, (key: string, value: any, object: any) => {
+    const result = mapObjectRecursive(value, (key: string | number, value: any, object: any) => {
       if (key === 'ignoreMe') {
         return; // no return value will leave key/value unchanged in result
       }

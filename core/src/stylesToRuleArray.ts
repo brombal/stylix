@@ -11,6 +11,7 @@ export default function stylesToRuleArray(
   hash: string,
   context: StylixContext,
 ): string[] {
+  if (!styles || !Object.keys(styles).length) return [];
   try {
     const processedStyles = applyPlugins('processStyles', styles, hash, context);
 
@@ -31,7 +32,7 @@ export default function stylesToRuleArray(
       result.push(serialize(key, value));
     }
     return result;
-  } catch (e) {
+  } catch (e: any) {
     if (e.name && e.reason) {
       console.error(
         `${e.name}: ${e.reason}\n`,

@@ -9,6 +9,7 @@ export const mediaArrays: StylixPlugin = {
   name: 'mediaArrays',
   type: 'processStyles',
   plugin(ctx: StylixPluginFunctionContext, styles: any) {
+    if (!ctx.media) return styles;
     // Fill out ditto values
     styles = mapObjectRecursive(styles, mapDittoValues);
     const mediaStyles: any = {};

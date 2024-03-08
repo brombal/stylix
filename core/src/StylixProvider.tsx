@@ -1,12 +1,11 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
+import React, { createContext, useContext, useRef } from 'react';
 
 import { simplifyStylePropName } from './classifyProps';
 import cssProps from './css-props.json';
 import { applyPlugins, defaultPlugins, StylixPlugin } from './plugins';
 import { styleCollectorContext } from './styleCollector';
 import { flatten } from './util/flatten';
-import { merge } from './util/merge';
-import useIsoLayoutEffect from './util/useIsoLayoutEffect';
+import { detectSSR } from './util/useIsoLayoutEffect';
 
 /**
  * Stylix context
@@ -15,36 +14,28 @@ import useIsoLayoutEffect from './util/useIsoLayoutEffect';
  * the <style> element where css is output. All nodes contained within a <StylixProvider> element will share this
  * Stylix instance's configuration.
  *
- * A StylixProvider internally contains a <StylixTheme>, so you can conveniently provide a theme object and media query
- * array with a single element.
- *
  * See the README for more details.
  */
 
 // StylixProvider component props
-type StylixProviderProps<Theme = any> = StylixThemeProps<Theme> & {
+type StylixProviderProps = {
   id?: string;
   devMode?: boolean;
   plugins?: StylixPlugin[] | StylixPlugin[][];
   styleElement?: HTMLStyleElement;
-  children: any;
-};
-
-type StylixThemeProps<Theme = any> = {
-  theme?: Theme;
   media?: string[];
+  ssr?: boolean;
   children: any;
 };
 
 // StylixContext object interface
-export type StylixContext<Theme = any> = {
+export type StylixContext = {
   id: string;
   devMode: boolean;
-  theme: Theme;
-  media: string[];
+  media: string[] | undefined;
   plugins: StylixPlugin[];
-  stylesheet: CSSStyleSheet;
-  styleElement: HTMLStyleElement;
+  stylesheet?: CSSStyleSheet;
+  styleElement?: HTMLStyleElement;
   styleCollector?: string[];
   rules: {
     [key: string]: {
@@ -54,13 +45,14 @@ export type StylixContext<Theme = any> = {
     };
   };
   styleProps: Record<string, string>;
+  ssr?: boolean;
   cleanupRequest?: number;
   requestApply: boolean;
 };
 
 export type StylixPublicContext = Pick<
   StylixContext,
-  'id' | 'devMode' | 'theme' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'
+  'id' | 'devMode' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'
 >;
 
 const defaultStyleProps: Record<string, string> = {};
@@ -71,32 +63,16 @@ for (const value of cssProps) {
 function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
   const ctx = {
     id: userValues.id || Math.round(Math.random() * 10000).toString(10),
-    devMode: userValues.devMode,
+    devMode: !!userValues.devMode,
     styleProps: defaultStyleProps,
-    theme: userValues.theme || null,
-    media: userValues.media || null,
+    media: userValues.media,
     styleElement: userValues.styleElement,
     plugins: flatten<StylixPlugin>(Object.values(defaultPlugins)),
     rules: {},
+    ssr: userValues.ssr ?? detectSSR(),
     cleanupRequest: undefined,
+    requestApply: false,
   } as StylixContext;
-
-  if (!ctx.styleElement && typeof document !== 'undefined') {
-    if (!ctx.devMode && 'adoptedStyleSheets' in document) {
-      ctx.stylesheet = new CSSStyleSheet();
-      document.adoptedStyleSheets.push(ctx.stylesheet);
-    } else {
-      // Legacy/devMode method
-      // TS assumes window.document is 'never', so we need to explicitly cast it to Document
-      const doc = document as Document;
-      ctx.styleElement = doc.createElement('style');
-      ctx.styleElement.className = 'stylix';
-      if (ctx.id) ctx.styleElement.id = 'stylix-' + ctx.id;
-      doc.head.appendChild(ctx.styleElement);
-    }
-  }
-
-  if (ctx.styleElement) ctx.stylesheet = ctx.styleElement.sheet as CSSStyleSheet;
 
   if (userValues.plugins?.length) {
     const flatPlugins = flatten<StylixPlugin>(userValues.plugins);
@@ -118,16 +94,18 @@ function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
 }
 
 // The React context object
-const stylixContext = createContext(createStylixContext());
+const stylixContext = createContext<StylixContext | undefined>(undefined);
+
+let defaultStylixContext: StylixContext | undefined = undefined;
 
 // Convenience wrapper hook that returns the current Stylix context
-export function useStylixContext<Theme = any>(): StylixContext<Theme> {
-  return useContext(stylixContext);
-}
-
-// Convenience wrapper hook that returns just the current Stylix theme
-export function useStylixTheme<Theme = any>(): Theme {
-  return useContext(stylixContext).theme;
+export function useStylixContext(): StylixContext {
+  const ctx = useContext(stylixContext);
+  if (!ctx) {
+    if (!defaultStylixContext) defaultStylixContext = createStylixContext();
+    return defaultStylixContext;
+  }
+  return ctx;
 }
 
 export function StylixProvider({
@@ -136,50 +114,12 @@ export function StylixProvider({
   plugins,
   styleElement,
   children,
-  ...themeProps
+  ssr,
 }: StylixProviderProps): React.ReactElement {
   const ctx = useRef<StylixContext>();
-  if (!ctx.current) ctx.current = createStylixContext({ id, devMode, plugins, styleElement });
+  if (!ctx.current) ctx.current = createStylixContext({ id, devMode, plugins, styleElement, ssr });
 
   ctx.current.styleCollector = useContext(styleCollectorContext);
 
-  return (
-    <stylixContext.Provider value={ctx.current}>
-      <StylixTheme {...themeProps}>{children}</StylixTheme>
-    </stylixContext.Provider>
-  );
-}
-
-function mergeContexts(contextA: any, contextB: any) {
-  const obj = { ...contextA };
-  const themeB = contextB.theme;
-  if (contextB) {
-    for (const key in contextB) {
-      const value = contextB[key];
-      if (typeof value !== 'undefined') obj[key] = value;
-    }
-  }
-  obj.theme = merge(contextA.theme || {}, themeB);
-  return obj;
-}
-
-export function StylixTheme({ children, media, theme }: StylixThemeProps) {
-  const parentCtx = useContext(stylixContext);
-  const [contextValue, setContextValue] = useState(() =>
-    mergeContexts(parentCtx, { media, theme }),
-  );
-
-  // contextValue should only update (and cause re-renders) when relevant properties change.
-  // `media` is treated as special because providing an array of strings is easier to do inline,
-  // but we don't want to cause descendent re-renders if the values don't change.
-
-  useIsoLayoutEffect(
-    () => {
-      setContextValue(mergeContexts(parentCtx, { media, theme }));
-    },
-    [parentCtx, media?.join('|') || '', theme],
-    false,
-  );
-
-  return <stylixContext.Provider value={contextValue}>{children}</stylixContext.Provider>;
+  return <stylixContext.Provider value={ctx.current}>{children}</stylixContext.Provider>;
 }

@@ -11,6 +11,10 @@ function flatten(styles: any, parent: any, selector: string, root: any, mediaRoo
     } else if (key.startsWith('@keyframes')) {
       // Add keyframe rules as-is directly to mediaRoot object
       mediaRoot[key] = value;
+    } else if (key.startsWith('@container')) {
+      // Flatten container queries, but nest them under the mediaRoot object
+      mediaRoot[key] = mediaRoot[key] || {};
+      flatten(value, mediaRoot[key], selector, root, mediaRoot[key]);
     } else if (isPlainObject(styles[key])) {
       // Concatenate or replace & in selectors and then continue flattening styles
       if (key.includes('&')) {

@@ -6,7 +6,6 @@ import { mediaArrays } from './mediaArrays';
 import { merge$css } from './merge$css';
 import { propCasing } from './propCasing';
 import { replace$$class } from './replace$$class';
-import { themeFunctions } from './themeFunctions';
 
 /**
  * Stylix plugin function context object
@@ -34,7 +33,6 @@ export function applyPlugins(
   const pluginContext = {
     id: context.id,
     devMode: context.devMode,
-    theme: context.theme,
     media: context.media,
     stylesheet: context.stylesheet,
     styleElement: context.styleElement,
@@ -53,7 +51,6 @@ export function applyPlugins(
 export { customProps } from './customProps';
 
 export const defaultPlugins = {
-  themeFunctions,
   merge$css,
   mediaArrays,
   propCasing,

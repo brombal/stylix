@@ -14,9 +14,9 @@ export const propCasing: StylixPlugin = {
 };
 
 function propCasingMap(key: string | number, value: any, object: any, context: any) {
-  if (typeof key !== 'string') return;
+  if (typeof key !== 'string' || key === '&') return;
   const simpleKey = simplifyStylePropName(key);
-  if (simpleKey in context.ctx.styleProps) {
+  if (simpleKey && simpleKey in context.ctx.styleProps) {
     return { [context.ctx.styleProps[simpleKey]]: value };
   }
 }

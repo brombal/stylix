@@ -65,7 +65,7 @@ export function useStyles(
 
   if (changed) {
     // Preprocess styles with plugins
-    if (!options.disabled && styles)
+    if (!options.disabled && styles && Object.keys(styles).length)
       styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
 
     // Serialize value and generate hash
@@ -82,11 +82,12 @@ export function useStyles(
   if (hash && changed && !stylixCtx.rules[hash]) {
     // If not global styles, wrap original styles with classname
     if (!options.global) styles = { ['.' + hash]: styles };
-    stylixCtx.rules[hash] = {
-      hash,
-      rules: stylesToRuleArray(styles, hash, stylixCtx),
-      refs: 1,
-    };
+    if (styles)
+      stylixCtx.rules[hash] = {
+        hash,
+        rules: stylesToRuleArray(styles, hash, stylixCtx),
+        refs: 1,
+      };
     stylixCtx.requestApply = true;
   }
 
@@ -103,6 +104,7 @@ export function useStyles(
     },
     undefined,
     true,
+    stylixCtx.ssr
   );
 
   // When hash changes, add/remove ref count
@@ -121,6 +123,7 @@ export function useStyles(
     },
     [hash],
     false,
+    stylixCtx.ssr
   );
 
   return hash;

@@ -2,6 +2,7 @@ import { mapObjectRecursive } from '../util/mapObjectRecursive';
 import { StylixPlugin } from './index';
 
 export const defaultIgnoreUnits = [
+  'aspect-ratio',
   'columns',
   'column-count',
   'fill-opacity',

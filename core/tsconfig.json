@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
     "jsx": "react",
+    "sourceMap": true,
+    "declaration": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "isolatedModules": true,
     "baseUrl": "./src",
     "moduleResolution": "node",
-    "lib": ["dom", "es2017"]
-  },
-  // Include src/index.ts and all ts and tsx files in tests/
-  "include": ["src/index.ts", "tests/**/*"]
+    "lib": ["dom", "esnext"]
+  }
 }

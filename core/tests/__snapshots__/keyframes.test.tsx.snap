@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useKeyframes() should work with percentage frames 1`] = `
+<div
+  className="stylix-1h22a8r"
+/>
+`;
+
+exports[`useKeyframes() should work with percentage frames 2`] = `
+[
+  "@keyframes stylix-ovhozy {
+0% {
+  color: red; }
+100% {
+  color: blue; } }",
+  ".stylix-1h22a8r {
+  animation: stylix-ovhozy 1s linear infinite; }",
+]
+`;

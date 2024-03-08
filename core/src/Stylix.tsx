@@ -2,10 +2,10 @@ import React from 'react';
 
 import { classifyProps } from './classifyProps';
 import { useStylixContext } from './StylixProvider';
-import { Stylix$Component, Stylix$Props } from './types';
+import { ComponentOrElement, Stylix$Component, Stylix$Props } from './types';
 import { useStyles } from './useStyles';
 
-export function _Stylix<ElType extends React.ElementType>(
+export function _Stylix<ElType extends ComponentOrElement>(
   props: Stylix$Props<ElType>,
   ref: React.Ref<ElType>,
 ) {
@@ -39,7 +39,7 @@ export function _Stylix<ElType extends React.ElementType>(
   return <$el {...allProps}>{children}</$el>;
 }
 
-const Stylix = React.forwardRef(_Stylix) as unknown as Stylix$Component;
+const Stylix: Stylix$Component = React.forwardRef(_Stylix) as unknown as Stylix$Component;
 Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
 

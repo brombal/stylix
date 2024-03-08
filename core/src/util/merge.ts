@@ -6,7 +6,7 @@ export function merge<A, B, C>(a: A, b: B, c: C): A & B & C;
 export function merge<A, B, C, D>(a: A, b: B, c: C, d: D): A & B & C & D;
 export function merge<A, B, C, D, E>(a: A, b: B, c: C, d: D, e: E): A & B & C & D & E;
 
-export function merge(...items: unknown[]) {
+export function merge(...items: object[]) {
   items = items.filter((item) => typeof item !== 'undefined' && item !== null);
   if (!items?.length) return undefined;
 
@@ -25,9 +25,9 @@ export function merge(...items: unknown[]) {
   for (const item of items) {
     if (!Array.isArray(item) && !isPlainObject(item)) return merged;
 
-    const keys: any[] = [...Object.keys(item), ...Object.getOwnPropertySymbols(item)];
+    const keys: (string | symbol)[] = [...Object.keys(item), ...Object.getOwnPropertySymbols(item)];
     for (const key of keys) {
-      const result = merge(merged[key], item[key]);
+      const result = merge(merged[key], (item as any)[key]);
       if (typeof result !== 'undefined') merged[key] = result;
     }
   }

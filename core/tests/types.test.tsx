@@ -3,11 +3,11 @@
 import * as assert from 'assert';
 import * as React from 'react';
 
-import $, { styled, StylixProps, StylixStyledComponent } from '../src';
+import $, { type Extends, styled, type StylixProps, type StylixStyledComponent } from '../src';
 
 /**
  * Test component with StylixProps for an html element.
- * Demonstrates that the component's props can accept any valid div html prop, any valid stylix prop,
+ * Demonstrates that the component's props can accept any valid stylix prop,
  * and any prop defined in MyComponentProps. Types of props defined by MyComponentProps should always override any
  * conflicting style props.
  */
@@ -17,7 +17,9 @@ interface WrappedHtmlComponentProps {
   someOtherProp: number;
 }
 
-function WrappedHtmlComponent(props: StylixProps<'div', WrappedHtmlComponentProps>) {
+function WrappedHtmlComponent(
+  props: StylixProps<WrappedHtmlComponentProps> & React.ComponentPropsWithoutRef<'div'>,
+) {
   const {
     //@ts-expect-error Unknown prop
     unknown,
@@ -33,7 +35,7 @@ function WrappedHtmlComponent(props: StylixProps<'div', WrappedHtmlComponentProp
   // Check that someOtherProp is a number
   someOtherProp.toFixed();
 
-  return <div {...other} />;
+  return <$.div {...other} />;
   // <$ $el={ComponentWithCssLookingProp} {...other} />
 }
 
@@ -56,16 +58,16 @@ interface ComponentWithCssLookingPropProps {
 }
 
 function ComponentWithCssLookingProp(props: ComponentWithCssLookingPropProps) {
-  // (Assume the component does something with props.margin)
+  // (Assume the component does something with props)
   return <div />;
 }
 
-interface WrappedComponentProps {
+interface WrapperComponentProps {
   padding: 'must be this value';
 }
 
-function WrappedComponent(
-  props: StylixProps<typeof ComponentWithCssLookingProp, WrappedComponentProps>,
+function WrapperComponent(
+  props: Extends<StylixProps, ComponentWithCssLookingPropProps, WrapperComponentProps>,
 ) {
   //@ts-expect-error Wrong value
   props.margin === 'wrong value';
@@ -108,13 +110,13 @@ function WrappedComponent(
   return <div />;
 }
 
-export type ForcedStylePropsProps = StylixProps<
-  typeof ComponentWithCssLookingProp,
-  {
-    padding: 'must be this value';
-  },
-  'margin'
->;
+export type ForcedStylePropsProps = StylixProps &
+  Extends<
+    Omit<ComponentWithCssLookingPropProps, 'margin'>,
+    {
+      padding: 'must be this value';
+    }
+  >;
 
 export default function ForcedStyleProps(props: ForcedStylePropsProps) {
   props.margin === 'must be this value';
@@ -122,7 +124,7 @@ export default function ForcedStyleProps(props: ForcedStylePropsProps) {
   props.margin === 1;
   //@ts-expect-error Invalid value for margin
   props.margin === { bad: 'value' };
-
+  // Ok
   props.padding === 'must be this value';
   // This is not okay because padding is not a style property and was not forced
   //@ts-expect-error Invalid value for padding

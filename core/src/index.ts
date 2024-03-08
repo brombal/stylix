@@ -5,9 +5,11 @@ export {
   type Stylix$elProp,
   type Stylix$elPropOptional,
   type Extends,
-  type StylixStyleProps,
+  type MappedProperties,
+  type HtmlOrComponentProps,
 } from './types';
-export { useStylixContext, useStylixTheme, StylixProvider, StylixTheme } from './StylixProvider';
+export { useStylixContext, StylixProvider } from './StylixProvider';
+export { StyleElement, RenderServerStyles } from './StyleElement';
 import { StylixPublicContext } from './StylixProvider';
 export type StylixContext = StylixPublicContext;
 export { useStyles, useKeyframes, useGlobalStyles } from './useStyles';

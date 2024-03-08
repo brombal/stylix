@@ -45,10 +45,10 @@ function App() {
 }
 ```
 
-The `<StylixProvider>` element can provide themes, media queries, and plugins to descendent
-elements. Each `<StylixProvider>` element outputs the CSS for its descendant elements to a `<style>`
-element that it places in your page's `<head>`. This behavior, and a few other configuration
-options, can be customized.
+The `<StylixProvider>` element can provide media queries and plugins to descendent elements. Each
+`<StylixProvider>` element outputs the CSS for its descendant elements to a `<style>` element that
+it places in your page's `<head>`. This behavior, and a few other configuration options, can be
+customized.
 
 ### Style your markup with Stylix HTML tags
 
