@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`global styles should handle matching global and component styles 1`] = `"<div><main data-testid="main">test</main><div class="stylix-2" data-testid="div"><main data-testid="inner-main">test</main></div></div>"`;
+
+exports[`global styles should handle matching global and component styles 2`] = `
+"main {
+  color: red; }
+.stylix-2 {
+main {
+  color: blue; } }"
+`;
+
+exports[`global styles should remove styles if unused 1`] = `"<div><main data-testid="main">test</main><button data-testid="button" type="button">toggle color</button></div>"`;
+
+exports[`global styles should remove styles if unused 2`] = `
+"main {
+  color: red; }"
+`;
+
+exports[`global styles should remove styles if unused 3`] = `
+"main {
+  color: blue; }"
+`;
+
+exports[`global styles should work 1`] = `"<main data-testid="main">test</main>"`;
+
+exports[`global styles should work 2`] = `
+"main {
+  color: red; }"
+`;

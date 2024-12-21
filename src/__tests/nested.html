@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+      body.foo {
+        .parent {
+            container-name: parent;
+            container-type: inline-size;
+            width: 100vw;
+        }
+
+        .child {
+          color: red;
+
+          @container parent (width > 1000px) {
+            color: blue;
+          }
+        }
+      }
+  </style>
+</head>
+<body class="foo">
+<div class="parent">
+  <div class="child">
+    <p>hello</p>
+    <p class="stylix-1"><span>a</span><span>b</span></p>
+  </div>
+</div>
+</body>
+</html>

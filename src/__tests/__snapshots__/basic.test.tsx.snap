@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Basic Stylix usage should work 1`] = `"<div><span class="stylix-1" data-testid="span"></span><main class="stylix-2" data-testid="main-1"></main><article class="stylix-3" data-testid="article"></article><main class="stylix-2" data-testid="main-2"></main></div>"`;
+
+exports[`Basic Stylix usage should work 2`] = `
+".stylix-1 {
+  color: red;
+  font-size: 13px; }
+.stylix-2 {
+  color: blue;
+  font-size: 14px; }
+.stylix-3 {
+  color: purple;
+  font-size: 15px; }"
+`;

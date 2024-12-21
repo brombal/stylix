@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RenderServerStyles should not render anything on client 1`] = `"<div class="stylix-1">red</div><div class="stylix-2">green</div><style type="text/css"></style>"`;
+
+exports[`RenderServerStyles should work with basic styles 1`] = `
+"<div class="stylix-1">red</div><div class="stylix-2">green</div><style type="text/css">.stylix-1 {
+  color: red; }
+.stylix-2 {
+  color: green; }</style>"
+`;

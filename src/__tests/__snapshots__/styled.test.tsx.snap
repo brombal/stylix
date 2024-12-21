@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Styled component wrappers should style a component with no prop mapping 1`] = `
+".stylix-1 {
+  color: red;
+  font-size: 13px; }"
+`;
+
+exports[`Styled component wrappers should style a component with prop mapping (alt) 1`] = `
+".stylix-1 {
+  font-size: 13px; }"
+`;
+
+exports[`Styled component wrappers should style a component with prop mapping (rename component prop) 1`] = `
+".stylix-1 {
+  font-size: 13px; }"
+`;
+
+exports[`Styled component wrappers should style a component with prop mapping (rename css prop) 1`] = `
+".stylix-1 {
+  font-size: 13px; }"
+`;
+
+exports[`Styled component wrappers should style a component with prop mapping 1`] = `
+".stylix-1 {
+  font-size: 13px; }"
+`;
+
+exports[`styled() should forward htmlContent prop to content 1`] = `"<div content="html content" class="stylix-1qyv9b0"></div>"`;
+
+exports[`styled() should forward htmlContent prop to content 2`] = `
+".stylix-1qyv9b0 {
+  content: css content; }"
+`;
+
+exports[`styled() should forward htmlTranslate prop to translate 1`] = `"<div translate="yes" class="stylix-1eaidkj"></div>"`;
+
+exports[`styled() should forward htmlTranslate prop to translate 2`] = `
+".stylix-1eaidkj {
+  translate: css content; }"
+`;
+
+exports[`styled() should map props to different name with same type 1`] = `"<div class="" data-otherprop="">must be this value</div>"`;
+
+exports[`styled() should map props to different name with same type 2`] = `""`;
+
+exports[`styled() should map props to same name with different type 1`] = `"<div class="stylix-1lntnqv" data-otherprop="foo"></div>"`;
+
+exports[`styled() should map props to same name with different type 2`] = `
+".stylix-1lntnqv {
+  color: must be this value; }"
+`;
+
+exports[`styled() should work with basic styles 1`] = `"<div class="stylix-1" data-otherprop="foo"></div>"`;
+
+exports[`styled() should work with basic styles 2`] = `
+".stylix-1 {
+  color: red; }"
+`;

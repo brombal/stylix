@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Custom component should map optional props 1`] = `"<div data-otherprop="" data-color="must be this value"></div>"`;
+
+exports[`Custom component should map optional props 2`] = `""`;
+
+exports[`Custom component should map props to new name 1`] = `"<div class="stylix-1" data-otherprop="foo" data-color="must be this value"></div>"`;
+
+exports[`Custom component should map props to new name 2`] = `
+".stylix-1 {
+  color: red; }"
+`;
+
+exports[`Custom component should work with basic styles 1`] = `"<div class="stylix-1"></div>"`;
+
+exports[`Custom component should work with basic styles 2`] = `
+".stylix-1 {
+  color: red; }"
+`;
+
+exports[`Custom component should work with extended styles 1`] = `"<div class="stylix-1" data-other="foo"></div>"`;
+
+exports[`Custom component should work with extended styles 2`] = `
+".stylix-1 {
+  color: onlyThis; }"
+`;

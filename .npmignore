@@ -1,6 +1,4 @@
 src/
-tests/
-.eslintignore
-.eslintrc.js
+biome.json
 jest.config.js
 .husky/

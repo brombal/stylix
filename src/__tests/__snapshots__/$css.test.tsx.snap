@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`$css should merge $css prop into styles 1`] = `"<div class="stylix-1"></div>"`;
+
+exports[`$css should merge $css prop into styles 2`] = `
+".stylix-1 {
+  color: green;
+  background: blue;
+  font-size: 12px; }"
+`;

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`container queries should render 1`] = `"<div class="stylix-1"><div class="stylix-2"></div></div>"`;
+
+exports[`container queries should render 2`] = `
+".stylix-1 {
+  margin-right: 4px;
+  container: parent / inline-size; }
+.stylix-2 {
+@container card (min-width: 1px) {
+& {
+  font-size: 100cqw; } } }"
+`;

@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mediaObjects should work 1`] = `"<div class="stylix-1"></div>"`;
+
+exports[`mediaObjects should work 2`] = `
+".stylix-1 {
+  flex-direction: row;
+@media (max-width: 600px) {
+  flex-direction: column; } }"
+`;

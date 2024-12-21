@@ -1,0 +1,55 @@
+import type { StylixContext } from './StylixProvider';
+import { applyPlugins } from './plugins';
+import type { StylixObject } from './types';
+import { isEmpty } from './util/isEmpty';
+import { isPlainObject } from './util/isPlainObject';
+
+/**
+ * Serialize selector and styles to css rule string
+ */
+function serialize(selector: string, styles: StylixObject) {
+  const lines: string[] = [];
+  for (const key in styles) {
+    const value = styles[key];
+    if (isPlainObject(value)) lines.push(serialize(key, value));
+    else lines.push(`  ${key}: ${value};`);
+  }
+  return `${selector} {\n${lines.join('\n')} }`;
+}
+
+/**
+ * Converts a Stylix CSS object to an array of rules, suitable for passing to StyleSheet#insertRule.
+ */
+export default function stylesToRuleArray(
+  styles: StylixObject,
+  className: string,
+  context: StylixContext,
+): string[] {
+  if (isEmpty(styles)) return [];
+  try {
+    const processedStyles = applyPlugins(
+      'processStyles',
+      styles,
+      className,
+      context,
+    ) as StylixObject;
+
+    const result: string[] = [];
+    for (const key in processedStyles) {
+      const value = processedStyles[key] as StylixObject;
+      result.push(serialize(key, value));
+    }
+    return result;
+  } catch (e: any) {
+    if (e.name && e.reason) {
+      console.error(
+        `${e.name}: ${e.reason}\n`,
+        `${e.source.replace('\n', ' ').substring(Math.max(0, e.column - 20), Math.max(0, e.column - 20) + 100)}\n`,
+        `${' '.repeat(20)}^`,
+      );
+    } else {
+      console.error(e);
+    }
+    return [];
+  }
+}

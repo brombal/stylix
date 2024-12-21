@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Stylix $component prop should render component with className prop 1`] = `"<div class="stylix-1 mergedClass" data-other="other"></div>"`;
+
+exports[`Stylix $component prop should render component with className prop 2`] = `
+".stylix-1 {
+  color: red;
+  font-size: 13px; }"
+`;

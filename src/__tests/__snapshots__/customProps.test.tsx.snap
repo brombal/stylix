@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`customProps should apply custom props 1`] = `"<div><div class="stylix-1"></div><div class="stylix-2"></div><div class="stylix-3"></div><div class="stylix-4"></div><div class="stylix-5"></div></div>"`;
+
+exports[`customProps should apply custom props 2`] = `
+".stylix-1 {
+  color: red; }
+.stylix-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; }
+.stylix-4 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: blue; }
+.stylix-5 {
+  margin-top: 1px;
+  margin-right: 2px;
+  margin-bottom: 3px;
+  margin-left: 4px; }"
+`;
