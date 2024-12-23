@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1734970211241" clover="3.2.0">
-  <project timestamp="1734970211242" name="All files">
+<coverage generated="1734971939316" clover="3.2.0">
+  <project timestamp="1734971939316" name="All files">
     <metrics statements="473" coveredstatements="441" conditionals="254" coveredconditionals="214" methods="80" coveredmethods="70" elements="807" coveredelements="725" complexity="0" loc="473" ncloc="473" packages="4" files="27" classes="27"/>
     <package name="src">
       <metrics statements="252" coveredstatements="220" conditionals="138" coveredconditionals="105" methods="45" coveredmethods="35"/>
       <file name="RenderServerStyles.tsx" path="/Users/abrombal/dev/stylix/src/RenderServerStyles.tsx">
         <metrics statements="6" coveredstatements="6" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="1" count="15" type="stmt"/>
         <line num="2" count="15" type="stmt"/>
         <line num="3" count="15" type="stmt"/>
-        <line num="4" count="15" type="stmt"/>
         <line num="6" count="15" type="stmt"/>
         <line num="7" count="2" type="stmt"/>
         <line num="8" count="2" type="cond" truecount="2" falsecount="0"/>
       </file>
       <file name="StyleElement.tsx" path="/Users/abrombal/dev/stylix/src/StyleElement.tsx">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
-        <line num="1" count="15" type="stmt"/>
+        <line num="3" count="15" type="stmt"/>
         <line num="4" count="2" type="stmt"/>
         <line num="5" count="2" type="stmt"/>
       </file>
@@ -185,17 +185,17 @@
       </file>
       <file name="index.ts" path="/Users/abrombal/dev/stylix/src/index.ts">
         <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="13" coveredmethods="6"/>
-        <line num="8" count="48" type="stmt"/>
-        <line num="9" count="15" type="stmt"/>
-        <line num="12" count="21" type="stmt"/>
-        <line num="13" count="15" type="stmt"/>
+        <line num="9" count="48" type="stmt"/>
+        <line num="10" count="15" type="stmt"/>
+        <line num="13" count="21" type="stmt"/>
         <line num="14" count="15" type="stmt"/>
-        <line num="15" count="16" type="stmt"/>
-        <line num="19" count="15" type="stmt"/>
+        <line num="15" count="15" type="stmt"/>
+        <line num="16" count="16" type="stmt"/>
         <line num="20" count="15" type="stmt"/>
         <line num="21" count="15" type="stmt"/>
-        <line num="23" count="95" type="stmt"/>
-        <line num="24" count="17" type="stmt"/>
+        <line num="22" count="15" type="stmt"/>
+        <line num="24" count="95" type="stmt"/>
+        <line num="25" count="17" type="stmt"/>
       </file>
       <file name="styleCollector.tsx" path="/Users/abrombal/dev/stylix/src/styleCollector.tsx">
         <metrics statements="10" coveredstatements="4" conditionals="2" coveredconditionals="0" methods="3" coveredmethods="0"/>

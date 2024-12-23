@@ -1,5 +1,6 @@
 export type {
   StylixProps,
+  StylixHTMLProps,
   StylixPropsExtensions,
   Extends,
   StylixObject,

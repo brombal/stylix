@@ -107,10 +107,10 @@ const htmlTags = [
 ];
 
 /**
- * A type that extracts the props (without the ref) of a given HTML tag.
+ * Gets the props of a given HTML tag.
  */
 export type HTMLProps<TTag extends keyof React.JSX.IntrinsicElements> =
-  React.JSX.IntrinsicElements[TTag] extends React.DetailedHTMLProps<infer T, infer _U> ? T : never;
+  React.JSX.IntrinsicElements[TTag];
 
 for (const i in htmlTags) {
   const Tag = htmlTags[i];

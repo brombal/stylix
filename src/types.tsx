@@ -1,4 +1,6 @@
 import type * as CSS from 'csstype';
+import type React from 'react';
+import type { HTMLProps } from './elements';
 
 type CSSProperties = CSS.StandardPropertiesHyphen<number | string> &
   CSS.VendorPropertiesHyphen<number | string> &
@@ -36,8 +38,12 @@ export type StylixStyles = StylixObject | null | undefined | false | StylixStyle
 export type StylixValue<T> = T | Record<string, T>;
 
 /**
- * All standard CSS properties, additional user-defined custom style props, and the $css prop.
+ * Used to indicate that a component can accept all Stylix properties, including
+ * all standard CSS properties, additional user-defined custom style props, and the $css prop.
+ *
  * The type arguments specify a type to override, and a type to extend from.
+ *
+ * To allow for HTML element props, use `StylixHTMLProps` instead.
  */
 export type StylixProps<TOverrideProps = unknown, TExtendsFromProps = unknown> = Extends<
   TExtendsFromProps,
@@ -55,6 +61,19 @@ export type StylixProps<TOverrideProps = unknown, TExtendsFromProps = unknown> =
   },
   TOverrideProps
 >;
+
+/**
+ * Used to indicate that a component can accept all Stylix properties, including
+ * all standard CSS properties, additional user-defined custom style props, and the $css prop,
+ * as well as all standard HTML element props for the given tag.
+ *
+ * For Stylix properties without allowing HTML props, use `StylixProps` instead.
+ */
+export type StylixHTMLProps<
+  TTag extends keyof React.JSX.IntrinsicElements,
+  TOverrideProps = unknown,
+  TExtendsFromProps = unknown,
+> = StylixProps<HTMLProps<TTag> & TOverrideProps, TExtendsFromProps>;
 
 /**
  * Used to allow users to add custom props to Stylix components.
