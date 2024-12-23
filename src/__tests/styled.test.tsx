@@ -26,22 +26,22 @@ describe('Styled component wrappers', () => {
     // @ts-expect-error style prop is invalid type
     void (<$ color={0}>{(className) => <div className={className} />}</$>);
 
-    // $component (will pass className and non-style props to component; type safe)
-    void (<$ $component={TestComponent} color="blue" theme="red" other="this-value" />);
+    // $el as component (will pass className and non-style props to component; type safe)
+    void (<$ $el={TestComponent} color="blue" theme="red" other="this-value" />);
     void (
       <$
-        $component={TestComponent}
+        $el={TestComponent}
         // @ts-expect-error unknown prop
         asdf="foo"
       />
     );
     // @ts-expect-error missing required props
-    void (<$ $component={TestComponent} />);
+    void (<$ $el={TestComponent} />);
     // @ts-expect-error wrong TestComponent prop value
-    void (<$ $component={TestComponent} theme="wrong" other="this-value" />);
+    void (<$ $el={TestComponent} theme="wrong" other="this-value" />);
     void (
       <$
-        $component={TestComponent}
+        $el={TestComponent}
         theme="red"
         other="this-value"
         // @ts-expect-error style prop is invalid type

@@ -9,6 +9,6 @@ describe('cleanStyles', () => {
         c: undefined,
         d: { a: false, b: null, c: undefined },
       }),
-    ).toEqual({});
+    ).toEqual(undefined);
   });
 });

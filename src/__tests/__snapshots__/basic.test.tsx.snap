@@ -20,10 +20,7 @@ exports[`Basic Stylix usage should merge multiple styles 2`] = `
 
 exports[`Basic Stylix usage should remove falsy styles 1`] = `"<div class="stylix-1">test</div>"`;
 
-exports[`Basic Stylix usage should remove falsy styles 2`] = `
-".stylix-1 {
-  &:hover: false; }"
-`;
+exports[`Basic Stylix usage should remove falsy styles 2`] = `""`;
 
 exports[`Basic Stylix usage should work 1`] = `"<div><span class="stylix-1" data-testid="span"></span><main class="stylix-2" data-testid="main-1"></main><article class="stylix-3" data-testid="article"></article><main class="stylix-2" data-testid="main-2"></main></div>"`;
 

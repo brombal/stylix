@@ -49,13 +49,6 @@ to {
   animation: stylix-1 1s linear infinite; }"
 `;
 
-exports[`useKeyframes() should work with basic styles 1`] = `
-".stylix-2 {
-  animation: stylix-1 1s linear infinite; }
-.stylix-4 {
-  animation: stylix-3 1s linear infinite; }"
-`;
-
 exports[`useKeyframes() should work with percentage frames 1`] = `
 "@keyframes stylix-1 {
 0% {

@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Stylix $el prop should render element with class name 1`] = `"<div data-other="other" data-passthru="passthru" class="stylix-1 mergedClass"></div>"`;
-
-exports[`Stylix $el prop should render element with class name 2`] = `
-".stylix-1 {
-  color: red;
-  font-size: 13px; }"
-`;

@@ -1,7 +1,7 @@
 import $ from '../index';
 import { renderStylix } from './util';
 
-describe('Stylix $el prop', () => {
+describe('Stylix $el prop as element', () => {
   it('should render element with class name', () => {
     void (<$ $el={<div data-other="other" />} unknown="unknown" />);
 
