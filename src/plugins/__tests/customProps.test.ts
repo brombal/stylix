@@ -66,4 +66,15 @@ describe('customProps plugin', () => {
       unknown: 'unknown',
     });
   });
+
+  it('should correctly process array of styles', () => {
+    expect(_customPropsProcess([{ flexbox: true }, { colour: 'red' }], myCustomProps)).toEqual([
+      {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+      },
+      { color: 'red' },
+    ]);
+  });
 });

@@ -1,156 +1,151 @@
-import { getMergeableValues, mergeObjects, recursivelyMergeArrayValues } from '../mergeArrays';
+import { _mergeArrays } from '../mergeArrays';
 
 describe('mergeArrays', () => {
-  describe('getMergeableValues', () => {
-    test('should return last primitive', () => {
-      expect(getMergeableValues([1, 2, 3])).toEqual(3);
-    });
-
-    test('should return all objects', () => {
-      expect(getMergeableValues([{ a: 1 }, { b: 2 }])).toEqual([{ a: 1 }, { b: 2 }]);
-    });
-
-    test('should return last primitive in mix', () => {
-      expect(getMergeableValues([{ a: 1 }, { b: 2 }, 2, 3])).toEqual(3);
-    });
-
-    test('should return last objects in mix', () => {
-      expect(getMergeableValues([{ a: 1 }, 2, { b: 2 }, { c: 3 }])).toEqual([{ b: 2 }, { c: 3 }]);
-    });
+  it('should return collapsed object', () => {
+    expect(_mergeArrays({ a: 1, b: 2, c: { d: 3 } })).toEqual({ a: 1, b: 2, c: { d: 3 } });
   });
 
-  describe('recursivelyMergeArrayValues', () => {
-    test('should merge basic nested object', () => {
-      const result = recursivelyMergeArrayValues({
-        w: [{ a: 1 }, { b: 2 }, { c: 3 }],
-        x: {
-          y: {
-            z: [{ a: 1 }, { b: 2 }, { c: 3 }],
-          },
-        },
-      });
-      expect(result).toEqual({
-        w: { a: 1, b: 2, c: 3 },
-        x: {
-          y: {
-            z: { a: 1, b: 2, c: 3 },
-          },
-        },
-      });
-    });
+  test('should merge simple objects in array', () => {
+    expect(_mergeArrays([{ a: 1 }, { b: 2 }])).toEqual({ a: 1, b: 2 });
   });
 
-  describe('mergeObjects', () => {
-    test('should merge basic arrays', () => {
-      const result = mergeObjects([
-        //
-        { a: 1 },
-        { b: 2 },
-        { c: 3 },
-      ]);
-      expect(result).toEqual({ a: 1, b: 2, c: 3 });
-    });
+  test('should merge double-nested arrays', () => {
+    expect(_mergeArrays([[{ a: 1 }], [[{ b: 2 }, [{ c: 3 }]]]])).toEqual({ a: 1, b: 2, c: 3 });
+  });
 
-    test('should merge nested objects', () => {
-      expect(
-        mergeObjects([
-          {
-            a: 1,
-            b: { g: 1, h: 2 },
-            c: {
-              m: { n: 1 },
-            },
-          },
-          {
-            c: {
-              m: { n: 3 },
-              o: 4,
-            },
-            d: 5,
-          },
-        ]),
-      ).toEqual({
-        a: 1,
-        b: { g: 1, h: 2 },
-        c: {
-          m: { n: 3 },
-          o: 4,
-        },
-        d: 5,
-      });
-    });
-
-    test('should merge nested arrays', () => {
-      expect(
-        mergeObjects([
-          {
-            a: [
-              { g: 1, h: 2 },
-              { h: 3, i: 4 },
+  test('should merge complex top-level array', () => {
+    expect(
+      _mergeArrays([
+        {
+          a: 1,
+          b: {
+            c: 1,
+            d: [
+              { e: 1, f: 1 },
+              { f: 2, g: 2 },
             ],
-            b: [{ m: [{ n: 5, o: 6 }] }],
-            c: [{ p: 2, q: 3 }],
           },
-          {
-            a: [{ i: 5 }, { j: 6 }],
-            b: [{ m: [{ o: 7, p: 8 }] }],
-            d: [{ r: 4 }],
-          },
-        ]),
-      ).toEqual({
-        a: { g: 1, h: 3, i: 5, j: 6 },
-        b: { m: { n: 5, o: 7, p: 8 } },
-        c: { p: 2, q: 3 },
-        d: { r: 4 },
-      });
+        },
+        {
+          a: 2,
+          b: { c: 2, e: 2 },
+          e: [
+            { e: 1, f: 1 },
+            { f: 2, g: 2 },
+          ],
+        },
+      ]),
+    ).toEqual({
+      a: 2,
+      b: { c: 2, d: { e: 1, f: 2, g: 2 }, e: 2 },
+      e: { e: 1, f: 2, g: 2 },
     });
+  });
 
-    test('should ignore undefined values', () => {
-      expect(
-        mergeObjects([
-          //
-          { b: [{ m: 1 }] },
-          { b: undefined },
-        ]),
-      ).toEqual({
-        b: { m: 1 },
-      });
+  test('should merge complex top-level object', () => {
+    expect(
+      _mergeArrays({
+        a: 1,
+        b: {
+          c: 1,
+          d: [
+            { e: 1, f: 1 },
+            { f: 2, g: 2 },
+          ],
+        },
+        d: [
+          { e: 1, f: 1 },
+          { f: 2, g: 2 },
+        ],
+      }),
+    ).toEqual({
+      a: 1,
+      b: { c: 1, d: { e: 1, f: 2, g: 2 } },
+      d: { e: 1, f: 2, g: 2 },
     });
+  });
 
-    test('should use primitives if last value', () => {
-      expect(
-        mergeObjects([
-          //
-          { b: [{ m: 1 }] },
-          { b: 5 },
-        ]),
-      ).toEqual({
-        b: 5,
-      });
+  test('should let object values take precedence over primitives (nested)', () => {
+    expect(
+      _mergeArrays([
+        { div: { color: 'red' } },
+        { div: { color: { mobile: 'green' } } },
+        { div: { color: 'blue' } },
+        { div: { color: { desktop: 'green' } } },
+      ]),
+    ).toEqual({
+      div: { color: { desktop: 'green', mobile: 'green' } },
     });
+  });
 
-    test('should use merged final objects', () => {
-      expect(
-        mergeObjects([
-          //
-          { b: [{ m: 1 }] },
-          { b: 5 },
-          { b: { m: 2, n: 4 } },
-          { b: { m: 3 } },
-        ]),
-      ).toEqual({
-        b: { m: 3, n: 4 },
-      });
-    });
+  test('should let primitives override previous values', () => {
+    expect(_mergeArrays([1, 2, 3] as any)).toEqual(3);
+  });
 
-    test('should ignore falsy values', () => {
-      const result = mergeObjects([
+  test('should let primitives override previous values (nested)', () => {
+    expect(
+      _mergeArrays([
         //
-        { a: 1 },
-        null,
-        { b: 2 },
-      ]);
-      expect(result).toEqual({ a: 1, b: 2 });
+        { div: { color: 'red' } },
+        { div: { color: 'blue' } },
+      ]),
+    ).toEqual({
+      div: { color: 'blue' },
+    });
+  });
+
+  test('should let objects override primitives', () => {
+    expect(_mergeArrays([1, { a: 1 }, 3] as any)).toEqual({ a: 1 });
+  });
+
+  test('should merge nested arrays', () => {
+    expect(
+      _mergeArrays([
+        {
+          a: [
+            { g: 1, h: 2 },
+            { h: 3, i: 4 },
+          ],
+          b: [{ m: [{ n: 5, o: 6 }] }],
+          c: [{ p: 2, q: 3 }],
+        },
+        {
+          a: [{ i: 5 }, { j: 6 }],
+          b: [{ m: [{ o: 7, p: 8 }] }],
+          d: [{ r: 4 }],
+        },
+      ]),
+    ).toEqual({
+      a: { g: 1, h: 3, i: 5, j: 6 },
+      b: { m: { n: 5, o: 7, p: 8 } },
+      c: { p: 2, q: 3 },
+      d: { r: 4 },
+    });
+  });
+
+  test('should ignore undefined values', () => {
+    expect(
+      _mergeArrays([
+        //
+        { b: [{ m: 1 }] },
+        { b: undefined },
+      ]),
+    ).toEqual({
+      b: { m: 1 },
+    });
+  });
+
+  test('should use merged final objects', () => {
+    expect(
+      _mergeArrays([
+        //
+        { b: [{ m: 1 }] },
+        { b: 5 },
+        { b: { m: 2, n: 4 } },
+        { b: { m: 3 } },
+      ]),
+    ).toEqual({
+      b: { m: 3, n: 4 },
     });
   });
 });

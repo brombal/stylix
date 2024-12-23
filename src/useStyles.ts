@@ -53,7 +53,7 @@ export function useStyles(
   const changed = stylesJson !== prevStylesJson.current;
   prevStylesJson.current = stylesJson;
 
-  options.debugLabel ||= !!stylixCtx.devMode && getParentComponentName();
+  options.debugLabel ||= stylixCtx.devMode ? getParentComponentName() : '';
 
   if (stylesJson && !stylixCtx.rules[stylesJson]) {
     stylixCtx.styleCounter++;

@@ -8,7 +8,7 @@ describe('Styled component wrappers', () => {
       theme: 'red' | 'blue';
       other: 'this-value';
     }) {
-      return <div />;
+      return <div {...props} />;
     }
 
     // $render method (accepts className and other non-style props)
@@ -98,7 +98,7 @@ describe('Styled component wrappers', () => {
 
     // with css props
     {
-      const [json, styles, result] = renderStylix(
+      const [json, styles] = renderStylix(
         <StyledComponent prop="foo" color="red" font-size={13} />,
       );
       expect(json).toEqual(
@@ -151,9 +151,7 @@ describe('Styled component wrappers', () => {
 
     // with css props
     {
-      const [json, styles, result] = renderStylix(
-        <StyledComponent color="primary" font-size={13} />,
-      );
+      const [json, styles] = renderStylix(<StyledComponent color="primary" font-size={13} />);
       expect(json).toEqual(
         '<div class="stylix-1" data-color="primary" data-testid="MyComponent"></div>',
       );
@@ -205,9 +203,7 @@ describe('Styled component wrappers', () => {
 
     // with css props
     {
-      const [json, styles, result] = renderStylix(
-        <StyledComponent themeColor="primary" font-size={13} />,
-      );
+      const [json, styles] = renderStylix(<StyledComponent themeColor="primary" font-size={13} />);
       expect(json).toEqual(
         '<div class="stylix-1" data-color="primary" data-testid="MyComponent"></div>',
       );

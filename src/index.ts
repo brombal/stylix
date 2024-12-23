@@ -19,5 +19,6 @@ export {
 export { mapObject } from './util/mapObject';
 export { createStyleCollector, styleCollectorContext, type StyleCollector } from './styleCollector';
 import './elements';
-export { default } from './Stylix';
+export type { HTMLProps } from './elements';
+export { Stylix as default, type Stylix$Component } from './Stylix';
 export { RenderServerStyles } from './RenderServerStyles';

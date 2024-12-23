@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Basic Stylix usage should merge multiple styles 1`] = `"<div class="stylix-1">test</div>"`;
+
+exports[`Basic Stylix usage should merge multiple styles 2`] = `
+".stylix-1 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+&:hover {
+  color: red; }
+&:disabled {
+  color: gray; }
+  background: blue;
+&:hover:not(:disabled) {
+  background: green; }
+  height: 32px;
+  width: 32px; }"
+`;
+
+exports[`Basic Stylix usage should remove falsy styles 1`] = `"<div class="stylix-1">test</div>"`;
+
+exports[`Basic Stylix usage should remove falsy styles 2`] = `
+".stylix-1 {
+  &:hover: false; }"
+`;
+
 exports[`Basic Stylix usage should work 1`] = `"<div><span class="stylix-1" data-testid="span"></span><main class="stylix-2" data-testid="main-1"></main><article class="stylix-3" data-testid="article"></article><main class="stylix-2" data-testid="main-2"></main></div>"`;
 
 exports[`Basic Stylix usage should work 2`] = `

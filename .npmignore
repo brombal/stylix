@@ -1,4 +1,8 @@
+.idea/
+.husky/
+coverage/
+scripts/
 src/
 biome.json
 jest.config.js
-.husky/
+rollup.config.js

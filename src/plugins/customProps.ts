@@ -6,8 +6,9 @@ import type { StylixPlugin } from './index';
 import { mergeArrays } from './mergeArrays';
 
 export function _customPropsProcess(styles: StylixStyles, customProps: Record<string, any>): any {
-  return mapObject(styles, (key, value, _source, _ctx, mapRecursive) => {
-    if (!isValidJSXProp(key) || isPlainObject(value)) return { [key]: mapRecursive(value) };
+  return mapObject(styles, (key, value, source, _ctx, mapRecursive) => {
+    if (!isValidJSXProp(key) || isPlainObject(value))
+      return Array.isArray(source) ? [mapRecursive(value)] : { [key]: mapRecursive(value) };
 
     const simpleKey = simplifyStylePropName(key);
     const propValue = customProps[simpleKey];
@@ -47,7 +48,7 @@ export const customProps = (customProps: Record<string, any>): StylixPlugin[] =>
       name: 'customPropsProcess',
       type: 'processStyles',
       before: mergeArrays,
-      plugin(ctx, styles) {
+      plugin(_ctx, styles) {
         return _customPropsProcess(styles, customProps);
       },
     },

@@ -17,7 +17,7 @@ export type StylixComponentMeta = {
  */
 type Stylix$ComponentExtras = StylixComponentMeta & {
   [key in keyof React.JSX.IntrinsicElements]: React.FC<
-    StylixProps<Omit<React.ComponentPropsWithRef<key>, 'color' | 'content' | 'translate'>> & {
+    StylixProps<Omit<React.JSX.IntrinsicElements[key], 'color' | 'content' | 'translate'>> & {
       htmlContent?: string;
       htmlTranslate?: 'yes' | 'no';
     }
@@ -37,7 +37,7 @@ type Stylix$renderProp = StylixProps &
     $component?: never;
     $el?: never;
     $render: StylixRenderFn;
-    children?: never;
+    children?: React.ReactNode | React.ReactNode[];
   };
 
 /**
@@ -85,10 +85,9 @@ export type Stylix$Props<TComponent extends React.ElementType> =
 /**
  * Type of main Stylix component ($).
  */
-export type Stylix$Component = Stylix$ComponentExtras & {
-  // biome-ignore lint: This is defined as a call signature so that the type of TComponent can be inferred when the component is used.
+export interface Stylix$Component extends Stylix$ComponentExtras {
   <TComponent extends React.ElementType>(props: Stylix$Props<TComponent>): React.ReactNode;
-};
+}
 
 export function _Stylix<TElement extends React.ElementType>(
   props: Stylix$Props<TElement>,
@@ -136,21 +135,26 @@ export function _Stylix<TElement extends React.ElementType>(
   }
 
   if ($render) {
-    return $render(className || undefined, { ref, children, ...otherProps });
+    return $render(className || undefined, { children, ...otherProps, ...(ref ? { ref } : null) });
   }
 
   if (children) {
-    return (children as StylixRenderFn)(className || undefined, { ref, ...otherProps });
+    if (typeof children !== 'function') {
+      throw new Error('Stylix: invalid component usage: children must be a function');
+    }
+    return (children as StylixRenderFn)(className || undefined, {
+      ...otherProps,
+      ...(ref ? { ref } : null),
+    });
   }
 
   throw new Error(
-    'Invalid Stylix component usage: must provide $el, $component, $render, or children',
+    'Stylix: invalid stylix component usage: must provide $el, $component, $render, or children',
   );
 }
 
-const Stylix: Stylix$Component = React.forwardRef(_Stylix as any) as unknown as Stylix$Component;
+export const Stylix: Stylix$Component = React.forwardRef(
+  _Stylix as any,
+) as unknown as Stylix$Component;
 Stylix.displayName = 'Stylix';
 Stylix.__isStylix = true;
-
-export const $ = Stylix;
-export default Stylix;

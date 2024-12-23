@@ -1,4 +1,4 @@
-import $ from '../Stylix';
+import $ from '../index';
 import { renderStylix } from './util';
 
 describe('$css', () => {

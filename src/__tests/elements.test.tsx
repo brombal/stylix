@@ -1,3 +1,4 @@
+import React from 'react';
 import $ from '../index';
 import { renderStylix } from './util';
 
@@ -11,6 +12,15 @@ describe('html elements', () => {
   it('should have proper type checks', () => {
     // Empty is okay
     void (<$.div />);
+
+    // Forwarded ref is okay
+    React.forwardRef<HTMLDivElement, { test: 'value' }>(function TestRef(props, ref) {
+      return (
+        <$.div {...props} ref={ref}>
+          asdf
+        </$.div>
+      );
+    });
 
     // Known html prop is okay
     void (<$.div id="test" onClick={() => {}} />);
@@ -48,11 +58,7 @@ describe('html elements', () => {
   });
 
   it('should pass htmlContent and htmlTranslate props correctly', () => {
-    const {
-      containerHtml: json,
-      result: r,
-      styleElement,
-    } = renderStylix(
+    const { containerHtml: json, styleElement } = renderStylix(
       <$.div
         data-testid="div"
         color="red"
@@ -77,6 +83,22 @@ describe('html elements', () => {
         // @ts-expect-error - invalid htmlTranslate value
         htmlTranslate="wrong"
       />
+    );
+  });
+
+  it('should pass ref correctly', () => {
+    const ref = React.createRef<HTMLDivElement>();
+    renderStylix(<$.div ref={ref} />);
+    expect(ref.current).not.toBeNull();
+  });
+
+  it('should pass keys correctly', () => {
+    renderStylix(
+      <div>
+        {[1, 2, 3].map((k) => (
+          <$.div key={k}>{k}</$.div>
+        ))}
+      </div>,
     );
   });
 });

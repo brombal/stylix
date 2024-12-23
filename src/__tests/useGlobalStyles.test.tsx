@@ -16,7 +16,7 @@ describe('global styles', () => {
       return <main data-testid="main">test</main>;
     }
 
-    const { containerHtml: json, result: r, styleElement } = renderStylix(<Component />);
+    const { containerHtml: json, styleElement } = renderStylix(<Component />);
 
     expect(json).toMatchSnapshot();
     expect(styleElement.innerHTML).toMatchSnapshot();
@@ -74,7 +74,7 @@ describe('global styles', () => {
       );
     }
 
-    const { containerHtml, result: r, styleElement } = renderStylix(<Component />);
+    const { containerHtml, styleElement } = renderStylix(<Component />);
 
     expect(containerHtml).toMatchSnapshot();
     expect(styleElement.innerHTML).toMatchSnapshot();
