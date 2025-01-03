@@ -52,8 +52,8 @@ type Stylix$childrenProp = StylixProps &
 /**
  * The props for the Stylix ($) component when using the $el prop as a component.
  */
-type Stylix$componentProp<TComponent extends React.ElementType> =
-  (TComponent extends React.ElementType<infer P> ? StylixProps<P> : never) & {
+type Stylix$elAsComponentProp<TComponent extends React.ElementType> =
+  (TComponent extends React.ElementType<infer P> ? StylixProps<object, P> : never) & {
     $el: TComponent;
     $render?: never;
     children?: React.ReactNode | React.ReactNode[];
@@ -62,7 +62,7 @@ type Stylix$componentProp<TComponent extends React.ElementType> =
 /**
  * The props for the Stylix ($) component when using the $el prop.
  */
-type Stylix$elProp = StylixProps &
+type Stylix$elAsElementProp = StylixProps &
   Record<string, unknown> & {
     $render?: never;
     $el: React.ReactElement;
@@ -73,10 +73,10 @@ type Stylix$elProp = StylixProps &
  * Props for the Stylix ($) component
  */
 export type Stylix$Props<TComponent extends React.ElementType> =
-  | Stylix$componentProp<TComponent>
+  | Stylix$elAsComponentProp<TComponent>
+  | Stylix$elAsElementProp
   | Stylix$renderProp
-  | Stylix$childrenProp
-  | Stylix$elProp;
+  | Stylix$childrenProp;
 
 /**
  * Type of main Stylix component ($).

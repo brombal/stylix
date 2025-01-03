@@ -27,4 +27,20 @@ describe('Stylix $el prop as component', () => {
     expect(json).toMatchSnapshot();
     expect(styles).toMatchSnapshot();
   });
+
+  it('should require correct prop types when they conflict with styles', () => {
+    function TestComponent({
+      className,
+      margin,
+      ...rest
+    }: { className?: string; margin: 'this-value' }) {
+      return <div className={className} data-margin={margin} {...rest} />;
+    }
+
+    // margin is not required
+    void (<$ $el={TestComponent} />);
+
+    // margin has original type from styles
+    void (<$ $el={TestComponent} margin={5} />);
+  });
 });
