@@ -17,7 +17,7 @@ export type StylixComponentMeta = {
  */
 type Stylix$ComponentExtras = StylixComponentMeta & {
   [key in keyof React.JSX.IntrinsicElements]: React.FC<
-    StylixProps<Omit<React.JSX.IntrinsicElements[key], 'color' | 'content' | 'translate'>> & {
+    StylixProps<unknown, React.JSX.IntrinsicElements[key]> & {
       htmlContent?: string;
       htmlTranslate?: 'yes' | 'no';
     }

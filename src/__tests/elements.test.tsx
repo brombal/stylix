@@ -57,6 +57,14 @@ describe('html elements', () => {
     void (<$.div id="foo" {...props} />);
   });
 
+  it('should handle elements that have conflicting prop names', () => {
+    void (<$.input height={50} />);
+    // 'height' on an input would normally only accept a string or number, but stylix allows media objects:
+    void (<$.input height={{ mobile: 50 }} />);
+    // @ts-ignore real invalid value:
+    void (<$.input height={[50]} />);
+  });
+
   it('should pass htmlContent and htmlTranslate props correctly', () => {
     const { containerHtml: json, styleElement } = renderStylix(
       <$.div

@@ -247,7 +247,7 @@ type StylixComponentMeta = {
  * Defines the static meta properties and the HTML elements on the `$` object ($.div, $.span, etc).
  */
 type Stylix$ComponentExtras = StylixComponentMeta & {
-    [key in keyof React.JSX.IntrinsicElements]: React.FC<StylixProps<Omit<React.JSX.IntrinsicElements[key], 'color' | 'content' | 'translate'>> & {
+    [key in keyof React.JSX.IntrinsicElements]: React.FC<StylixProps<{}, React.JSX.IntrinsicElements[key]> & {
         htmlContent?: string;
         htmlTranslate?: 'yes' | 'no';
     }>;
