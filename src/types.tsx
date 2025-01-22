@@ -41,7 +41,8 @@ export type StylixValue<T> = T | Record<string, T>;
  * Used to indicate that a component can accept all Stylix properties, including
  * all standard CSS properties, additional user-defined custom style props, and the $css prop.
  *
- * The type arguments specify a type to override, and a type to extend from.
+ * `TOverrideProps` specifies a type whose properties will override any CSS style props if they conflict.
+ * `TExtendsFromProps` specifies a type whose conflicting style properties will be omitted.
  *
  * To allow for HTML element props, use `StylixHTMLProps` instead.
  */
@@ -68,12 +69,24 @@ export type StylixProps<TOverrideProps = unknown, TExtendsFromProps = unknown> =
  * as well as all standard HTML element props for the given tag.
  *
  * For Stylix properties without allowing HTML props, use `StylixProps` instead.
+ *
+ * Note that some HTML elements have properties that conflict with CSS properties (e.g. `content`, or `width` and `height`
+ * on inputs). By default, Stylix always consumes CSS properties as if they were styles, so HTML props are suppressed
+ * and style props take precedence. If you need to use a conflicting prop as its original type from the HTML element,
+ * consider passing it in the `TOverrideProps` type parameter. E.g.:
+ *
+ * ```ts
+ * function MyComponent(props: StylixHTMLProps<'input', Pick<HTMLProps<'input'>, 'width'>>) {
+ *   // props.width is a string, not a CSS value
+ *   return <input {...props} />;
+ * }
+ * ```
  */
 export type StylixHTMLProps<
   TTag extends keyof React.JSX.IntrinsicElements,
   TOverrideProps = unknown,
   TExtendsFromProps = unknown,
-> = StylixProps<HTMLProps<TTag> & TOverrideProps, TExtendsFromProps>;
+> = StylixProps<TOverrideProps, HTMLProps<TTag> & TExtendsFromProps>;
 
 /**
  * Used to allow users to add custom props to Stylix components.

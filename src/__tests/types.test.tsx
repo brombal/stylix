@@ -1,4 +1,4 @@
-import type { StylixProps } from '../index';
+import $, { type HTMLProps, type StylixProps } from '../index';
 import type { StylixHTMLProps } from '../types';
 
 describe('Types', () => {
@@ -52,5 +52,24 @@ describe('Types', () => {
     void x.fontSize?.f;
     // @ts-expect-error - prop is overridden
     void x.margin?.fizz;
+
+    function Input(props: StylixHTMLProps<'input', Pick<HTMLProps<'input'>, 'width'>>) {
+      return <$.input {...props} />;
+    }
+    void (<Input />); // no width is fine
+    void (<Input width={50} />);
+    void (<Input width="50" />);
+    // @ts-expect-error invalid value ('width' is the real HTML property, does not accept a media object):
+    void (<Input width={{ mobile: 50 }} />);
+    // @ts-expect-error real invalid value:
+    void (<Input width={[50]} />);
+
+    function Button(props: StylixHTMLProps<'button'>) {
+      return <$.button {...props} />;
+    }
+    void (<Button content="50" />);
+    void (<Button content={{ mobile: '50' }} />);
+    // @ts-expect-error real invalid value:
+    void (<Button content={50} />);
   });
 });
