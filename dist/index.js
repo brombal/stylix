@@ -680,24 +680,19 @@ function processMediaStyles(mediaDef, styleProps, styles) {
         return styles.map((style) => processMediaStyles(mediaDef, styleProps, style));
     }
     mediaDef.default ||= (styles) => styles;
-    let plainStyles = null;
-    const result = [];
+    const result = { default: [] };
     for (const styleKey in styles) {
         const styleValue = styles[styleKey];
         if (styleProps[simplifyStylePropName(styleKey)]) {
             if (typeof styleValue !== 'object') {
                 // Regular style prop
-                if (!plainStyles) {
-                    plainStyles = {};
-                    result.push(plainStyles);
-                }
-                plainStyles[styleKey] = styleValue;
+                result.default.push({ [styleKey]: styleValue });
                 continue;
             }
             // An object for a style prop is definitely a media object
-            plainStyles = null;
             for (const mediaKey in styleValue) {
-                result.push(mediaDef[mediaKey]({
+                result[mediaKey] ||= [];
+                result[mediaKey].push(mediaDef[mediaKey]({
                     // process recursively
                     [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
                 }));
@@ -705,20 +700,17 @@ function processMediaStyles(mediaDef, styleProps, styles) {
             continue;
         }
         if (styleKey in mediaDef) {
-            plainStyles = null;
-            result.push(mediaDef[styleKey](
+            result[styleKey] ||= [];
+            result[styleKey].push(mediaDef[styleKey](
             // process recursively
             processMediaStyles(mediaDef, styleProps, styleValue)));
             continue;
         }
         // Key is a selector, just process recursively and add to plain styles
-        if (!plainStyles) {
-            plainStyles = {};
-            result.push(plainStyles);
-        }
-        plainStyles[styleKey] = processMediaStyles(mediaDef, styleProps, styleValue);
+        result.default.push({ [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue) });
     }
-    return result.length === 1 ? result[0] : result.length === 0 ? null : result;
+    const results = Object.values(result);
+    return results.length === 1 ? results[0] : results.length === 0 ? null : results;
 }
 
 /**

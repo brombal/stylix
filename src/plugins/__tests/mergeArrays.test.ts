@@ -148,4 +148,27 @@ describe('mergeArrays', () => {
       b: { m: 3, n: 4 },
     });
   });
+
+  it('should convert simple media objects', () => {
+    expect(
+      JSON.stringify(
+        _mergeArrays([
+          [{ color: 'color-default' }, { fontWeight: 'fw-default' }],
+          [
+            {
+              '@media (max-width: 600px)': [{ color: 'color-mobile' }, { fontWeight: 'fw-mobile' }],
+            },
+          ],
+          [{ 'html[theme="dark"] &': [{ color: 'color-dark' }, { fontWeight: 'fw-dark' }] }],
+        ]),
+      ),
+    ).toEqual(
+      JSON.stringify({
+        color: 'color-default',
+        fontWeight: 'fw-default',
+        '@media (max-width: 600px)': { color: 'color-mobile', fontWeight: 'fw-mobile' },
+        'html[theme="dark"] &': { color: 'color-dark', fontWeight: 'fw-dark' },
+      }),
+    );
+  });
 });
