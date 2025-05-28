@@ -241,6 +241,22 @@ type MapObjectFunction = (key: string | number, value: any, source: unknown, con
  */
 declare function mapObject<TSource>(source: TSource, map: MapObjectFunction, context?: any): TSource;
 
+type ClassNamePrimitive = string | number | boolean | null | undefined;
+type ClassName = ClassNamePrimitive | ClassName[] | {
+    [key: string]: ClassNamePrimitive;
+} | (() => ClassName);
+/**
+ * A utility function to create a string of class names based on the provided parameters.
+ * Accepts a variable number of arguments, each of which can be one of the following:
+ *
+ * - A string, which will be included in the class name string.
+ * - An object, where the keys are class names and the values are booleans indicating whether to include the class name.
+ * - An array of strings or objects, which will be flattened and processed as above.
+ * - A function that returns a string, object, or array, which will be processed as above.
+ * - Any other value will be ignored.
+ */
+declare function cx(...args: ClassName[]): string;
+
 interface StyleCollector {
     collect: (element: React.ReactElement) => React.ReactElement;
     render: React.FC<React.ComponentProps<'style'>>;
@@ -314,4 +330,4 @@ declare function RenderServerStyles(props: Partial<HTMLProps<'style'>>): react_j
 
 type StylixContext = StylixPublicContext;
 
-export { type Extends, type HTMLProps, RenderServerStyles, type StyleCollector, StyleElement, type Stylix$Component, type StylixContext, type StylixHTMLProps, type StylixObject, type StylixPlugin, type StylixPluginFunctionContext, type StylixProps, type StylixPropsExtensions, StylixProvider, type StylixStyles, type StylixValue, createStyleCollector, customProps, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };
+export { type Extends, type HTMLProps, RenderServerStyles, type StyleCollector, StyleElement, type Stylix$Component, type StylixContext, type StylixHTMLProps, type StylixObject, type StylixPlugin, type StylixPluginFunctionContext, type StylixProps, type StylixPropsExtensions, StylixProvider, type StylixStyles, type StylixValue, createStyleCollector, customProps, cx, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };

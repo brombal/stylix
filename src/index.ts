@@ -19,6 +19,7 @@ export {
   type StylixPluginFunctionContext,
 } from './plugins';
 export { mapObject } from './util/mapObject';
+export { cx } from './util/cx';
 export { createStyleCollector, styleCollectorContext, type StyleCollector } from './styleCollector';
 import './elements';
 export type { HTMLProps } from './elements';

@@ -1,6 +1,6 @@
 {
   "name": "@stylix/core",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "React, with style. Add styles to your React apps with props: the easy, natural, and low learning curve approach.",
   "keywords": ["react", "styles", "css", "css-in-js", "emotion", "styled-components"],
   "type": "module",

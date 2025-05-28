@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/plugins/hoistKeyframes.ts</title>
+    <title>Code coverage report for src/util/cx.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,20 +19,20 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/plugins</a> hoistKeyframes.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/util</a> cx.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>12/12</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>11/11</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -91,62 +91,101 @@
 <a name='L26'></a><a href='#L26'>26</a>
 <a name='L27'></a><a href='#L27'>27</a>
 <a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">16x</span>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">98x</span>
-<span class="cline-any cline-yes">133x</span>
-<span class="cline-any cline-yes">133x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">126x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">51x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">98x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">25x</span>
+<span class="cline-any cline-yes">25x</span>
+<span class="cline-any cline-yes">44x</span>
+<span class="cline-any cline-yes">19x</span>
+<span class="cline-any cline-yes">25x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">47x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">25x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { isPlainObject } from '../util/isPlainObject';
-import type { StylixPlugin } from './index';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">type ClassNamePrimitive = string | number | boolean | null | undefined;
+type ClassName =
+  | ClassNamePrimitive
+  | ClassName[]
+  | { [key: string]: ClassNamePrimitive }
+  | (() =&gt; ClassName);
 &nbsp;
-function _hoistKeyframes(styles: any, root: any) {
-  for (const key in styles) {
-    const value = styles[key];
-    if (key.startsWith('@keyframes')) {
-      // Add keyframe rules as-is directly to root object
-      root[key] = value;
-      if (styles !== root) delete styles[key];
-    } else if (isPlainObject(value)) {
-      // Recursively flatten nested styles
-      _hoistKeyframes(value, root);
+// Internal helper to collect class name parts without joining
+function cxArray(args: ClassName[]): string[] {
+  const classNames: string[] = [];
+  for (const arg of args) {
+    if (arg &amp;&amp; typeof arg === 'string') {
+      classNames.push(arg);
+    } else if (Array.isArray(arg)) {
+      classNames.push(...cxArray(arg));
+    } else if (typeof arg === 'function') {
+      classNames.push(...cxArray([arg()]));
+    } else if (typeof arg === 'object' &amp;&amp; arg !== null) {
+      for (const [key, value] of Object.entries(arg)) {
+        if (value) {
+          classNames.push(key);
+        }
+      }
     }
   }
-  return styles;
+  return classNames;
 }
 &nbsp;
 /**
- * Hoists @keyframe declarations to root of styles object.
+ * A utility function to create a string of class names based on the provided parameters.
+ * Accepts a variable number of arguments, each of which can be one of the following:
+ *
+ * - A string, which will be included in the class name string.
+ * - An object, where the keys are class names and the values are booleans indicating whether to include the class name.
+ * - An array of strings or objects, which will be flattened and processed as above.
+ * - A function that returns a string, object, or array, which will be processed as above.
+ * - Any other value will be ignored.
  */
-export const hoistKeyframes: StylixPlugin = {
-  name: 'hoistKeyframes',
-  type: 'processStyles',
-  plugin(_ctx, styles) {
-    return _hoistKeyframes(styles, styles);
-  },
-};
+export function cx(...args: ClassName[]): string {
+  return cxArray(args).join(' ');
+}
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

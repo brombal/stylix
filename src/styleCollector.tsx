@@ -25,14 +25,3 @@ export function createStyleCollector() {
   collector.render.displayName = 'StylixStyleCollectorRenderer';
   return collector;
 }
-
-// Collect your styles:
-// const styles = [];
-// ReactDOM.renderToString(
-//   <StylixSSR.StyleCollector styles={styles}>
-//     <App />
-//   </StylixSSR.StyleCollector>
-// );
-//
-// // Then render your styles:
-// <RenderServerStyles styles={styles} />
