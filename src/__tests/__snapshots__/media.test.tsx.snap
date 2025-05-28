@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`mediaObjects should handle media objects combined with $css 1`] = `"<div class="stylix-1">test</div>"`;
+
+exports[`mediaObjects should handle media objects combined with $css 2`] = `
+".stylix-1 {
+  visibility: hidden;
+@media (max-width: 600px) {
+  visibility: visible; }
+.test {
+  display: none; } }"
+`;
+
 exports[`mediaObjects should work 1`] = `"<div class="stylix-1"></div>"`;
 
 exports[`mediaObjects should work 2`] = `

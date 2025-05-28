@@ -11,7 +11,7 @@ describe('useKeyframes()', () => {
       return <$.div data-testid="div1" animation={`${animation} 1s linear infinite`} />;
     };
 
-    const { result, styles } = renderStylix(<Component1 />);
+    const { styles } = renderStylix(<Component1 />);
     expect(styles).toMatchSnapshot();
   });
 
@@ -78,7 +78,7 @@ describe('useKeyframes()', () => {
       return <$.div data-testid="div3" animation={`${animation} 1s linear infinite`} />;
     };
 
-    const { result, styles } = renderStylix(
+    const { styles } = renderStylix(
       <>
         <Component1 />
         <Component2 />

@@ -20,6 +20,10 @@ function reduceArray(arr: StylixStyles[]): StylixObject | undefined {
   arr = arr.flat();
   let target = arr[0] as StylixObject;
 
+  if (Array.isArray(target)) {
+    target = reduceArray(target) as StylixObject;
+  }
+
   for (let i = 1; i < arr.length; i++) {
     let source = arr[i] as StylixObject | undefined;
 

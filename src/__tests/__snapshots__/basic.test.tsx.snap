@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Basic Stylix usage should handle class names that consist of css properties 1`] = `"<div class="stylix-1">test</div>"`;
+
+exports[`Basic Stylix usage should handle class names that consist of css properties 2`] = `
+".stylix-1 {
+  overflow-x: auto;
+&.font-weight {
+  color: blue; } }"
+`;
+
+exports[`Basic Stylix usage should handle weird class names 1`] = `"<div class="stylix-1">test</div>"`;
+
+exports[`Basic Stylix usage should handle weird class names 2`] = `
+".stylix-1 {
+  overflow-x: auto;
+&.font-weight {
+  color: blue; } }"
+`;
+
 exports[`Basic Stylix usage should merge multiple styles 1`] = `"<div class="stylix-1">test</div>"`;
 
 exports[`Basic Stylix usage should merge multiple styles 2`] = `

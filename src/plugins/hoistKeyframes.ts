@@ -22,7 +22,7 @@ function _hoistKeyframes(styles: any, root: any) {
 export const hoistKeyframes: StylixPlugin = {
   name: 'hoistKeyframes',
   type: 'processStyles',
-  plugin(ctx, styles) {
+  plugin(_ctx, styles) {
     return _hoistKeyframes(styles, styles);
   },
 };

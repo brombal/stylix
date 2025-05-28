@@ -5,6 +5,7 @@ export type {
   Extends,
   StylixObject,
   StylixStyles,
+  StylixValue,
 } from './types';
 export { useStylixContext, StylixProvider } from './StylixProvider';
 export { StyleElement } from './StyleElement';

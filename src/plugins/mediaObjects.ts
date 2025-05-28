@@ -1,4 +1,4 @@
-import { simplifyStylePropName } from '../classifyProps';
+import { isStyleProp } from '../classifyProps';
 import type { StylixObject, StylixStyles } from '../index';
 import type { StylixPlugin, StylixPluginFunctionContext } from './index';
 
@@ -45,7 +45,7 @@ export function processMediaStyles(
   for (const styleKey in styles) {
     const styleValue = styles[styleKey];
 
-    if (styleProps[simplifyStylePropName(styleKey)]) {
+    if (isStyleProp(styleKey, styleProps)) {
       if (typeof styleValue !== 'object') {
         // Regular style prop
         result.default.push({ [styleKey]: styleValue });

@@ -23,7 +23,7 @@ describe('mapObject', () => {
   });
 
   test('should map arrays', () => {
-    const result = mapObject([1, 2, 3], (key, value) => {
+    const result = mapObject([1, 2, 3], (_key, value) => {
       return [value, value * 2];
     });
 
@@ -95,14 +95,14 @@ describe('mapObject', () => {
           a: 1,
           b: 2,
         },
-        (key, value) => {
+        () => {
           return [];
         },
       );
     }).toThrow();
 
     expect(() => {
-      mapObject([1, 2, 3], (key, value) => {
+      mapObject([1, 2, 3], () => {
         return {};
       });
     }).toThrow();
@@ -110,13 +110,13 @@ describe('mapObject', () => {
 
   test('should return input if not object or array', () => {
     expect(
-      mapObject('foo', (key, value) => {
+      mapObject('foo', () => {
         return {};
       }),
     ).toEqual('foo');
 
     expect(
-      mapObject(1, (key, value) => {
+      mapObject(1, () => {
         return {};
       }),
     ).toEqual(1);

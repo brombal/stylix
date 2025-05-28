@@ -1,5 +1,5 @@
 import type { StylixContext } from '../StylixProvider';
-import { simplifyStylePropName } from '../classifyProps';
+import { isStyleProp } from '../classifyProps';
 import { type MapObjectFunction, mapObject } from '../util/mapObject';
 import type { StylixPlugin } from './index';
 
@@ -17,13 +17,13 @@ export const propCasing: StylixPlugin = {
 const propCasingMap: MapObjectFunction = (
   key,
   value,
-  object,
+  _object,
   context: { ctx: StylixContext },
   mapRecursive,
 ) => {
   if (typeof key !== 'string' || key === '&') return { [key]: mapRecursive(value) };
-  const simpleKey = simplifyStylePropName(key);
-  if (simpleKey && simpleKey in context.ctx.styleProps) {
+  const simpleKey = isStyleProp(key, context.ctx.styleProps);
+  if (simpleKey) {
     return { [context.ctx.styleProps[simpleKey]]: mapRecursive(value) };
   }
   return { [key]: mapRecursive(value) };

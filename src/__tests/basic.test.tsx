@@ -57,4 +57,23 @@ describe('Basic Stylix usage', () => {
     expect(json).toMatchSnapshot();
     expect(styles).toMatchSnapshot();
   });
+
+  it('should handle class names that consist of css properties', () => {
+    const [json, styles] = renderStylix(
+      <$.div
+        overflow-x="auto"
+        $css={[
+          {
+            '&.font-weight': {
+              color: 'blue',
+            },
+          },
+        ]}
+      >
+        test
+      </$.div>,
+    );
+    expect(json).toMatchSnapshot();
+    expect(styles).toMatchSnapshot();
+  });
 });

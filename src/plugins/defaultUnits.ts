@@ -27,13 +27,13 @@ export const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits): Sty
   return {
     name: 'defaultUnits',
     type: 'processStyles',
-    plugin(ctx, styles) {
+    plugin(_ctx, styles) {
       return mapObject(styles, defaultUnitsMap, { unit, ignoreProps });
     },
   };
 };
 
-const defaultUnitsMap: MapObjectFunction = (key, value, object, ctx, mapRecursive) => {
+const defaultUnitsMap: MapObjectFunction = (key, value, _object, ctx, mapRecursive) => {
   if (typeof value === 'number' && !ctx.ignoreProps.includes(key as string)) {
     return { [key]: String(value) + ctx.unit };
   }

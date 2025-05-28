@@ -13,6 +13,34 @@ describe('mergeArrays', () => {
     expect(_mergeArrays([[{ a: 1 }], [[{ b: 2 }, [{ c: 3 }]]]])).toEqual({ a: 1, b: 2, c: 3 });
   });
 
+  test('should merge double-nested arrays within object', () => {
+    expect(
+      _mergeArrays([
+        {
+          a: [
+            [
+              [
+                {
+                  b: 1,
+                },
+              ],
+              [
+                {
+                  c: { d: 2 },
+                },
+              ],
+            ],
+          ],
+        },
+      ]),
+    ).toEqual({
+      a: {
+        b: 1,
+        c: { d: 2 },
+      },
+    });
+  });
+
   test('should merge complex top-level array', () => {
     expect(
       _mergeArrays([

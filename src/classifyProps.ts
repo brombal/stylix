@@ -17,9 +17,14 @@ export function classifyProps(props: any, knownProps: Record<string, string>): [
 
 /**
  * Determines if `value` is a recognized CSS property (can be standard CSS or custom Stylix prop).
+ * If it is, the simplified prop name is returned. Otherwise, false is returned.
  */
-export function isStyleProp(prop: unknown, knownProps: Record<string, string>): prop is string {
-  return isValidJSXProp(prop) && simplifyStylePropName(prop) in knownProps;
+export function isStyleProp(prop: unknown, knownProps: Record<string, string>): string | false {
+  if (isValidJSXProp(prop)) {
+    const simplified = simplifyStylePropName(prop);
+    return simplified in knownProps ? simplified : false;
+  }
+  return false;
 }
 
 export function isValidJSXProp(value: unknown): value is string {

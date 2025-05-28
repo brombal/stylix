@@ -15,7 +15,7 @@ export const replace$$class: StylixPlugin = {
 const replace$$classMap: MapObjectFunction = (
   key,
   value,
-  object,
+  _object,
   context: { ctx: StylixPluginFunctionContext },
   mapRecursive,
 ) => {

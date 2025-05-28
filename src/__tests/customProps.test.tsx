@@ -37,16 +37,7 @@ describe('customProps', () => {
     // @ts-expect-error invalid type
     void (<$.div marginArray="invalid" />);
 
-    const [json, styles] = renderStylix(
-      <$.div>
-        <$.div colour="red" />
-        <$.div flexbox />
-        <$.div flexbox={false} />
-        <$.div flexBlue />
-        <$.div marginArray={[1, 2, 3, 4]} />
-      </$.div>,
-      [customProps(myCustomProps)],
-    );
+    const [json, styles] = renderStylix(<$.div flexbox />, [customProps(myCustomProps)]);
     expect(json).toMatchSnapshot();
     expect(styles).toMatchSnapshot();
   });

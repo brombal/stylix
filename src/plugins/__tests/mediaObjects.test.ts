@@ -239,4 +239,27 @@ describe('mediaObjects', () => {
       }),
     );
   });
+
+  it('should handle props that are style properties', () => {
+    expect(
+      JSON.stringify(
+        _mergeArrays(
+          processMediaStyles(media, styleProps, {
+            '.font-weight': {
+              color: { mobile: 'red', default: 'black' },
+            },
+          }),
+        ),
+      ),
+    ).toEqual(
+      JSON.stringify({
+        '.font-weight': {
+          color: 'black',
+          '@media (max-width: 600px)': {
+            color: 'red',
+          },
+        },
+      }),
+    );
+  });
 });

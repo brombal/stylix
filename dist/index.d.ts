@@ -314,4 +314,4 @@ declare function RenderServerStyles(props: Partial<HTMLProps<'style'>>): react_j
 
 type StylixContext = StylixPublicContext;
 
-export { type Extends, type HTMLProps, RenderServerStyles, type StyleCollector, StyleElement, type Stylix$Component, type StylixContext, type StylixHTMLProps, type StylixObject, type StylixPlugin, type StylixPluginFunctionContext, type StylixProps, type StylixPropsExtensions, StylixProvider, type StylixStyles, createStyleCollector, customProps, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };
+export { type Extends, type HTMLProps, RenderServerStyles, type StyleCollector, StyleElement, type Stylix$Component, type StylixContext, type StylixHTMLProps, type StylixObject, type StylixPlugin, type StylixPluginFunctionContext, type StylixProps, type StylixPropsExtensions, StylixProvider, type StylixStyles, type StylixValue, createStyleCollector, customProps, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };

@@ -18,9 +18,14 @@ function classifyProps(props, knownProps) {
 }
 /**
  * Determines if `value` is a recognized CSS property (can be standard CSS or custom Stylix prop).
+ * If it is, the simplified prop name is returned. Otherwise, false is returned.
  */
 function isStyleProp(prop, knownProps) {
-    return isValidJSXProp(prop) && simplifyStylePropName(prop) in knownProps;
+    if (isValidJSXProp(prop)) {
+        const simplified = simplifyStylePropName(prop);
+        return simplified in knownProps ? simplified : false;
+    }
+    return false;
 }
 function isValidJSXProp(value) {
     // Not an exact check, but mostly rules out complex css selectors
@@ -619,12 +624,12 @@ const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits) => {
     return {
         name: 'defaultUnits',
         type: 'processStyles',
-        plugin(ctx, styles) {
+        plugin(_ctx, styles) {
             return mapObject(styles, defaultUnitsMap, { unit, ignoreProps });
         },
     };
 };
-const defaultUnitsMap = (key, value, object, ctx, mapRecursive) => {
+const defaultUnitsMap = (key, value, _object, ctx, mapRecursive) => {
     if (typeof value === 'number' && !ctx.ignoreProps.includes(key)) {
         return { [key]: String(value) + ctx.unit };
     }
@@ -654,7 +659,7 @@ function _hoistKeyframes(styles, root) {
 const hoistKeyframes = {
     name: 'hoistKeyframes',
     type: 'processStyles',
-    plugin(ctx, styles) {
+    plugin(_ctx, styles) {
         return _hoistKeyframes(styles, styles);
     },
 };
@@ -683,7 +688,7 @@ function processMediaStyles(mediaDef, styleProps, styles) {
     const result = { default: [] };
     for (const styleKey in styles) {
         const styleValue = styles[styleKey];
-        if (styleProps[simplifyStylePropName(styleKey)]) {
+        if (isStyleProp(styleKey, styleProps)) {
             if (typeof styleValue !== 'object') {
                 // Regular style prop
                 result.default.push({ [styleKey]: styleValue });
@@ -729,6 +734,9 @@ function _mergeArrays(obj) {
 function reduceArray(arr) {
     arr = arr.flat();
     let target = arr[0];
+    if (Array.isArray(target)) {
+        target = reduceArray(target);
+    }
     for (let i = 1; i < arr.length; i++) {
         let source = arr[i];
         if (Array.isArray(source)) {
@@ -794,7 +802,7 @@ function reduceObjectProperties(obj) {
 const prepareStyles = {
     name: 'prepareStyles',
     type: 'preprocessStyles',
-    plugin(ctx, styles) {
+    plugin(_ctx, styles) {
         while (Array.isArray(styles) && styles.length === 1)
             styles = styles[0];
         if (Array.isArray(styles) && !styles.length)
@@ -815,11 +823,11 @@ const propCasing = {
         return mapObject(styles, propCasingMap, { ctx });
     },
 };
-const propCasingMap = (key, value, object, context, mapRecursive) => {
+const propCasingMap = (key, value, _object, context, mapRecursive) => {
     if (typeof key !== 'string' || key === '&')
         return { [key]: mapRecursive(value) };
-    const simpleKey = simplifyStylePropName(key);
-    if (simpleKey && simpleKey in context.ctx.styleProps) {
+    const simpleKey = isStyleProp(key, context.ctx.styleProps);
+    if (simpleKey) {
         return { [context.ctx.styleProps[simpleKey]]: mapRecursive(value) };
     }
     return { [key]: mapRecursive(value) };
@@ -835,7 +843,7 @@ const replace$$class = {
         return mapObject(styles, replace$$classMap, { ctx });
     },
 };
-const replace$$classMap = (key, value, object, context, mapRecursive) => {
+const replace$$classMap = (key, value, _object, context, mapRecursive) => {
     value =
         typeof value === 'string'
             ? value.replace('$$class', context.ctx.className || '')
