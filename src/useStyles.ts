@@ -1,9 +1,8 @@
 import { useRef } from 'react';
-
-import { type StylixContext, useStylixContext } from './StylixProvider';
 import applyRules from './applyRules';
 import { getParentComponentName } from './getParentComponentName';
 import { applyPlugins } from './plugins';
+import { type StylixContext, useStylixContext } from './StylixProvider';
 import stylesToRuleArray from './stylesToRuleArray';
 import type { StylixObject, StylixStyles } from './types';
 import { isEmpty } from './util/isEmpty';

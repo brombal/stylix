@@ -12,6 +12,8 @@ export default function useIsoLayoutEffect(
   if (isSsr) {
     if (runOnSsr) return fn();
   } else {
+    // biome-ignore lint/correctness/useHookAtTopLevel: isSsr should never change
+    // biome-ignore lint/correctness/useExhaustiveDependencies: dependencies are passed as-is
     useLayoutEffect(fn, deps);
   }
 }

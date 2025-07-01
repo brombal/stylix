@@ -5,7 +5,7 @@ export function getParentComponentName(): string | undefined {
   const stack = internals?.ReactDebugCurrentFrame?.getStackAddendum?.()?.split('\n') || [];
   for (const line of stack) {
     // Look for a component name like "Component$123", either at the start of the line (Firefox) or after "at " (Safari/Chrome)
-    const m = line.trim().match(/^(?:at )?([A-Z][A-Za-z0-9$\.]*)/);
+    const m = line.trim().match(/^(?:at )?([A-Z][A-Za-z0-9$.]*)/);
     const res = m?.[1] && m[1] !== 'Stylix' ? m[1] : undefined;
     if (res) return res;
   }

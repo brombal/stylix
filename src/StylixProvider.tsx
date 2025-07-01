@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useRef } from 'react';
 
 import { classifyProps, simplifyStylePropName } from './classifyProps';
 import cssProps from './css-props.json';
-import { type StylixPlugin, applyPlugins, defaultPlugins } from './plugins';
+import { applyPlugins, defaultPlugins, type StylixPlugin } from './plugins';
 import type { StylixMediaDefinition } from './plugins/mediaObjects';
 import { styleCollectorContext } from './styleCollector';
 import { detectSSR } from './util/useIsoLayoutEffect';
@@ -61,7 +61,7 @@ export type StylixPublicContext = Pick<
   'id' | 'devMode' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'
 >;
 
-let defaultStyleProps: Record<string, string> | undefined = undefined;
+let defaultStyleProps: Record<string, string> | undefined;
 
 export function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
   if (!defaultStyleProps) {
@@ -113,7 +113,7 @@ export function createStylixContext(userValues = {} as Partial<StylixProviderPro
 // The React context object
 const stylixContext = createContext<StylixContext | undefined>(undefined);
 
-let defaultStylixContext: StylixContext | undefined = undefined;
+let defaultStylixContext: StylixContext | undefined;
 
 /**
  * Gets the current Stylix context.

@@ -23,6 +23,7 @@ describe('html elements', () => {
     });
 
     // Known html prop is okay
+    // biome-ignore lint/nursery/useUniqueElementIds: testing
     void (<$.div id="test" onClick={() => {}} />);
 
     // Known style prop is okay
@@ -45,6 +46,7 @@ describe('html elements', () => {
     // @ts-expect-error - unknown prop
     void (<$.div unknownProp />);
     // @ts-expect-error - unknown prop
+    // biome-ignore lint/nursery/useUniqueElementIds: testing
     void (<$.div id="test" unknownProp />);
 
     // @ts-expect-error - wrong custom prop value
@@ -54,6 +56,7 @@ describe('html elements', () => {
     // @ts-expect-error - prop spread has invalid prop
     void (<$.div {...props} />);
     // Prop spread is okay when valid prop exists (TS quirk :( )
+    // biome-ignore lint/nursery/useUniqueElementIds: testing
     void (<$.div id="foo" {...props} />);
   });
 

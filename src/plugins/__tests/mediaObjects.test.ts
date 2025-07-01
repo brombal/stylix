@@ -1,4 +1,4 @@
-import { type StylixMediaDefinition, processMediaStyles } from '../mediaObjects';
+import { processMediaStyles, type StylixMediaDefinition } from '../mediaObjects';
 import { _mergeArrays } from '../mergeArrays';
 
 describe('mediaObjects', () => {

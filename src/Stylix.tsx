@@ -1,6 +1,7 @@
 import React from 'react';
+import type { IntrinsicElements } from './elements';
 import { useStylixContext } from './StylixProvider';
-import type { StylixProps } from './types';
+import type { Extends, StylixProps, StylixStyles } from './types';
 import { useStyles } from './useStyles';
 import { isEmpty } from './util/isEmpty';
 
@@ -16,8 +17,8 @@ export type StylixComponentMeta = {
  * Defines the static meta properties and the HTML elements on the `$` object ($.div, $.span, etc).
  */
 type Stylix$ComponentExtras = StylixComponentMeta & {
-  [key in keyof React.JSX.IntrinsicElements]: React.FC<
-    StylixProps<unknown, React.JSX.IntrinsicElements[key]> & {
+  [key in IntrinsicElements]: React.FC<
+    Extends<React.JSX.IntrinsicElements[key], StylixProps> & {
       htmlContent?: string;
       htmlTranslate?: 'yes' | 'no';
     }
@@ -36,57 +37,39 @@ type Stylix$renderProp = StylixProps &
   Record<string, unknown> & {
     $el?: never;
     $render: StylixRenderFn;
-    children?: React.ReactNode | React.ReactNode[];
+    children?: never;
   };
 
 /**
- * The props for the Stylix ($) component when using the children render function.
+ * The props for the Stylix ($) component when using the $el prop as a component, intrinsic element tag, or rendered element.
  */
-type Stylix$childrenProp = StylixProps &
+type Stylix$elAsComponentProp = StylixProps &
   Record<string, unknown> & {
-    $el?: never;
-    $render?: never;
-    children: StylixRenderFn;
-  };
-
-/**
- * The props for the Stylix ($) component when using the $el prop as a component.
- */
-type Stylix$elAsComponentProp<TComponent extends React.ElementType> =
-  (TComponent extends React.ElementType<infer P> ? StylixProps<object, P> : never) & {
-    $el: TComponent;
+    $el: React.ReactElement | React.ComponentType<any> | IntrinsicElements;
     $render?: never;
     children?: React.ReactNode | React.ReactNode[];
   };
 
 /**
- * The props for the Stylix ($) component when using the $el prop.
+ * Internal props type for the Stylix ($) component where actual types are unknown.
  */
-type Stylix$elAsElementProp = StylixProps &
-  Record<string, unknown> & {
-    $render?: never;
-    $el: React.ReactElement;
-    children?: React.ReactNode | React.ReactNode[];
-  };
+type InternalStylix$Props = {
+  $el?: React.ReactElement | React.ComponentType<any> | IntrinsicElements;
+  $render?: StylixRenderFn;
+  children?: React.ReactNode | React.ReactNode[];
+  $css?: StylixProps['$css'];
+  className?: string;
+};
 
-/**
- * Props for the Stylix ($) component
- */
-export type Stylix$Props<TComponent extends React.ElementType> =
-  | Stylix$elAsComponentProp<TComponent>
-  | Stylix$elAsElementProp
-  | Stylix$renderProp
-  | Stylix$childrenProp;
+type Stylix$props = Stylix$elAsComponentProp | Stylix$renderProp;
 
 /**
  * Type of main Stylix component ($).
  */
-export interface Stylix$Component extends Stylix$ComponentExtras {
-  <TComponent extends React.ElementType>(props: Stylix$Props<TComponent>): React.ReactNode;
-}
+export type Stylix$Component = Stylix$ComponentExtras & ((props: Stylix$props) => React.ReactNode);
 
 export function _Stylix<TElement extends React.ElementType>(
-  props: Stylix$Props<TElement>,
+  props: InternalStylix$Props,
   ref: React.Ref<TElement>,
 ) {
   const { $el, $render, $css, className: outerClassName, children, ...rest } = props;
@@ -94,10 +77,10 @@ export function _Stylix<TElement extends React.ElementType>(
   const ctx = useStylixContext();
   const [styleProps, otherProps] = ctx.classifyProps(rest);
 
-  let styles = [];
+  let styles: StylixStyles = [];
   if (!isEmpty(styleProps)) styles.push(styleProps);
   if (!isEmpty($css)) styles.push($css);
-  if (styles.length === 1) styles = styles[0];
+  if (styles.length === 1 && styles[0]) styles = styles[0];
   const stylixClassName = useStyles(styles);
 
   const className = `${stylixClassName} ${outerClassName || ''}`.trim() || undefined;
@@ -134,17 +117,7 @@ export function _Stylix<TElement extends React.ElementType>(
     return $render(className || undefined, { children, ...otherProps, ...(ref ? { ref } : null) });
   }
 
-  if (children) {
-    if (typeof children !== 'function') {
-      throw new Error('Stylix: invalid component usage: children must be a function');
-    }
-    return (children as StylixRenderFn)(className || undefined, {
-      ...otherProps,
-      ...(ref ? { ref } : null),
-    });
-  }
-
-  throw new Error('Stylix: invalid stylix component usage: must provide $el, $render, or children');
+  throw new Error('Stylix: invalid stylix component usage: must provide $el or $render prop.');
 }
 
 export const Stylix: Stylix$Component = React.forwardRef(

@@ -1,6 +1,5 @@
-import { useState } from 'react';
-
 import { act } from '@testing-library/react';
+import { useState } from 'react';
 import $, { useGlobalStyles } from '../index';
 import { renderStylix } from './util';
 

@@ -952,11 +952,13 @@ function useIsoLayoutEffect(fn, deps, runOnSsr, isSsr = detectSSR()) {
             return fn();
     }
     else {
+        // biome-ignore lint/correctness/useHookAtTopLevel: isSsr should never change
+        // biome-ignore lint/correctness/useExhaustiveDependencies: dependencies are passed as-is
         useLayoutEffect(fn, deps);
     }
 }
 
-let defaultStyleProps = undefined;
+let defaultStyleProps;
 function createStylixContext(userValues = {}) {
     if (!defaultStyleProps) {
         defaultStyleProps = {};
@@ -1003,7 +1005,7 @@ function createStylixContext(userValues = {}) {
 }
 // The React context object
 const stylixContext = createContext(undefined);
-let defaultStylixContext = undefined;
+let defaultStylixContext;
 /**
  * Gets the current Stylix context.
  */
@@ -1048,7 +1050,7 @@ function applyRules(ctx) {
     if (ctx.ssr)
         return;
     const supportsAdoptedStylesheets = 'adoptedStyleSheets' in document;
-    // If there's no style element, and we're in dev mode or legacy browser, create one
+    // If there's no style element, and we're in dev mode, create one
     if (!ctx.styleElement && (ctx.devMode || !supportsAdoptedStylesheets)) {
         ctx.styleElement = document.createElement('style');
         ctx.styleElement.className = 'stylix';
@@ -1056,14 +1058,13 @@ function applyRules(ctx) {
             ctx.styleElement.id = `stylix-${ctx.id}`;
         document.head.appendChild(ctx.styleElement);
     }
-    if (ctx.devMode && ctx.styleElement) {
+    console.log('test');
+    if (ctx.styleElement) {
+        // If there's a style element, use it
         const flattenedRules = flattenRules(ctx);
         ctx.styleElement.innerHTML = flattenedRules.join('\n');
     }
     else {
-        // If there's a style element, use its stylesheet
-        if (ctx.styleElement)
-            ctx.stylesheet = ctx.styleElement.sheet;
         // Still no stylesheet yet, create one
         if (!ctx.stylesheet) {
             ctx.stylesheet = new CSSStyleSheet();
@@ -1085,20 +1086,6 @@ function applyRules(ctx) {
                 console.warn(e);
             }
         }
-        else {
-            // Legacy method
-            while (stylesheet.rules?.length || stylesheet.cssRules?.length) {
-                stylesheet.deleteRule(0);
-            }
-            for (const i in flattenedRules)
-                try {
-                    stylesheet.insertRule(flattenedRules[i], +i);
-                }
-                catch (e) {
-                    // Errors are ignored, this just means that a browser doesn't support a certain CSS feature.
-                    console.warn(e);
-                }
-        }
     }
 }
 
@@ -1107,7 +1094,7 @@ function getParentComponentName() {
     const stack = internals?.ReactDebugCurrentFrame?.getStackAddendum?.()?.split('\n') || [];
     for (const line of stack) {
         // Look for a component name like "Component$123", either at the start of the line (Firefox) or after "at " (Safari/Chrome)
-        const m = line.trim().match(/^(?:at )?([A-Z][A-Za-z0-9$\.]*)/);
+        const m = line.trim().match(/^(?:at )?([A-Z][A-Za-z0-9$.]*)/);
         const res = m?.[1] && m[1] !== 'Stylix' ? m[1] : undefined;
         if (res)
             return res;
@@ -1243,43 +1230,6 @@ function useGlobalStyles(styles, options = { disabled: false }) {
     return useStyles(styles, { ...options, global: true });
 }
 
-// Internal helper to collect class name parts without joining
-function cxArray(args) {
-    const classNames = [];
-    for (const arg of args) {
-        if (arg && typeof arg === 'string') {
-            classNames.push(arg);
-        }
-        else if (Array.isArray(arg)) {
-            classNames.push(...cxArray(arg));
-        }
-        else if (typeof arg === 'function') {
-            classNames.push(...cxArray([arg()]));
-        }
-        else if (typeof arg === 'object' && arg !== null) {
-            for (const [key, value] of Object.entries(arg)) {
-                if (value) {
-                    classNames.push(key);
-                }
-            }
-        }
-    }
-    return classNames;
-}
-/**
- * A utility function to create a string of class names based on the provided parameters.
- * Accepts a variable number of arguments, each of which can be one of the following:
- *
- * - A string, which will be included in the class name string.
- * - An object, where the keys are class names and the values are booleans indicating whether to include the class name.
- * - An array of strings or objects, which will be flattened and processed as above.
- * - A function that returns a string, object, or array, which will be processed as above.
- * - Any other value will be ignored.
- */
-function cx(...args) {
-    return cxArray(args).join(' ');
-}
-
 function _Stylix(props, ref) {
     const { $el, $render, $css, className: outerClassName, children, ...rest } = props;
     const ctx = useStylixContext();
@@ -1289,7 +1239,7 @@ function _Stylix(props, ref) {
         styles.push(styleProps);
     if (!isEmpty($css))
         styles.push($css);
-    if (styles.length === 1)
+    if (styles.length === 1 && styles[0])
         styles = styles[0];
     const stylixClassName = useStyles(styles);
     const className = `${stylixClassName} ${outerClassName || ''}`.trim() || undefined;
@@ -1314,16 +1264,7 @@ function _Stylix(props, ref) {
     if ($render) {
         return $render(className || undefined, { children, ...otherProps, ...(ref ? { ref } : null) });
     }
-    if (children) {
-        if (typeof children !== 'function') {
-            throw new Error('Stylix: invalid component usage: children must be a function');
-        }
-        return children(className || undefined, {
-            ...otherProps,
-            ...(ref ? { ref } : null),
-        });
-    }
-    throw new Error('Stylix: invalid stylix component usage: must provide $el, $render, or children');
+    throw new Error('Stylix: invalid stylix component usage: must provide $el or $render prop.');
 }
 const Stylix = React.forwardRef(_Stylix);
 Stylix.displayName = 'Stylix';
@@ -1443,6 +1384,43 @@ for (const i in htmlTags) {
 function RenderServerStyles(props) {
     const ctx = useStylixContext();
     return jsx(StyleElement, { styles: ctx.ssr ? flattenRules(ctx) : [], ...props });
+}
+
+// Internal helper to collect class name parts without joining
+function cxArray(args) {
+    const classNames = [];
+    for (const arg of args) {
+        if (arg && typeof arg === 'string') {
+            classNames.push(arg);
+        }
+        else if (Array.isArray(arg)) {
+            classNames.push(...cxArray(arg));
+        }
+        else if (typeof arg === 'function') {
+            classNames.push(...cxArray([arg()]));
+        }
+        else if (typeof arg === 'object' && arg !== null) {
+            for (const [key, value] of Object.entries(arg)) {
+                if (value) {
+                    classNames.push(key);
+                }
+            }
+        }
+    }
+    return classNames;
+}
+/**
+ * A utility function to create a string of class names based on the provided parameters.
+ * Accepts a variable number of arguments, each of which can be one of the following:
+ *
+ * - A string, which will be included in the class name string.
+ * - An object, where the keys are class names and the values are booleans indicating whether to include the class name.
+ * - An array of strings or objects, which will be flattened and processed as above.
+ * - A function that returns a string, object, or array, which will be processed as above.
+ * - Any other value will be ignored.
+ */
+function cx(...args) {
+    return cxArray(args).join(' ');
 }
 
 export { RenderServerStyles, StyleElement, StylixProvider, createStyleCollector, customProps, cx, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };

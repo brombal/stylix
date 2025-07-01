@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Stylix tag components should require correct props 1`] = `"<div class="stylix-1 mergedClass" data-passthru="passthru"></div>"`;
+
+exports[`Stylix tag components should require correct props 2`] = `
+".stylix-1 {
+  color: red;
+  font-size: 13px; }"
+`;

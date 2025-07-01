@@ -1,4 +1,4 @@
-import $, { type HTMLProps, type StylixProps } from '../index';
+import $, { type Extends, type HTMLProps, type StylixProps } from '../index';
 import type { StylixHTMLProps } from '../types';
 
 describe('Types', () => {
@@ -8,9 +8,10 @@ describe('Types', () => {
      * The first argument should override style props. The second argument should be extended from, so
      * new properties are fine but conflicting css properties are overridden.
      */
-    type TestStylixProps = StylixProps<
-      { padding: 'must be this value' },
-      { color: number; otherProp: string }
+    type TestStylixProps = Extends<
+      { color: number; otherProp: string },
+      StylixProps,
+      { padding: 'must be this value' }
     >;
 
     const props: TestStylixProps = {
@@ -34,10 +35,10 @@ describe('Types', () => {
     // @ts-expect-error invalid prop value
     props.content = 4;
 
-    const x: StylixHTMLProps<
-      'div',
-      { customProp?: string; fontSize?: { f: 1 } },
-      { margin: { fizz: 'buzz' } }
+    const x: Extends<
+      { margin: { fizz: 'buzz' } },
+      StylixHTMLProps<'div'>,
+      { customProp?: string; fontSize?: { f: 1 } }
     > = {};
 
     // ok - valid prop
@@ -53,9 +54,10 @@ describe('Types', () => {
     // @ts-expect-error - prop is overridden
     void x.margin?.fizz;
 
-    function Input(props: StylixHTMLProps<'input', Pick<HTMLProps<'input'>, 'width'>>) {
+    function Input(props: Extends<StylixHTMLProps<'input'>, Pick<HTMLProps<'input'>, 'width'>>) {
       return <$.input {...props} />;
     }
+
     void (<Input />); // no width is fine
     void (<Input width={50} />);
     void (<Input width="50" />);
@@ -67,6 +69,7 @@ describe('Types', () => {
     function Button(props: StylixHTMLProps<'button'>) {
       return <$.button {...props} />;
     }
+
     void (<Button content="50" />);
     void (<Button content={{ mobile: '50' }} />);
     // @ts-expect-error real invalid value:

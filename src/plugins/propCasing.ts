@@ -1,5 +1,5 @@
-import type { StylixContext } from '../StylixProvider';
 import { isStyleProp } from '../classifyProps';
+import type { StylixContext } from '../StylixProvider';
 import { type MapObjectFunction, mapObject } from '../util/mapObject';
 import type { StylixPlugin } from './index';
 

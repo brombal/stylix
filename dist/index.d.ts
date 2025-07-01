@@ -1,7 +1,9 @@
-import * as CSS from 'csstype';
 import React from 'react';
+import * as CSS from 'csstype';
 import * as react_jsx_runtime from 'react/jsx-runtime';
 
+declare const htmlTags: readonly ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "dd", "del", "details", "dfn", "dialog", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "label", "legend", "li", "main", "map", "mark", "menu", "menuitem", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "picture", "pre", "progress", "q", "rt", "ruby", "s", "samp", "section", "select", "slot", "small", "source", "span", "strong", "sub", "summary", "sup", "svg", "table", "tbody", "td", "textarea", "tfoot", "th", "thead", "time", "tr", "track", "u", "ul", "var", "video"];
+type IntrinsicElements = (typeof htmlTags)[number];
 /**
  * Gets the props of a given HTML tag.
  */
@@ -18,11 +20,11 @@ type Extends<T1, T2, T3 = unknown, T4 = unknown> = Override<Override<Override<T1
  */
 type StylixObject = Record<string, unknown>;
 /**
- * Used to represent any value that can appear within a StylixObject.
+ * Represents any value that can appear within a StylixObject.
  */
 type StylixStyles = StylixObject | null | undefined | false | StylixStyles[];
 /**
- * Used to represent a value for a CSS prop in a Stylix object.
+ * Represents a value for a CSS prop in a Stylix object.
  * The value can be a single value or an object with keys for different media queries.
  */
 type StylixValue<T> = T | Record<string, T>;
@@ -35,7 +37,7 @@ type StylixValue<T> = T | Record<string, T>;
  *
  * To allow for HTML element props, use `StylixHTMLProps` instead.
  */
-type StylixProps<TOverrideProps = unknown, TExtendsFromProps = unknown> = Extends<TExtendsFromProps, {
+type StylixProps = {
     /**
      * Additional styles.
      */
@@ -44,27 +46,35 @@ type StylixProps<TOverrideProps = unknown, TExtendsFromProps = unknown> = Extend
     [key in keyof CSSProperties]?: StylixValue<CSSProperties[key]>;
 } & {
     [key in keyof StylixPropsExtensions]?: StylixValue<key extends keyof StylixPropsExtensions ? StylixPropsExtensions[key] : never>;
-}, TOverrideProps>;
+};
 /**
- * Used to indicate that a component can accept all Stylix properties, including
+ * Props for a component that can accept all Stylix properties, including
  * all standard CSS properties, additional user-defined custom style props, and the $css prop,
  * as well as all standard HTML element props for the given tag.
  *
  * For Stylix properties without allowing HTML props, use `StylixProps` instead.
  *
  * Note that some HTML elements have properties that conflict with CSS properties (e.g. `content`, or `width` and `height`
- * on inputs). By default, Stylix always consumes CSS properties as if they were styles, so HTML props are suppressed
- * and style props take precedence. If you need to use a conflicting prop as its original type from the HTML element,
- * consider passing it in the `TOverrideProps` type parameter. E.g.:
+ * on image inputs). By default, Stylix always consumes CSS properties as if they were styles, so HTML props are suppressed
+ * and style props take precedence. If you need to use a style prop with a conflicting name, consider renaming the prop
+ * in your component.
  *
  * ```ts
- * function MyComponent(props: StylixHTMLProps<'input', Pick<HTMLProps<'input'>, 'width'>>) {
- *   // props.width is a string, not a CSS value
- *   return <input {...props} />;
+ * function StyledInput(props: StylixHTMLProps<'input'> & { inputWidth: HTMLProps<'input'>['width'] }) {
+ *   const { inputWidth, ...styles } = props;
+ *   return <$ $el={<input width={inputWidth} />} {...styles} />;
+ * }
+ * ```
+ *
+ * Alternatively, use `Extends` to create a type that overrides the conflicting properties:
+ * ```ts
+ * function StyledInput(props: Extends<StylixHTMLProps<'input'>, { width: HTMLProps<'input'>['width'] }>) {
+ *   const { inputWidth, ...styles } = props;
+ *   return <$ $el={<input width={inputWidth} />} {...styles} />;
  * }
  * ```
  */
-type StylixHTMLProps<TTag extends keyof React.JSX.IntrinsicElements, TOverrideProps = unknown, TExtendsFromProps = unknown> = StylixProps<TOverrideProps, HTMLProps<TTag> & TExtendsFromProps>;
+type StylixHTMLProps<TTag extends IntrinsicElements> = Extends<HTMLProps<TTag>, StylixProps>;
 /**
  * Used to allow users to add custom props to Stylix components.
  *
@@ -166,6 +176,56 @@ declare function StyleElement(props: {
     styles: string[];
 } & Partial<HTMLProps<'style'>>): react_jsx_runtime.JSX.Element;
 
+declare function RenderServerStyles(props: Partial<HTMLProps<'style'>>): react_jsx_runtime.JSX.Element;
+
+/**
+ * Additional properties on the Stylix ($) component and its html component properties (`<$.div>`, etc).
+ */
+type StylixComponentMeta = {
+    displayName?: string;
+    __isStylix: true;
+};
+/**
+ * Defines the static meta properties and the HTML elements on the `$` object ($.div, $.span, etc).
+ */
+type Stylix$ComponentExtras = StylixComponentMeta & {
+    [key in IntrinsicElements]: React.FC<Extends<React.JSX.IntrinsicElements[key], StylixProps> & {
+        htmlContent?: string;
+        htmlTranslate?: 'yes' | 'no';
+    }>;
+};
+type StylixRenderFn<TProps = any> = (className: string | undefined, props: TProps) => React.ReactNode;
+/**
+ * The props for the Stylix ($) component when using the $render prop.
+ */
+type Stylix$renderProp = StylixProps & Record<string, unknown> & {
+    $el?: never;
+    $render: StylixRenderFn;
+    children?: never;
+};
+/**
+ * The props for the Stylix ($) component when using the $el prop as a component, intrinsic element tag, or rendered element.
+ */
+type Stylix$elAsComponentProp = StylixProps & Record<string, unknown> & {
+    $el: React.ReactElement | React.ComponentType<any> | IntrinsicElements;
+    $render?: never;
+    children?: React.ReactNode | React.ReactNode[];
+};
+type Stylix$props = Stylix$elAsComponentProp | Stylix$renderProp;
+/**
+ * Type of main Stylix component ($).
+ */
+type Stylix$Component = Stylix$ComponentExtras & ((props: Stylix$props) => React.ReactNode);
+declare const Stylix: Stylix$Component;
+
+interface StyleCollector {
+    collect: (element: React.ReactElement) => React.ReactElement;
+    render: React.FC<React.ComponentProps<'style'>>;
+    styles: string[];
+}
+declare const styleCollectorContext: React.Context<string[] | undefined>;
+declare function createStyleCollector(): StyleCollector;
+
 /**
  * Accepts a Stylix CSS object and returns a unique className.
  * The styles are registered with the Stylix context and will be applied to the document.
@@ -180,6 +240,22 @@ declare function useKeyframes(keyframes: any): string;
 declare function useGlobalStyles(styles: StylixStyles, options?: {
     disabled?: boolean;
 }): string;
+
+type ClassNamePrimitive = string | number | boolean | null | undefined;
+type ClassName = ClassNamePrimitive | ClassName[] | {
+    [key: string]: ClassNamePrimitive;
+} | (() => ClassName);
+/**
+ * A utility function to create a string of class names based on the provided parameters.
+ * Accepts a variable number of arguments, each of which can be one of the following:
+ *
+ * - A string, which will be included in the class name string.
+ * - An object, where the keys are class names and the values are booleans indicating whether to include the class name.
+ * - An array of strings or objects, which will be flattened and processed as above.
+ * - A function that returns a string, object, or array, which will be processed as above.
+ * - Any other value will be ignored.
+ */
+declare function cx(...args: ClassName[]): string;
 
 type MapObjectFunction = (key: string | number, value: any, source: unknown, context: any, mapRecursive: (value: unknown) => unknown) => unknown;
 /**
@@ -241,93 +317,7 @@ type MapObjectFunction = (key: string | number, value: any, source: unknown, con
  */
 declare function mapObject<TSource>(source: TSource, map: MapObjectFunction, context?: any): TSource;
 
-type ClassNamePrimitive = string | number | boolean | null | undefined;
-type ClassName = ClassNamePrimitive | ClassName[] | {
-    [key: string]: ClassNamePrimitive;
-} | (() => ClassName);
-/**
- * A utility function to create a string of class names based on the provided parameters.
- * Accepts a variable number of arguments, each of which can be one of the following:
- *
- * - A string, which will be included in the class name string.
- * - An object, where the keys are class names and the values are booleans indicating whether to include the class name.
- * - An array of strings or objects, which will be flattened and processed as above.
- * - A function that returns a string, object, or array, which will be processed as above.
- * - Any other value will be ignored.
- */
-declare function cx(...args: ClassName[]): string;
-
-interface StyleCollector {
-    collect: (element: React.ReactElement) => React.ReactElement;
-    render: React.FC<React.ComponentProps<'style'>>;
-    styles: string[];
-}
-declare const styleCollectorContext: React.Context<string[] | undefined>;
-declare function createStyleCollector(): StyleCollector;
-
-/**
- * Additional properties on the Stylix ($) component and its html component properties (`<$.div>`, etc).
- */
-type StylixComponentMeta = {
-    displayName?: string;
-    __isStylix: true;
-};
-/**
- * Defines the static meta properties and the HTML elements on the `$` object ($.div, $.span, etc).
- */
-type Stylix$ComponentExtras = StylixComponentMeta & {
-    [key in keyof React.JSX.IntrinsicElements]: React.FC<StylixProps<unknown, React.JSX.IntrinsicElements[key]> & {
-        htmlContent?: string;
-        htmlTranslate?: 'yes' | 'no';
-    }>;
-};
-type StylixRenderFn<TProps = any> = (className: string | undefined, props: TProps) => React.ReactNode;
-/**
- * The props for the Stylix ($) component when using the $render prop.
- */
-type Stylix$renderProp = StylixProps & Record<string, unknown> & {
-    $el?: never;
-    $render: StylixRenderFn;
-    children?: React.ReactNode | React.ReactNode[];
-};
-/**
- * The props for the Stylix ($) component when using the children render function.
- */
-type Stylix$childrenProp = StylixProps & Record<string, unknown> & {
-    $el?: never;
-    $render?: never;
-    children: StylixRenderFn;
-};
-/**
- * The props for the Stylix ($) component when using the $el prop as a component.
- */
-type Stylix$elAsComponentProp<TComponent extends React.ElementType> = (TComponent extends React.ElementType<infer P> ? StylixProps<object, P> : never) & {
-    $el: TComponent;
-    $render?: never;
-    children?: React.ReactNode | React.ReactNode[];
-};
-/**
- * The props for the Stylix ($) component when using the $el prop.
- */
-type Stylix$elAsElementProp = StylixProps & Record<string, unknown> & {
-    $render?: never;
-    $el: React.ReactElement;
-    children?: React.ReactNode | React.ReactNode[];
-};
-/**
- * Props for the Stylix ($) component
- */
-type Stylix$Props<TComponent extends React.ElementType> = Stylix$elAsComponentProp<TComponent> | Stylix$elAsElementProp | Stylix$renderProp | Stylix$childrenProp;
-/**
- * Type of main Stylix component ($).
- */
-interface Stylix$Component extends Stylix$ComponentExtras {
-    <TComponent extends React.ElementType>(props: Stylix$Props<TComponent>): React.ReactNode;
-}
-declare const Stylix: Stylix$Component;
-
-declare function RenderServerStyles(props: Partial<HTMLProps<'style'>>): react_jsx_runtime.JSX.Element;
-
 type StylixContext = StylixPublicContext;
 
-export { type Extends, type HTMLProps, RenderServerStyles, type StyleCollector, StyleElement, type Stylix$Component, type StylixContext, type StylixHTMLProps, type StylixObject, type StylixPlugin, type StylixPluginFunctionContext, type StylixProps, type StylixPropsExtensions, StylixProvider, type StylixStyles, type StylixValue, createStyleCollector, customProps, cx, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };
+export { RenderServerStyles, StyleElement, StylixProvider, createStyleCollector, customProps, cx, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };
+export type { Extends, HTMLProps, IntrinsicElements, StyleCollector, Stylix$Component, StylixContext, StylixHTMLProps, StylixObject, StylixPlugin, StylixPluginFunctionContext, StylixProps, StylixPropsExtensions, StylixStyles, StylixValue };

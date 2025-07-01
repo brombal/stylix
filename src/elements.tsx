@@ -104,7 +104,9 @@ const htmlTags = [
   'ul',
   'var',
   'video',
-];
+] as const;
+
+export type IntrinsicElements = (typeof htmlTags)[number];
 
 /**
  * Gets the props of a given HTML tag.
@@ -113,10 +115,10 @@ export type HTMLProps<TTag extends keyof React.JSX.IntrinsicElements> =
   React.JSX.IntrinsicElements[TTag];
 
 for (const i in htmlTags) {
-  const Tag = htmlTags[i];
+  const Tag: any = htmlTags[i];
   (Stylix as any)[Tag] = React.forwardRef(({ htmlContent, htmlTranslate, ...props }: any, ref) => (
     <Stylix
-      $render={(className, props) => (
+      $render={(className: string, props: object) => (
         <Tag
           className={className}
           content={htmlContent}

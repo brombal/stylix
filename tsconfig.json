@@ -10,6 +10,7 @@
     "isolatedModules": true,
     "baseUrl": "./src",
     "moduleResolution": "node",
+    "noEmit": true,
     "lib": ["dom", "esnext"]
   }
 }

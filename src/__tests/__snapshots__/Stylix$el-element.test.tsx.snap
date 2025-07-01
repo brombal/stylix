@@ -1,8 +1,16 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`Stylix $el prop as element should render element with class name 1`] = `"<div data-other="other" data-passthru="passthru" class="stylix-1 mergedClass"></div>"`;
+exports[`Stylix $el prop as element should render custom element with merged className 1`] = `"<div class="mergedClass stylix-1" data-other="other"></div>"`;
 
-exports[`Stylix $el prop as element should render element with class name 2`] = `
+exports[`Stylix $el prop as element should render custom element with merged className 2`] = `
+".stylix-1 {
+  color: red;
+  font-size: 13px; }"
+`;
+
+exports[`Stylix $el prop as element should render intrinsic element with merged class name 1`] = `"<div data-other="other" class="mergedClass stylix-1" data-passthru="passthru"></div>"`;
+
+exports[`Stylix $el prop as element should render intrinsic element with merged class name 2`] = `
 ".stylix-1 {
   color: red;
   font-size: 13px; }"

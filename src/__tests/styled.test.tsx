@@ -14,31 +14,22 @@ describe('Styled component wrappers', () => {
     // $render method (accepts className and other non-style props)
     void (<$ $render={() => <div />} color="blue" unknown="unknown" />);
 
+    // $render method (with className and props)
+    void (
+      <$
+        color="blue"
+        unknown="unknown"
+        $render={(className, props) => <div className={className} {...props} />}
+      />
+    );
+
     // @ts-expect-error color prop is invalid type
     void (<$ $render={() => <div />} color={9} />);
 
-    // child method (same as $render)
-    void (
-      <$ color="blue" unknown="unknown">
-        {(className) => <div className={className} />}
-      </$>
-    );
     // @ts-expect-error style prop is invalid type
     void (<$ color={0}>{(className) => <div className={className} />}</$>);
 
-    // $el as component (will pass className and non-style props to component; type safe)
-    void (<$ $el={TestComponent} color="blue" theme="red" other="this-value" />);
-    void (
-      <$
-        $el={TestComponent}
-        // @ts-expect-error unknown prop
-        asdf="foo"
-      />
-    );
-    // @ts-expect-error missing required props
-    void (<$ $el={TestComponent} />);
-    // @ts-expect-error wrong TestComponent prop value
-    void (<$ $el={TestComponent} theme="wrong" other="this-value" />);
+    // $el as component
     void (
       <$
         $el={TestComponent}
@@ -53,12 +44,12 @@ describe('Styled component wrappers', () => {
     void (
       <$
         $el={<TestComponent className="foo" theme="red" other="this-value" />}
-        color="blue"
+        margin="10px"
         unknown="unknown"
+        // @ts-expect-error color prop is invalid type
+        color={0}
       />
     );
-    // @ts-expect-error color prop is invalid type
-    void (<$ $el={<TestComponent className="foo" theme="red" other="this-value" />} color={0} />);
   });
 
   it('should style a component with no prop mapping', () => {
@@ -74,11 +65,12 @@ describe('Styled component wrappers', () => {
     // Styled component wrapper
     function StyledComponent(props: StylixProps & ComponentProps) {
       return (
-        <$ {...props}>
-          {(className, props) => {
+        <$
+          {...props}
+          $render={(className, props) => {
             return <MyComponent className={className} {...props} />;
           }}
-        </$>
+        />
       );
     }
 
@@ -128,12 +120,14 @@ describe('Styled component wrappers', () => {
     ) {
       const { cssColor, color, ...other } = props;
       return (
-        <$ color={cssColor} {...other}>
-          {(className, props) => {
+        <$
+          color={cssColor}
+          {...other}
+          $render={(className, props) => {
             // color is carried through from outer render function
             return <MyComponent className={className} color={color} {...props} />;
           }}
-        </$>
+        />
       );
     }
 
@@ -180,12 +174,13 @@ describe('Styled component wrappers', () => {
       },
     ) {
       return (
-        <$ {...props}>
-          {(className, props) => {
+        <$
+          {...props}
+          $render={(className, props) => {
             // color is carried through from outer render function
             return <MyComponent className={className} color={props.themeColor} {...props} />;
           }}
-        </$>
+        />
       );
     }
 

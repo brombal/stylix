@@ -2,7 +2,7 @@ import $ from '../index';
 import { renderStylix } from './util';
 
 describe('Stylix $render prop', () => {
-  it('should render component with className prop', () => {
+  it('should render element with className and passed props', () => {
     const [json, styles] = renderStylix(
       <$
         $render={(className, props) => <div className={className} {...props} />}

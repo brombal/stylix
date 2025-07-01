@@ -1,5 +1,5 @@
-import type { StylixContext } from './StylixProvider';
 import { applyPlugins } from './plugins';
+import type { StylixContext } from './StylixProvider';
 import type { StylixObject } from './types';
 import { isEmpty } from './util/isEmpty';
 import { isPlainObject } from './util/isPlainObject';

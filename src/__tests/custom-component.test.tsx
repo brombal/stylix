@@ -1,4 +1,4 @@
-import $, { type StylixProps } from '../index';
+import $, { type Extends, type StylixProps } from '../index';
 import { renderStylix } from './util';
 
 describe('Custom component', () => {
@@ -26,7 +26,7 @@ describe('Custom component', () => {
     function MyComponent({
       otherProp,
       ...other
-    }: StylixProps<{ otherProp: string; color: 'onlyThis' }>) {
+    }: Extends<StylixProps, { otherProp: string; color: 'onlyThis' }>) {
       return <$.div {...other} data-other={otherProp} />;
     }
 
@@ -51,7 +51,7 @@ describe('Custom component', () => {
       cssColor,
       color,
       ...styles
-    }: StylixProps<{ color: 'must be this value'; otherProp: string }, { cssColor: 'red' }>) {
+    }: Extends<StylixProps, { color: 'must be this value'; otherProp: string; cssColor: 'red' }>) {
       return <$.div {...styles} color={cssColor} data-otherprop={otherProp} data-color={color} />;
     }
 
@@ -75,7 +75,7 @@ describe('Custom component', () => {
       color,
       otherProp,
       ...styles
-    }: StylixProps<{ color: 'must be this value'; otherProp: string }, { cssColor?: 'red' }>) {
+    }: Extends<StylixProps, { color: 'must be this value'; otherProp: string; cssColor?: 'red' }>) {
       return <$.div {...styles} color={cssColor} data-otherprop={otherProp} data-color={color} />;
     }
 
