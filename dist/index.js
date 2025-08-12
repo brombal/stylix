@@ -846,9 +846,9 @@ const replace$$class = {
 const replace$$classMap = (key, value, _object, context, mapRecursive) => {
     value =
         typeof value === 'string'
-            ? value.replace('$$class', context.ctx.className || '')
+            ? value.replaceAll('$$class', context.ctx.className || '')
             : mapRecursive(value);
-    key = typeof key === 'string' ? key.replace('$$class', context.ctx.className || '') : key;
+    key = typeof key === 'string' ? key.replaceAll('$$class', context.ctx.className || '') : key;
     return { [key]: value };
 };
 
@@ -1058,7 +1058,6 @@ function applyRules(ctx) {
             ctx.styleElement.id = `stylix-${ctx.id}`;
         document.head.appendChild(ctx.styleElement);
     }
-    console.log('test');
     if (ctx.styleElement) {
         // If there's a style element, use it
         const flattenedRules = flattenRules(ctx);

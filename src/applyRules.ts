@@ -29,8 +29,6 @@ export default function applyRules(ctx: StylixContext): void {
     document.head.appendChild(ctx.styleElement);
   }
 
-  console.log('test');
-
   if (ctx.styleElement) {
     // If there's a style element, use it
     const flattenedRules = flattenRules(ctx);
