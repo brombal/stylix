@@ -95,11 +95,11 @@ export function createStylixContext(userValues = {} as Partial<StylixProviderPro
     for (const i in flatPlugins) {
       const plugin = flatPlugins[i];
       let pluginIndex = -1;
-      if (plugin.before && ctx.plugins.includes(plugin.before))
-        pluginIndex = ctx.plugins.indexOf(plugin.before);
-      else if (plugin.after && ctx.plugins.includes(plugin.after))
-        pluginIndex = ctx.plugins.indexOf(plugin.after) + 1;
-      else if (plugin.atIndex !== undefined) pluginIndex = plugin.atIndex;
+      if (plugin.before) pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
+      else if (plugin.after) {
+        pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
+        if (pluginIndex !== -1) pluginIndex += 1;
+      } else if (plugin.atIndex !== undefined) pluginIndex = plugin.atIndex;
 
       if (pluginIndex === -1) ctx.plugins.push(plugin);
       else ctx.plugins.splice(pluginIndex, 0, plugin);

@@ -42,4 +42,29 @@ describe('mediaObjects', () => {
     expect(json).toMatchSnapshot();
     expect(styles).toMatchSnapshot();
   });
+
+  it('should handle media objects combined with $css (2)', () => {
+    const [json, styles] = renderStylix(
+      <$.div
+        padding={{ mobile: '10px 0', default: '20px 0' }}
+        $css={[
+          {
+            mobile: { color: 'red' },
+            default: { color: 'blue' },
+          },
+        ]}
+      >
+        test
+      </$.div>,
+      undefined,
+      {
+        mobile: (styles) => ({
+          '@media (max-width: 600px)': styles,
+        }),
+      },
+    );
+
+    expect(json).toMatchSnapshot();
+    expect(styles).toMatchSnapshot();
+  });
 });

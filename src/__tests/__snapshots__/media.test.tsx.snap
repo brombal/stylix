@@ -1,4 +1,15 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`mediaObjects should handle media objects combined with $css (2) 1`] = `"<div class="stylix-1">test</div>"`;
+
+exports[`mediaObjects should handle media objects combined with $css (2) 2`] = `
+".stylix-1 {
+  padding: 20px 0;
+@media (max-width: 600px) {
+  padding: 10px 0;
+  color: red; }
+  color: blue; }"
+`;
 
 exports[`mediaObjects should handle media objects combined with $css 1`] = `"<div class="stylix-1">test</div>"`;
 

@@ -31,6 +31,12 @@ describe('customProps', () => {
     unknown: 123,
   };
 
+  it('basic', () => {
+    const [json, styles] = renderStylix(<$.div flexbox />, [customProps(myCustomProps)]);
+    expect(json).toMatchSnapshot();
+    expect(styles).toMatchSnapshot();
+  });
+
   it('should apply custom props', () => {
     // @ts-expect-error invalid type
     void (<$.div colour={0} />);

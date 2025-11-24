@@ -2,7 +2,13 @@ import $ from '../index';
 import { renderStylix } from './util';
 
 describe('Basic Stylix usage', () => {
-  it('should work', () => {
+  it('should work (basic)', () => {
+    const [json, styles] = renderStylix(<$.span color="red" font-size={13} data-testid="span" />);
+    expect(json).toMatchSnapshot();
+    expect(styles).toMatchSnapshot();
+  });
+
+  it('should work (nested)', () => {
     const [json, styles] = renderStylix(
       <$.div>
         <$.span color="red" font-size={13} data-testid="span" />

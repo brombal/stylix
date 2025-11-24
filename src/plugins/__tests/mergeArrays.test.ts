@@ -1,21 +1,25 @@
-import { _mergeArrays } from '../mergeArrays';
+import { reduceArrays } from '../mergeArrays';
 
 describe('mergeArrays', () => {
   it('should return collapsed object', () => {
-    expect(_mergeArrays({ a: 1, b: 2, c: { d: 3 } })).toEqual({ a: 1, b: 2, c: { d: 3 } });
+    expect(reduceArrays({ a: 1, b: 2, c: { d: 3 } })).toEqual({ a: 1, b: 2, c: { d: 3 } });
   });
 
   test('should merge simple objects in array', () => {
-    expect(_mergeArrays([{ a: 1 }, { b: 2 }])).toEqual({ a: 1, b: 2 });
+    expect(reduceArrays([{ a: 1 }, { b: 2 }])).toEqual({ a: 1, b: 2 });
+  });
+
+  test('should overwrite previous values', () => {
+    expect(reduceArrays([{ a: 1 }, { a: 2 }])).toEqual({ a: 2 });
   });
 
   test('should merge double-nested arrays', () => {
-    expect(_mergeArrays([[{ a: 1 }], [[{ b: 2 }, [{ c: 3 }]]]])).toEqual({ a: 1, b: 2, c: 3 });
+    expect(reduceArrays([[{ a: 1 }], [[{ b: 2 }, [{ c: 3 }]]]])).toEqual({ a: 1, b: 2, c: 3 });
   });
 
   test('should merge double-nested arrays within object', () => {
     expect(
-      _mergeArrays([
+      reduceArrays([
         {
           a: [
             [
@@ -43,7 +47,7 @@ describe('mergeArrays', () => {
 
   test('should merge complex top-level array', () => {
     expect(
-      _mergeArrays([
+      reduceArrays([
         {
           a: 1,
           b: {
@@ -72,7 +76,7 @@ describe('mergeArrays', () => {
 
   test('should merge complex top-level object', () => {
     expect(
-      _mergeArrays({
+      reduceArrays({
         a: 1,
         b: {
           c: 1,
@@ -93,26 +97,33 @@ describe('mergeArrays', () => {
     });
   });
 
+  test('should let object values take precedence over primitives', () => {
+    expect(reduceArrays([{ color: 'red' }, 'blue', { fontSize: 13 }])).toEqual({
+      color: 'red',
+      fontSize: 13,
+    });
+  });
+
   test('should let object values take precedence over primitives (nested)', () => {
     expect(
-      _mergeArrays([
+      reduceArrays([
         { div: { color: 'red' } },
         { div: { color: { mobile: 'green' } } },
         { div: { color: 'blue' } },
         { div: { color: { desktop: 'green' } } },
       ]),
     ).toEqual({
-      div: { color: { desktop: 'green', mobile: 'green' } },
+      div: { color: { desktop: 'green' } },
     });
   });
 
   test('should let primitives override previous values', () => {
-    expect(_mergeArrays([1, 2, 3] as any)).toEqual(3);
+    expect(reduceArrays([1, 2, 3] as any)).toEqual({});
   });
 
   test('should let primitives override previous values (nested)', () => {
     expect(
-      _mergeArrays([
+      reduceArrays([
         //
         { div: { color: 'red' } },
         { div: { color: 'blue' } },
@@ -123,12 +134,20 @@ describe('mergeArrays', () => {
   });
 
   test('should let objects override primitives', () => {
-    expect(_mergeArrays([1, { a: 1 }, 3] as any)).toEqual({ a: 1 });
+    expect(reduceArrays([1, { a: 1 }, 3] as any)).toEqual({ a: 1 });
+  });
+
+  test('should nullify previous values', () => {
+    expect(reduceArrays([{ a: 1, b: { c: 2 } }, { b: null }])).toEqual({ a: 1, b: null });
+  });
+
+  test('should ignore undefined values', () => {
+    expect(reduceArrays([{ a: 1, b: { c: 2 } }, { b: undefined }])).toEqual({ a: 1, b: { c: 2 } });
   });
 
   test('should merge nested arrays', () => {
     expect(
-      _mergeArrays([
+      reduceArrays([
         {
           a: [
             { g: 1, h: 2 },
@@ -140,20 +159,20 @@ describe('mergeArrays', () => {
         {
           a: [{ i: 5 }, { j: 6 }],
           b: [{ m: [{ o: 7, p: 8 }] }],
-          d: [{ r: 4 }],
+          d: [[[[{ r: 4 }]]], [[[{ s: 4 }]]]],
         },
       ]),
     ).toEqual({
       a: { g: 1, h: 3, i: 5, j: 6 },
       b: { m: { n: 5, o: 7, p: 8 } },
       c: { p: 2, q: 3 },
-      d: { r: 4 },
+      d: { r: 4, s: 4 },
     });
   });
 
   test('should ignore undefined values', () => {
     expect(
-      _mergeArrays([
+      reduceArrays([
         //
         { b: [{ m: 1 }] },
         { b: undefined },
@@ -165,7 +184,7 @@ describe('mergeArrays', () => {
 
   test('should use merged final objects', () => {
     expect(
-      _mergeArrays([
+      reduceArrays([
         //
         { b: [{ m: 1 }] },
         { b: 5 },
@@ -177,25 +196,44 @@ describe('mergeArrays', () => {
     });
   });
 
-  it('should convert simple media objects', () => {
+  it('should convert complex media objects', () => {
     expect(
       JSON.stringify(
-        _mergeArrays([
-          [{ color: 'color-default' }, { fontWeight: 'fw-default' }],
-          [
-            {
-              '@media (max-width: 600px)': [{ color: 'color-mobile' }, { fontWeight: 'fw-mobile' }],
-            },
-          ],
-          [{ 'html[theme="dark"] &': [{ color: 'color-dark' }, { fontWeight: 'fw-dark' }] }],
+        reduceArrays([
+          {
+            a: [
+              [
+                [
+                  [
+                    [
+                      {
+                        e: 3,
+                      },
+                    ],
+                  ],
+                  [
+                    {
+                      f: [
+                        {
+                          g: 4,
+                        },
+                      ],
+                    },
+                  ],
+                ],
+              ],
+            ],
+          },
         ]),
       ),
     ).toEqual(
       JSON.stringify({
-        color: 'color-default',
-        fontWeight: 'fw-default',
-        '@media (max-width: 600px)': { color: 'color-mobile', fontWeight: 'fw-mobile' },
-        'html[theme="dark"] &': { color: 'color-dark', fontWeight: 'fw-dark' },
+        a: {
+          e: 3,
+          f: {
+            g: 4,
+          },
+        },
       }),
     );
   });

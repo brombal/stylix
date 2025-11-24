@@ -19,8 +19,8 @@ export type StylixPluginFunctionContext = StylixPublicContext & { className: str
  */
 export type StylixPlugin = {
   name: string;
-  before?: StylixPlugin;
-  after?: StylixPlugin;
+  before?: string;
+  after?: string;
   atIndex?: number;
 } & (
   | {

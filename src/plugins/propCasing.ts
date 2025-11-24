@@ -1,7 +1,6 @@
 import { isStyleProp } from '../classifyProps';
-import type { StylixContext } from '../StylixProvider';
 import { type MapObjectFunction, mapObject } from '../util/mapObject';
-import type { StylixPlugin } from './index';
+import type { StylixPlugin, StylixPluginFunctionContext } from './index';
 
 /**
  * Fixes casing and hyphenation on known style props
@@ -14,17 +13,23 @@ export const propCasing: StylixPlugin = {
   },
 };
 
-const propCasingMap: MapObjectFunction = (
+const propCasingMap: MapObjectFunction<{ ctx: StylixPluginFunctionContext }> = (
   key,
   value,
-  _object,
-  context: { ctx: StylixContext },
+  target,
+  context,
   mapRecursive,
 ) => {
-  if (typeof key !== 'string' || key === '&') return { [key]: mapRecursive(value) };
+  if (typeof key !== 'string' || key === '&') {
+    target[key] = mapRecursive(value);
+    return;
+  }
+
   const simpleKey = isStyleProp(key, context.ctx.styleProps);
   if (simpleKey) {
-    return { [context.ctx.styleProps[simpleKey]]: mapRecursive(value) };
+    target[context.ctx.styleProps[simpleKey]] = mapRecursive(value);
+    return;
   }
-  return { [key]: mapRecursive(value) };
+
+  target[key] = mapRecursive(value);
 };

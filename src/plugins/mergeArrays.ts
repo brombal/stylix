@@ -1,5 +1,3 @@
-import type { StylixObject, StylixStyles } from '../types';
-import { isEmpty } from '../util/isEmpty';
 import type { StylixPlugin } from './index';
 
 /**
@@ -8,83 +6,43 @@ import type { StylixPlugin } from './index';
 export const mergeArrays: StylixPlugin = {
   name: 'mergeArrays',
   type: 'processStyles',
-  plugin: (_ctx, styles) => _mergeArrays(styles),
+  plugin: (_ctx, styles) => reduceArrays(styles),
 };
 
-export function _mergeArrays(obj: StylixStyles) {
-  if (Array.isArray(obj)) return reduceArray(obj);
-  return reduceObjectProperties(obj);
+export function reduceArrays(obj: any) {
+  return _reduceArrays(obj);
 }
 
-function reduceArray(arr: StylixStyles[]): StylixObject | undefined {
-  arr = arr.flat();
-  let target = arr[0] as StylixObject;
+export function _reduceArrays(obj: any, target: any = {}) {
+  if (!obj || typeof obj !== 'object') return obj;
 
-  if (Array.isArray(target)) {
-    target = reduceArray(target) as StylixObject;
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      if (!item || typeof item !== 'object') continue;
+      _reduceArrays(item, target);
+    }
+    return target;
   }
 
-  for (let i = 1; i < arr.length; i++) {
-    let source = arr[i] as StylixObject | undefined;
+  for (const key in obj) {
+    const value = obj[key];
 
-    if (Array.isArray(source)) {
-      source = reduceArray(source);
-    }
-
-    // ignore falsy values
-    if (typeof source === 'undefined') continue;
-
-    // if both values are primitives, the source value takes precedence
-    if (typeof target !== 'object' && typeof source !== 'object') {
-      target = source;
-      continue;
-    }
-
-    // if target is primitive but source is object, replace target with source
-    if (typeof target !== 'object') {
-      target = source;
-      continue;
-    }
-
-    for (const key in source) {
-      const value = source[key] as StylixStyles;
-      // if the key does not exist in target, just add it
-      if (!(key in target)) target[key] = value;
-      // else, if the target value is an object or array:
-      else if (typeof target[key] === 'object') {
-        // if the source value is an object or array, convert target to array if necessary and push source value
-        if (typeof value === 'object') {
-          if (!Array.isArray(target[key])) target[key] = [target[key]];
-          (target[key] as StylixStyles[]).push(value);
-        }
-        // else, ignore the source value (it's primitive; object values take precedence)
+    // If target[key] is an object
+    if (target[key] && typeof target[key] === 'object') {
+      // If value is an object, merge them
+      if (value && typeof value === 'object') {
+        _reduceArrays(value, target[key]);
       }
-      // else, target value is primitive, overwrite target value
-      else {
+      // If value is not undefined, replace target[key]
+      else if (value !== undefined) {
         target[key] = value;
       }
+      // otherwise do nothing, keep target[key] as is
+    }
+    // If target[key] is not an object, process normally
+    else {
+      target[key] = _reduceArrays(value, {});
     }
   }
-
-  return reduceObjectProperties(target);
-}
-
-const _reduced = Symbol('reduced');
-
-function reduceObjectProperties(
-  obj: Exclude<StylixStyles, StylixStyles[]>,
-): StylixObject | undefined {
-  if (!obj || isEmpty(obj)) return undefined;
-  if (typeof obj !== 'object') return obj;
-  if (obj?.[_reduced as any]) {
-    return obj;
-  }
-
-  for (const k in obj) {
-    if (!obj[k] || typeof obj[k] !== 'object') continue;
-    obj[k] = _mergeArrays(obj[k] as StylixStyles);
-  }
-
-  Object.defineProperty(obj, _reduced as any, { value: true, enumerable: false });
-  return obj;
+  return target;
 }

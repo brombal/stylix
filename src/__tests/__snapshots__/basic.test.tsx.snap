@@ -31,9 +31,17 @@ exports[`Basic Stylix usage should remove falsy styles 1`] = `"<div class="styli
 
 exports[`Basic Stylix usage should remove falsy styles 2`] = `""`;
 
-exports[`Basic Stylix usage should work 1`] = `"<div><span class="stylix-1" data-testid="span"></span><main class="stylix-2" data-testid="main-1"></main><article class="stylix-3" data-testid="article"></article><main class="stylix-2" data-testid="main-2"></main></div>"`;
+exports[`Basic Stylix usage should work (basic) 1`] = `"<span class="stylix-1" data-testid="span"></span>"`;
 
-exports[`Basic Stylix usage should work 2`] = `
+exports[`Basic Stylix usage should work (basic) 2`] = `
+".stylix-1 {
+  color: red;
+  font-size: 13px; }"
+`;
+
+exports[`Basic Stylix usage should work (nested) 1`] = `"<div><span class="stylix-1" data-testid="span"></span><main class="stylix-2" data-testid="main-1"></main><article class="stylix-3" data-testid="article"></article><main class="stylix-2" data-testid="main-2"></main></div>"`;
+
+exports[`Basic Stylix usage should work (nested) 2`] = `
 ".stylix-1 {
   color: red;
   font-size: 13px; }

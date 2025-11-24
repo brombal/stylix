@@ -1,13 +1,13 @@
 import { jsx } from 'react/jsx-runtime';
 import React, { createContext, useLayoutEffect, useContext, useRef, useEffect } from 'react';
 
-function classifyProps(props, knownProps) {
+function classifyProps(props, knownStyleProps) {
     const styles = {};
     const other = {};
     for (const prop in props) {
         // If prop is not a valid JSX prop, it must be a CSS selector.
         // If prop has a style prop name and the value is likely a style value, it's a style prop.
-        if (!isValidJSXProp(prop) || isStyleProp(prop, knownProps)) {
+        if (!isValidJSXProp(prop) || isStyleProp(prop, knownStyleProps)) {
             styles[prop] = props[prop];
         }
         else {
@@ -20,10 +20,10 @@ function classifyProps(props, knownProps) {
  * Determines if `value` is a recognized CSS property (can be standard CSS or custom Stylix prop).
  * If it is, the simplified prop name is returned. Otherwise, false is returned.
  */
-function isStyleProp(prop, knownProps) {
+function isStyleProp(prop, knownStyleProps) {
     if (isValidJSXProp(prop)) {
         const simplified = simplifyStylePropName(prop);
-        return simplified in knownProps ? simplified : false;
+        return simplified in knownStyleProps ? simplified : false;
     }
     return false;
 }
@@ -572,31 +572,17 @@ const cleanStyles = {
  * // }
  * ```
  */
-function mapObject(source, map, context = {}) {
+function mapObject(source, mapFn, context) {
     if (typeof source !== 'object')
         return source;
-    const result = Array.isArray(source) ? [] : {};
+    const target = (Array.isArray(source) ? [] : {});
     for (const _key in source) {
         const key = Array.isArray(source) ? +_key : _key;
         const value = source[key];
         const contextClone = { ...context };
-        const mapResult = map(key, value, source, contextClone, (value) => mapObject(value, map, contextClone));
-        if (typeof mapResult === 'undefined')
-            continue;
-        if (Array.isArray(mapResult) && Array.isArray(source)) {
-            result.push(...mapResult);
-            continue;
-        }
-        if (typeof mapResult === 'object' &&
-            !Array.isArray(mapResult) &&
-            typeof source === 'object' &&
-            !Array.isArray(source)) {
-            Object.assign(result, mapResult);
-            continue;
-        }
-        throw new Error(`mapObjectRecursive: return value of map function must be an object, array, or undefined, and must match the type of the source value. Type of source value was ${typeof source}, and type of returned value was ${typeof mapResult}.`);
+        mapFn(key, value, target, contextClone, (value) => mapObject(value, mapFn, contextClone));
     }
-    return result;
+    return target;
 }
 
 const defaultIgnoreUnits = [
@@ -629,11 +615,12 @@ const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits) => {
         },
     };
 };
-const defaultUnitsMap = (key, value, _object, ctx, mapRecursive) => {
+const defaultUnitsMap = (key, value, target, ctx, mapRecursive) => {
     if (typeof value === 'number' && !ctx.ignoreProps.includes(key)) {
-        return { [key]: String(value) + ctx.unit };
+        target[key] = String(value) + ctx.unit;
+        return;
     }
-    return { [key]: mapRecursive(value) };
+    target[key] = mapRecursive(value);
 };
 const defaultPixelUnits = defaultUnits();
 
@@ -724,76 +711,42 @@ function processMediaStyles(mediaDef, styleProps, styles) {
 const mergeArrays = {
     name: 'mergeArrays',
     type: 'processStyles',
-    plugin: (_ctx, styles) => _mergeArrays(styles),
+    plugin: (_ctx, styles) => reduceArrays(styles),
 };
-function _mergeArrays(obj) {
-    if (Array.isArray(obj))
-        return reduceArray(obj);
-    return reduceObjectProperties(obj);
+function reduceArrays(obj) {
+    return _reduceArrays(obj);
 }
-function reduceArray(arr) {
-    arr = arr.flat();
-    let target = arr[0];
-    if (Array.isArray(target)) {
-        target = reduceArray(target);
+function _reduceArrays(obj, target = {}) {
+    if (!obj || typeof obj !== 'object')
+        return obj;
+    if (Array.isArray(obj)) {
+        for (const item of obj) {
+            if (!item || typeof item !== 'object')
+                continue;
+            _reduceArrays(item, target);
+        }
+        return target;
     }
-    for (let i = 1; i < arr.length; i++) {
-        let source = arr[i];
-        if (Array.isArray(source)) {
-            source = reduceArray(source);
-        }
-        // ignore falsy values
-        if (typeof source === 'undefined')
-            continue;
-        // if both values are primitives, the source value takes precedence
-        if (typeof target !== 'object' && typeof source !== 'object') {
-            target = source;
-            continue;
-        }
-        // if target is primitive but source is object, replace target with source
-        if (typeof target !== 'object') {
-            target = source;
-            continue;
-        }
-        for (const key in source) {
-            const value = source[key];
-            // if the key does not exist in target, just add it
-            if (!(key in target))
-                target[key] = value;
-            // else, if the target value is an object or array:
-            else if (typeof target[key] === 'object') {
-                // if the source value is an object or array, convert target to array if necessary and push source value
-                if (typeof value === 'object') {
-                    if (!Array.isArray(target[key]))
-                        target[key] = [target[key]];
-                    target[key].push(value);
-                }
-                // else, ignore the source value (it's primitive; object values take precedence)
+    for (const key in obj) {
+        const value = obj[key];
+        // If target[key] is an object
+        if (target[key] && typeof target[key] === 'object') {
+            // If value is an object, merge them
+            if (value && typeof value === 'object') {
+                _reduceArrays(value, target[key]);
             }
-            // else, target value is primitive, overwrite target value
-            else {
+            // If value is not undefined, replace target[key]
+            else if (value !== undefined) {
                 target[key] = value;
             }
+            // otherwise do nothing, keep target[key] as is
+        }
+        // If target[key] is not an object, process normally
+        else {
+            target[key] = _reduceArrays(value, {});
         }
     }
-    return reduceObjectProperties(target);
-}
-const _reduced = Symbol('reduced');
-function reduceObjectProperties(obj) {
-    if (!obj || isEmpty(obj))
-        return undefined;
-    if (typeof obj !== 'object')
-        return obj;
-    if (obj?.[_reduced]) {
-        return obj;
-    }
-    for (const k in obj) {
-        if (!obj[k] || typeof obj[k] !== 'object')
-            continue;
-        obj[k] = _mergeArrays(obj[k]);
-    }
-    Object.defineProperty(obj, _reduced, { value: true, enumerable: false });
-    return obj;
+    return target;
 }
 
 /**
@@ -823,14 +776,17 @@ const propCasing = {
         return mapObject(styles, propCasingMap, { ctx });
     },
 };
-const propCasingMap = (key, value, _object, context, mapRecursive) => {
-    if (typeof key !== 'string' || key === '&')
-        return { [key]: mapRecursive(value) };
+const propCasingMap = (key, value, target, context, mapRecursive) => {
+    if (typeof key !== 'string' || key === '&') {
+        target[key] = mapRecursive(value);
+        return;
+    }
     const simpleKey = isStyleProp(key, context.ctx.styleProps);
     if (simpleKey) {
-        return { [context.ctx.styleProps[simpleKey]]: mapRecursive(value) };
+        target[context.ctx.styleProps[simpleKey]] = mapRecursive(value);
+        return;
     }
-    return { [key]: mapRecursive(value) };
+    target[key] = mapRecursive(value);
 };
 
 /**
@@ -843,35 +799,45 @@ const replace$$class = {
         return mapObject(styles, replace$$classMap, { ctx });
     },
 };
-const replace$$classMap = (key, value, _object, context, mapRecursive) => {
+const replace$$classMap = (key, value, target, context, mapRecursive) => {
     value =
         typeof value === 'string'
             ? value.replaceAll('$$class', context.ctx.className || '')
             : mapRecursive(value);
     key = typeof key === 'string' ? key.replaceAll('$$class', context.ctx.className || '') : key;
-    return { [key]: value };
+    target[key] = value;
 };
 
 function _customPropsProcess(styles, customProps) {
-    return mapObject(styles, (key, value, source, _ctx, mapRecursive) => {
-        if (!isValidJSXProp(key) || isPlainObject(value))
-            return Array.isArray(source) ? [mapRecursive(value)] : { [key]: mapRecursive(value) };
+    if (typeof styles !== 'object' || styles === null)
+        return styles;
+    return mapObject(styles, (key, value, target, _ctx, mapRecursive) => {
+        if (!isValidJSXProp(key) || isPlainObject(value)) {
+            target[key] = mapRecursive(value);
+            return;
+        }
         const simpleKey = simplifyStylePropName(key);
         const propValue = customProps[simpleKey];
-        if (!propValue)
-            return { [key]: mapRecursive(value) };
-        if (typeof propValue === 'object') {
-            if (value)
-                return mapRecursive(propValue);
-            return undefined;
+        if (propValue && typeof propValue === 'object') {
+            // For object, merge the mapped value into target if original prop value is truthy
+            if (value) {
+                const mappedValue = mapRecursive(propValue);
+                Object.assign(target, mappedValue);
+            }
         }
-        if (typeof propValue === 'string') {
-            return { [propValue]: mapRecursive(value) };
+        else if (typeof propValue === 'string') {
+            // For string, just remap the prop name
+            target[propValue] = mapRecursive(value);
         }
-        if (typeof propValue === 'function') {
-            return mapRecursive(propValue(value));
+        else if (typeof propValue === 'function') {
+            // For function, call it with the original value and merge the result
+            const mappedValue = mapRecursive(propValue(value));
+            Object.assign(target, mappedValue);
         }
-        return { [key]: mapRecursive(value) };
+        else {
+            // Unknown type, just keep original
+            target[key] = mapRecursive(value);
+        }
     });
 }
 const customProps = (customProps) => {
@@ -891,7 +857,7 @@ const customProps = (customProps) => {
         {
             name: 'customPropsProcess',
             type: 'processStyles',
-            before: mergeArrays,
+            before: 'mergeArrays',
             plugin(_ctx, styles) {
                 return _customPropsProcess(styles, customProps);
             },
@@ -988,10 +954,13 @@ function createStylixContext(userValues = {}) {
         for (const i in flatPlugins) {
             const plugin = flatPlugins[i];
             let pluginIndex = -1;
-            if (plugin.before && ctx.plugins.includes(plugin.before))
-                pluginIndex = ctx.plugins.indexOf(plugin.before);
-            else if (plugin.after && ctx.plugins.includes(plugin.after))
-                pluginIndex = ctx.plugins.indexOf(plugin.after) + 1;
+            if (plugin.before)
+                pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
+            else if (plugin.after) {
+                pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
+                if (pluginIndex !== -1)
+                    pluginIndex += 1;
+            }
             else if (plugin.atIndex !== undefined)
                 pluginIndex = plugin.atIndex;
             if (pluginIndex === -1)

@@ -33,11 +33,18 @@ export const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits): Sty
   };
 };
 
-const defaultUnitsMap: MapObjectFunction = (key, value, _object, ctx, mapRecursive) => {
+const defaultUnitsMap: MapObjectFunction<{ unit: string; ignoreProps: string[] }> = (
+  key,
+  value,
+  target,
+  ctx,
+  mapRecursive,
+) => {
   if (typeof value === 'number' && !ctx.ignoreProps.includes(key as string)) {
-    return { [key]: String(value) + ctx.unit };
+    target[key] = String(value) + ctx.unit;
+    return;
   }
-  return { [key]: mapRecursive(value) };
+  target[key] = mapRecursive(value);
 };
 
 export const defaultPixelUnits = defaultUnits();

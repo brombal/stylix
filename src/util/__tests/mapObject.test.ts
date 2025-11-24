@@ -8,23 +8,32 @@ describe('mapObject', () => {
         b: 'foo',
         c: false,
       },
-      (key, value) => {
-        if (typeof value === 'number') return { [key]: value, [`${key}-mapped`]: value * 2 };
-        if (typeof value === 'string') return { [`${key}-mapped`]: `${value}-mapped` };
-        return undefined;
+      (key, value, target) => {
+        const targetObject = target as Record<string, unknown>;
+        targetObject[key] = value;
+        if (typeof value === 'number') {
+          targetObject[`${key}-mapped`] = value * 2;
+        }
+        if (typeof value === 'string') {
+          targetObject[`${key}-mapped`] = `${value}-mapped`;
+        }
       },
     );
 
     expect(result).toEqual({
       a: 1,
       'a-mapped': 2,
+      b: 'foo',
       'b-mapped': 'foo-mapped',
+      c: false,
     });
   });
 
   test('should map arrays', () => {
-    const result = mapObject([1, 2, 3], (_key, value) => {
-      return [value, value * 2];
+    const result = mapObject([1, 2, 3], (_key, value, target) => {
+      const targetArray = target as unknown[];
+      targetArray.push(value);
+      targetArray.push((value as number) * 2);
     });
 
     expect(result).toEqual([1, 2, 2, 4, 3, 6]);
@@ -39,8 +48,9 @@ describe('mapObject', () => {
           d: 3,
         },
       },
-      (key, value, _source, _arg, mapRecursive) => {
-        return { [key]: typeof value === 'number' ? value * 2 : mapRecursive(value) };
+      (key, value, target, _arg, mapRecursive) => {
+        const targetObject = target as Record<string, unknown>;
+        targetObject[key] = typeof value === 'number' ? value * 2 : mapRecursive(value);
       },
     );
 
@@ -65,11 +75,11 @@ describe('mapObject', () => {
           f: 2,
         },
       },
-      (key, value, _source, ctx, mapRecursive) => {
+      (key, value, target, ctx, mapRecursive) => {
         ctx.prefix = `${ctx.prefix}${key}`;
-        return {
-          [key]: typeof value === 'number' ? `${ctx.prefix}-${value}` : mapRecursive(value),
-        };
+        const targetObject = target as Record<string, unknown>;
+        targetObject[key] =
+          typeof value === 'number' ? `${ctx.prefix}-${value}` : mapRecursive(value as object);
       },
       {
         prefix: '',
@@ -88,37 +98,42 @@ describe('mapObject', () => {
     });
   });
 
-  test('should error if return type is wrong', () => {
-    expect(() => {
-      mapObject(
-        {
-          a: 1,
-          b: 2,
-        },
-        () => {
-          return [];
-        },
-      );
-    }).toThrow();
-
-    expect(() => {
-      mapObject([1, 2, 3], () => {
-        return {};
-      });
-    }).toThrow();
-  });
-
   test('should return input if not object or array', () => {
     expect(
-      mapObject('foo', () => {
-        return {};
-      }),
+      // @ts-expect-error testing invalid input
+      mapObject('foo', () => {}),
     ).toEqual('foo');
 
     expect(
-      mapObject(1, () => {
-        return {};
-      }),
+      // @ts-expect-error testing invalid input
+      mapObject(1, () => {}),
     ).toEqual(1);
+  });
+
+  test('should correctly map nested mixed object/array', () => {
+    expect(
+      mapObject(
+        [
+          {
+            a: 'a',
+          },
+          [{ b: 'b' }, { c: 'c' }],
+        ],
+        (key, value, target, _context, mapRecursive) => {
+          if (typeof key === 'string') {
+            const targetObject = target as Record<string, unknown>;
+            targetObject[`${key}-mapped`] = mapRecursive(value as object);
+          } else {
+            const targetArray = target as unknown[];
+            targetArray[key] = mapRecursive(value as object);
+          }
+        },
+      ),
+    ).toEqual([
+      {
+        'a-mapped': 'a',
+      },
+      [{ 'b-mapped': 'b' }, { 'c-mapped': 'c' }],
+    ]);
   });
 });

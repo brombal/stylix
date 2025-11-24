@@ -1,5 +1,5 @@
 import { processMediaStyles, type StylixMediaDefinition } from '../mediaObjects';
-import { _mergeArrays } from '../mergeArrays';
+import { reduceArrays } from '../mergeArrays';
 
 describe('mediaObjects', () => {
   const media = {
@@ -30,7 +30,7 @@ describe('mediaObjects', () => {
   it('should convert simple media objects', () => {
     expect(
       JSON.stringify(
-        _mergeArrays(
+        reduceArrays(
           processMediaStyles(media, styleProps, {
             color: 'color-default',
             fontWeight: 'fw-default',
@@ -59,7 +59,7 @@ describe('mediaObjects', () => {
   it('should convert nested media objects', () => {
     expect(
       JSON.stringify(
-        _mergeArrays(
+        reduceArrays(
           processMediaStyles(media, styleProps, {
             main: {
               div: {
@@ -147,7 +147,7 @@ describe('mediaObjects', () => {
   it('should convert media objects for style props', () => {
     expect(
       JSON.stringify(
-        _mergeArrays(
+        reduceArrays(
           processMediaStyles(media, styleProps, {
             span: {
               fontWeight: {
@@ -182,7 +182,7 @@ describe('mediaObjects', () => {
   it('should convert arrays in media objects', () => {
     expect(
       JSON.stringify(
-        _mergeArrays(
+        reduceArrays(
           processMediaStyles(media, styleProps, {
             span: {
               color: 'span-color',
@@ -213,7 +213,7 @@ describe('mediaObjects', () => {
   it('should correctly order media query output', () => {
     expect(
       JSON.stringify(
-        _mergeArrays(
+        reduceArrays(
           processMediaStyles(media, styleProps, {
             background: 'span-background',
             color: { mobile: 'span-mobile-color', default: 'span-default-color' },
@@ -243,7 +243,7 @@ describe('mediaObjects', () => {
   it('should handle props that are style properties', () => {
     expect(
       JSON.stringify(
-        _mergeArrays(
+        reduceArrays(
           processMediaStyles(media, styleProps, {
             '.font-weight': {
               color: { mobile: 'red', default: 'black' },

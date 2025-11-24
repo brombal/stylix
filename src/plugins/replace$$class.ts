@@ -12,11 +12,11 @@ export const replace$$class: StylixPlugin = {
   },
 };
 
-const replace$$classMap: MapObjectFunction = (
+const replace$$classMap: MapObjectFunction<{ ctx: StylixPluginFunctionContext }> = (
   key,
   value,
-  _object,
-  context: { ctx: StylixPluginFunctionContext },
+  target,
+  context,
   mapRecursive,
 ) => {
   value =
@@ -24,5 +24,5 @@ const replace$$classMap: MapObjectFunction = (
       ? value.replaceAll('$$class', context.ctx.className || '')
       : mapRecursive(value);
   key = typeof key === 'string' ? key.replaceAll('$$class', context.ctx.className || '') : key;
-  return { [key]: value };
+  target[key] = value;
 };
