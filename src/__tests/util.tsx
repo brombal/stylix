@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, RenderResult } from '@testing-library/react';
 import type React from 'react';
 
-import { StylixProvider } from '../index';
+import { StylixContext, StylixProvider } from '../index';
 import type { StylixMediaDefinition } from '../plugins/mediaObjects';
 
 type RenderStylixReturn = readonly [string, string, ReturnType<typeof render>, HTMLStyleElement] & {
@@ -14,18 +14,35 @@ type RenderStylixReturn = readonly [string, string, ReturnType<typeof render>, H
 
 export function renderStylix(
   element: React.ReactElement,
-  plugins?: any[],
-  media?: StylixMediaDefinition,
+  config?: {
+    context?: StylixContext;
+    plugins?: any[];
+    media?: StylixMediaDefinition;
+  },
 ): RenderStylixReturn {
   cleanup();
-  const htmlStyleElement = document.createElement('style');
-  document.head.appendChild(htmlStyleElement);
-  const r = (
-    <StylixProvider devMode styleElement={htmlStyleElement} plugins={plugins} media={media}>
-      {element}
-    </StylixProvider>
-  );
-  const result = render(r);
+
+  let result: RenderResult;
+  let htmlStyleElement: HTMLStyleElement;
+  if (config?.context) {
+    htmlStyleElement = config.context.styleElement!;
+    const r = <StylixProvider context={config.context}>{element}</StylixProvider>;
+    result = render(r);
+  } else {
+    htmlStyleElement = document.createElement('style');
+    document.head.appendChild(htmlStyleElement);
+    const r = (
+      <StylixProvider
+        devMode
+        styleElement={htmlStyleElement}
+        plugins={config?.plugins}
+        media={config?.media}
+      >
+        {element}
+      </StylixProvider>
+    );
+    result = render(r);
+  }
 
   const returnVal = [
     result.container.innerHTML,

@@ -1,4 +1,4 @@
-import type { StylixContext } from './StylixProvider';
+import type { StylixContext } from './stylixContext';
 
 export function flattenRules(ctx: StylixContext): string[] {
   return Object.values(ctx.rules)

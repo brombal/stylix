@@ -3,8 +3,8 @@ import type { StylixPlugin } from './index';
 
 export const defaultIgnoreUnits = [
   'aspect-ratio',
-  'columns',
   'column-count',
+  'columns',
   'fill-opacity',
   'flex',
   'flex-grow',
@@ -12,16 +12,16 @@ export const defaultIgnoreUnits = [
   'font-weight',
   'line-height',
   'opacity',
+  'order',
   'orphans',
   'stroke-opacity',
   'widows',
   'z-index',
   'zoom',
-  'order',
 ];
 
 /**
- * Adds unit (px, em, etc) to numeric values for any style properties not included in `ignoreProps`..
+ * Adds unit (px, em, etc) to numeric values for any style properties not included in `ignoreProps`.
  */
 export const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits): StylixPlugin => {
   return {

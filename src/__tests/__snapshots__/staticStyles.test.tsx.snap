@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`static styles should render 1`] = `
+".stylix-1 {
+  color: red;
+.child {
+  color: blue; } }"
+`;
+
+exports[`static styles should render combined static styles with dynamic styles 1`] = `
+".stylix-1 {
+  color: red;
+.child {
+  color: blue; } }
+.stylix-2 {
+  font-size: 16px; }"
+`;
+
+exports[`static styles should render global static styles 1`] = `
+"div {
+  color: red;
+.child {
+  color: blue; } }"
+`;

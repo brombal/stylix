@@ -1,5 +1,5 @@
 import { jsx } from 'react/jsx-runtime';
-import React, { createContext, useLayoutEffect, useContext, useRef, useEffect } from 'react';
+import React, { createContext, useRef, useInsertionEffect, useContext, useEffect } from 'react';
 
 function classifyProps(props, knownStyleProps) {
     const styles = {};
@@ -587,8 +587,8 @@ function mapObject(source, mapFn, context) {
 
 const defaultIgnoreUnits = [
     'aspect-ratio',
-    'columns',
     'column-count',
+    'columns',
     'fill-opacity',
     'flex',
     'flex-grow',
@@ -596,15 +596,15 @@ const defaultIgnoreUnits = [
     'font-weight',
     'line-height',
     'opacity',
+    'order',
     'orphans',
     'stroke-opacity',
     'widows',
     'z-index',
     'zoom',
-    'order',
 ];
 /**
- * Adds unit (px, em, etc) to numeric values for any style properties not included in `ignoreProps`..
+ * Adds unit (px, em, etc) to numeric values for any style properties not included in `ignoreProps`.
  */
 const defaultUnits = (unit = 'px', ignoreProps = defaultIgnoreUnits) => {
     return {
@@ -684,10 +684,21 @@ function processMediaStyles(mediaDef, styleProps, styles) {
             // An object for a style prop is definitely a media object
             for (const mediaKey in styleValue) {
                 result[mediaKey] ||= [];
-                result[mediaKey].push(mediaDef[mediaKey]({
-                    // process recursively
-                    [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
-                }));
+                // mediaKey corresponds to a media definition
+                if (mediaKey in mediaDef) {
+                    result[mediaKey].push(mediaDef[mediaKey]({
+                        // process recursively
+                        [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
+                    }));
+                }
+                // mediaKey does not correspond to a media definition, it must be a @media or @container rule
+                else {
+                    result[mediaKey].push({
+                        [mediaKey]: {
+                            [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
+                        },
+                    });
+                }
             }
             continue;
         }
@@ -808,6 +819,36 @@ const replace$$classMap = (key, value, target, context, mapRecursive) => {
     target[key] = value;
 };
 
+function _hoistLayers(styles, root) {
+    for (const key in styles) {
+        const value = styles[key];
+        if (typeof value === 'string' && key.startsWith('@layer')) {
+            // Add layer rules as-is directly to root object
+            root['@layer'] ||= [];
+            root['@layer'].push(value.replace('@layer', '').trim());
+            if (styles !== root)
+                delete styles[key];
+        }
+        else if (isPlainObject(value)) {
+            // Recursively flatten nested styles
+            _hoistLayers(value, root);
+        }
+    }
+    return styles;
+}
+/**
+ * Hoists @layer declarations to root of styles object.
+ */
+const hoistLayers = {
+    name: 'hoistLayers',
+    type: 'processStyles',
+    plugin(_ctx, styles) {
+        if (styles && typeof styles === 'object' && !Array.isArray(styles))
+            styles['@layer'] = [];
+        return _hoistLayers(styles, styles);
+    },
+};
+
 function _customPropsProcess(styles, customProps) {
     if (typeof styles !== 'object' || styles === null)
         return styles;
@@ -889,6 +930,7 @@ const defaultPlugins = [
     mergeArrays,
     propCasing,
     hoistKeyframes,
+    hoistLayers,
     replace$$class,
     defaultPixelUnits,
     cleanStyles,
@@ -912,94 +954,6 @@ function createStyleCollector() {
 }
 
 const detectSSR = () => !(typeof window !== 'undefined' && window.document?.head?.appendChild);
-function useIsoLayoutEffect(fn, deps, runOnSsr, isSsr = detectSSR()) {
-    if (isSsr) {
-        if (runOnSsr)
-            return fn();
-    }
-    else {
-        // biome-ignore lint/correctness/useHookAtTopLevel: isSsr should never change
-        // biome-ignore lint/correctness/useExhaustiveDependencies: dependencies are passed as-is
-        useLayoutEffect(fn, deps);
-    }
-}
-
-let defaultStyleProps;
-function createStylixContext(userValues = {}) {
-    if (!defaultStyleProps) {
-        defaultStyleProps = {};
-        for (const value of cssProps) {
-            defaultStyleProps[simplifyStylePropName(value)] = value;
-        }
-    }
-    const ctx = {
-        id: userValues.id || '$default',
-        devMode: !!userValues.devMode,
-        styleProps: defaultStyleProps,
-        media: userValues.media,
-        styleElement: userValues.styleElement,
-        plugins: defaultPlugins.flat(),
-        styleCounter: 0,
-        rules: {},
-        ssr: userValues.ssr ?? detectSSR(),
-        cleanupRequest: undefined,
-        requestApply: false,
-        classifyProps(props) {
-            const [styles, other] = classifyProps(props, this.styleProps);
-            return [styles, other];
-        },
-    };
-    if (userValues.plugins?.length) {
-        const flatPlugins = userValues.plugins.flat();
-        for (const i in flatPlugins) {
-            const plugin = flatPlugins[i];
-            let pluginIndex = -1;
-            if (plugin.before)
-                pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
-            else if (plugin.after) {
-                pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
-                if (pluginIndex !== -1)
-                    pluginIndex += 1;
-            }
-            else if (plugin.atIndex !== undefined)
-                pluginIndex = plugin.atIndex;
-            if (pluginIndex === -1)
-                ctx.plugins.push(plugin);
-            else
-                ctx.plugins.splice(pluginIndex, 0, plugin);
-        }
-    }
-    applyPlugins('initialize', null, null, ctx);
-    return ctx;
-}
-// The React context object
-const stylixContext = createContext(undefined);
-let defaultStylixContext;
-/**
- * Gets the current Stylix context.
- */
-function useStylixContext() {
-    const ctx = useContext(stylixContext);
-    if (!ctx) {
-        if (!defaultStylixContext)
-            defaultStylixContext = createStylixContext();
-        return defaultStylixContext;
-    }
-    return ctx;
-}
-function StylixProvider({ id, devMode, plugins, media, styleElement, children, ssr, }) {
-    const ctx = useRef(null);
-    if (!ctx.current)
-        ctx.current = createStylixContext({ id, devMode, plugins, media, styleElement, ssr });
-    ctx.current.styleCollector = useContext(styleCollectorContext);
-    // When the component is unmounted, remove the style element, if any
-    useEffect(() => {
-        return () => {
-            ctx.current?.styleElement?.remove();
-        };
-    }, []);
-    return jsx(stylixContext.Provider, { value: ctx.current, children: children });
-}
 
 function flattenRules(ctx) {
     return Object.values(ctx.rules)
@@ -1073,6 +1027,9 @@ function getParentComponentName() {
  * Serialize selector and styles to css rule string
  */
 function serialize(selector, styles) {
+    if (selector.startsWith('@') && Array.isArray(styles)) {
+        return `${selector} ${styles.join(', ')};`;
+    }
     const lines = [];
     for (const key in styles) {
         const value = styles[key];
@@ -1092,6 +1049,11 @@ function stylesToRuleArray(styles, className, context) {
     try {
         const processedStyles = applyPlugins('processStyles', styles, className, context);
         const result = [];
+        // Handle @layer rules first
+        if (processedStyles['@layer']) {
+            result.push(serialize('@layer', processedStyles['@layer']));
+            delete processedStyles['@layer'];
+        }
         for (const key in processedStyles) {
             const value = processedStyles[key];
             result.push(serialize(key, value));
@@ -1128,6 +1090,47 @@ function cleanup(ctx) {
         ctx.cleanupRequest = setTimeout(doCleanup, 100);
     }
 }
+function createStyles(config) {
+    const { stylixCtx, global } = config;
+    let styles = config.styles;
+    const priorKey = config.key || '';
+    let stylesKey = '';
+    if (styles && !isEmpty(styles)) {
+        // Preprocess styles with plugins
+        styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
+        // Generate styles key
+        stylesKey = styles ? (global ? 'global:' : '') + JSON.stringify(styles) : '';
+    }
+    if (stylesKey && !stylixCtx.rules[stylesKey]) {
+        stylixCtx.styleCounter++;
+        const debugLabel = config.debugLabel || (stylixCtx.devMode && getParentComponentName()) || '';
+        const className = `stylix-${(stylixCtx.styleCounter).toString(36)}${debugLabel ? `-${debugLabel}` : ''}`;
+        // If not global styles, wrap original styles with classname
+        if (!global)
+            styles = { [`.${className}`]: styles };
+        stylixCtx.rules[stylesKey] = {
+            className,
+            rules: stylesToRuleArray(styles, className, stylixCtx),
+            refs: 0,
+        };
+    }
+    const isChanged = stylesKey !== priorKey;
+    const ruleSet = stylesKey ? stylixCtx.rules[stylesKey] : null;
+    if (isChanged) {
+        // Mark styles to be applied
+        stylixCtx.requestApply = true;
+        // When json changes, add/remove ref count
+        const priorRuleSet = priorKey ? stylixCtx.rules[priorKey] : null;
+        if (priorRuleSet)
+            priorRuleSet.refs--;
+        if (ruleSet)
+            ruleSet.refs++;
+    }
+    return {
+        className: ruleSet?.className || '',
+        key: stylesKey,
+    };
+}
 /**
  * Accepts a Stylix CSS object and returns a unique className.
  * The styles are registered with the Stylix context and will be applied to the document.
@@ -1136,66 +1139,144 @@ function cleanup(ctx) {
  */
 function useStyles(styles, options = { global: false }) {
     const stylixCtx = useStylixContext();
-    const prevStylesJson = useRef('');
-    // Preprocess styles with plugins
-    if (styles && !isEmpty(styles))
-        styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
-    let stylesJson = styles && !isEmpty(styles) ? JSON.stringify(styles) : '';
-    if (stylesJson && options.global)
-        stylesJson = `global:${stylesJson}`;
-    const changed = stylesJson !== prevStylesJson.current;
-    prevStylesJson.current = stylesJson;
-    options.debugLabel ||= stylixCtx.devMode ? getParentComponentName() : '';
-    if (stylesJson && !stylixCtx.rules[stylesJson]) {
-        stylixCtx.styleCounter++;
-        const className = `stylix-${(stylixCtx.styleCounter).toString(36)}${options.debugLabel ? `-${options.debugLabel}` : ''}`;
-        // If not global styles, wrap original styles with classname
-        if (!options.global)
-            styles = { [`.${className}`]: styles };
-        stylixCtx.rules[stylesJson] = {
-            className,
-            rules: stylesToRuleArray(styles, className, stylixCtx),
-            refs: 0,
-        };
-    }
-    if (changed)
-        stylixCtx.requestApply = true;
-    // When json changes, add/remove ref count
-    const ruleSet = stylixCtx.rules[stylesJson];
-    if (stylesJson && changed && ruleSet) {
-        ruleSet.refs++;
-    }
+    const prevStylesKey = useRef('');
+    const s = createStyles({
+        stylixCtx,
+        styles,
+        global: options.global,
+        debugLabel: options.debugLabel,
+        key: prevStylesKey.current,
+    });
+    prevStylesKey.current = s.key;
     // Apply styles if requested.
-    // This runs on every render. We utilize useLayoutEffect so that it runs *after* all the other
+    // This runs on every render. We utilize useInsertionEffect so that it runs *after* all the other
     // renders have completed. stylixCtx.requestApply guards against multiple runs. This reduces the number of calls
     // to applyRules(), but prevents styles potentially being added to the DOM after other components force the
     // browser to compute styles.
-    useIsoLayoutEffect(() => {
+    // biome-ignore lint/correctness/useExhaustiveDependencies: stylixCtx is stable
+    useInsertionEffect(() => {
         if (!stylixCtx.requestApply)
             return;
         stylixCtx.requestApply = false;
         applyRules(stylixCtx);
-    }, undefined, true, stylixCtx.ssr);
-    useIsoLayoutEffect(() => {
-        if (!stylesJson || !changed)
-            return;
         return () => {
-            const ruleSet = stylixCtx.rules[stylesJson];
-            if (!ruleSet)
-                return;
-            ruleSet.refs--;
-            if (ruleSet.refs <= 0)
-                stylixCtx.rules[stylesJson] = undefined;
             cleanup(stylixCtx);
         };
-    }, [stylesJson], false, stylixCtx.ssr);
-    return stylixCtx.rules[stylesJson]?.className || '';
+    }, [s.key]);
+    return s.className;
 }
 function useKeyframes(keyframes) {
     return useStyles({ '@keyframes $$class': keyframes }, { global: true });
 }
 function useGlobalStyles(styles, options = { disabled: false }) {
     return useStyles(styles, { ...options, global: true });
+}
+
+/**
+ * Default style props mapping. This will be populated on the first call to createStylixContext.
+ */
+let defaultStyleProps;
+function createStylixContext(userValues = {}) {
+    if (!defaultStyleProps) {
+        defaultStyleProps = {};
+        for (const value of cssProps) {
+            defaultStyleProps[simplifyStylePropName(value)] = value;
+        }
+    }
+    const ctx = {
+        id: userValues.id || '$default',
+        devMode: !!userValues.devMode,
+        styleProps: defaultStyleProps,
+        media: userValues.media,
+        styleElement: userValues.styleElement,
+        plugins: defaultPlugins.flat(),
+        styleCounter: 0,
+        rules: {},
+        ssr: userValues.ssr ?? detectSSR(),
+        cleanupRequest: undefined,
+        requestApply: false,
+        classifyProps(props) {
+            const [styles, other] = classifyProps(props, this.styleProps);
+            return [styles, other];
+        },
+        styles(styles, config) {
+            const s = createStyles({
+                stylixCtx: ctx,
+                styles,
+                global: config?.global || false,
+            });
+            applyRules(ctx);
+            return s.className;
+        },
+    };
+    if (userValues.plugins?.length) {
+        const flatPlugins = userValues.plugins.flat();
+        for (const i in flatPlugins) {
+            const plugin = flatPlugins[i];
+            let pluginIndex = -1;
+            if (plugin.before)
+                pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
+            else if (plugin.after) {
+                pluginIndex = ctx.plugins.findIndex((v) => v.name === plugin.before);
+                if (pluginIndex !== -1)
+                    pluginIndex += 1;
+            }
+            else if (plugin.atIndex !== undefined)
+                pluginIndex = plugin.atIndex;
+            if (pluginIndex === -1)
+                ctx.plugins.push(plugin);
+            else
+                ctx.plugins.splice(pluginIndex, 0, plugin);
+        }
+    }
+    applyPlugins('initialize', null, null, ctx);
+    return ctx;
+}
+/**
+ * The React context object for Stylix.
+ */
+const stylixContext = createContext(undefined);
+/**
+ * Default Stylix context, used when no provider is present.
+ */
+let defaultStylixContext;
+/**
+ * React hook that gets the current Stylix context.
+ */
+function useStylixContext() {
+    const ctx = useContext(stylixContext);
+    if (!ctx) {
+        if (!defaultStylixContext)
+            defaultStylixContext = createStylixContext();
+        return defaultStylixContext;
+    }
+    return ctx;
+}
+/**
+ * StylixProvider component. Provides a Stylix context to its descendent elements.
+ * Can either accept an existing context via the `context` prop, or create a new context
+ * using the other configuration props.
+ */
+function StylixProvider(props) {
+    const { context, id, devMode, plugins, media, styleElement, children, ssr } = props;
+    const ctx = useRef(context);
+    if (!ctx.current)
+        ctx.current = createStylixContext({
+            id,
+            devMode,
+            plugins,
+            media,
+            styleElement,
+            ssr,
+        });
+    ctx.current.styleCollector = useContext(styleCollectorContext);
+    // When the component is unmounted, remove the style element, if any
+    useEffect(() => {
+        return () => {
+            ctx.current?.styleElement?.remove();
+        };
+    }, []);
+    return jsx(stylixContext.Provider, { value: ctx.current, children: children });
 }
 
 function _Stylix(props, ref) {
@@ -1214,7 +1295,7 @@ function _Stylix(props, ref) {
     if (React.isValidElement($el)) {
         const $elProps = {
             ...$el.props,
-            ref,
+            ref: ('ref' in $el && $el.ref) || ref,
             /**
              * `allProps` must override `$el.props` because the latter may contain default prop values provided by defaultProps.
              * The expectation is that for <$ $el={<SomeComponent />} someComponentProp="my value" />,

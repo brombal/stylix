@@ -55,12 +55,25 @@ export function processMediaStyles(
       // An object for a style prop is definitely a media object
       for (const mediaKey in styleValue) {
         result[mediaKey] ||= [];
-        result[mediaKey].push(
-          mediaDef[mediaKey]({
-            // process recursively
-            [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
-          } as OpaqueMediaStyles),
-        );
+
+        // mediaKey corresponds to a media definition
+        if (mediaKey in mediaDef) {
+          result[mediaKey].push(
+            mediaDef[mediaKey]({
+              // process recursively
+              [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
+            } as OpaqueMediaStyles),
+          );
+        }
+
+        // mediaKey does not correspond to a media definition, it must be a @media or @container rule
+        else {
+          result[mediaKey].push({
+            [mediaKey]: {
+              [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
+            },
+          });
+        }
       }
       continue;
     }

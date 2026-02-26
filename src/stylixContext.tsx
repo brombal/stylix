@@ -1,35 +1,28 @@
 import type React from 'react';
 import { createContext, useContext, useEffect, useRef } from 'react';
-
 import { classifyProps, simplifyStylePropName } from './classifyProps';
 import cssProps from './css-props.json';
 import { applyPlugins, defaultPlugins, type StylixPlugin } from './plugins';
 import type { StylixMediaDefinition } from './plugins/mediaObjects';
 import { styleCollectorContext } from './styleCollector';
 import { detectSSR } from './util/useIsoLayoutEffect';
+import { StylixStyles } from './types';
+import { createStyles } from './useStyles';
+import applyRules from './applyRules';
 
 /**
  * Stylix context
  *
- * The <StylixProvider> wrapper represents an "instance" of Stylix - a configuration, set of plugins, and reference to
- * the <style> element where css is output. All nodes contained within a <StylixProvider> element will share this
- * Stylix instance's configuration.
+ * A Stylix context represents an "instance" of Stylix - a configuration, set of plugins, and reference to
+ * the <style> element where css is output.
  *
- * See the README for more details.
+ * A <StylixProvider> creates a context instance and provides it via React context to its descendent elements.
+ * All nodes contained within a <StylixProvider> element will share this context.
  */
 
-// StylixProvider component props
-type StylixProviderProps = {
-  id?: string;
-  devMode?: boolean;
-  plugins?: StylixPlugin[] | StylixPlugin[][];
-  styleElement?: HTMLStyleElement;
-  media?: StylixMediaDefinition;
-  ssr?: boolean;
-  children: any;
-};
-
-// StylixContext object interface
+/**
+ * The Stylix context object.
+ */
 export type StylixContext = {
   id: string;
   devMode: boolean;
@@ -54,16 +47,27 @@ export type StylixContext = {
   requestApply: boolean;
 
   classifyProps(props: Record<string, unknown>): [Record<string, unknown>, Record<string, unknown>];
+  styles(styles: StylixStyles, config?: { global: boolean }): string;
 };
 
-export type StylixPublicContext = Pick<
-  StylixContext,
-  'id' | 'devMode' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'
->;
-
+/**
+ * Default style props mapping. This will be populated on the first call to createStylixContext.
+ */
 let defaultStyleProps: Record<string, string> | undefined;
 
-export function createStylixContext(userValues = {} as Partial<StylixProviderProps>) {
+/**
+ * Configuration options for creating a Stylix context.
+ */
+type CreateStylixContextConfig = {
+  id?: string;
+  devMode?: boolean;
+  plugins?: StylixPlugin[] | StylixPlugin[][];
+  styleElement?: HTMLStyleElement;
+  media?: StylixMediaDefinition;
+  ssr?: boolean;
+};
+
+export function createStylixContext(userValues: CreateStylixContextConfig = {}): StylixContext {
   if (!defaultStyleProps) {
     defaultStyleProps = {};
     for (const value of cssProps) {
@@ -71,7 +75,7 @@ export function createStylixContext(userValues = {} as Partial<StylixProviderPro
     }
   }
 
-  const ctx = {
+  const ctx: StylixContext = {
     id: userValues.id || '$default',
     devMode: !!userValues.devMode,
     styleProps: defaultStyleProps,
@@ -88,7 +92,17 @@ export function createStylixContext(userValues = {} as Partial<StylixProviderPro
       const [styles, other] = classifyProps(props, this.styleProps);
       return [styles, other];
     },
-  } as StylixContext;
+
+    styles(styles: StylixStyles, config?: { global: boolean }): string {
+      const s = createStyles({
+        stylixCtx: ctx,
+        styles,
+        global: config?.global || false,
+      });
+      applyRules(ctx);
+      return s.className;
+    },
+  };
 
   if (userValues.plugins?.length) {
     const flatPlugins = userValues.plugins.flat();
@@ -110,13 +124,18 @@ export function createStylixContext(userValues = {} as Partial<StylixProviderPro
   return ctx;
 }
 
-// The React context object
+/**
+ * The React context object for Stylix.
+ */
 const stylixContext = createContext<StylixContext | undefined>(undefined);
 
+/**
+ * Default Stylix context, used when no provider is present.
+ */
 let defaultStylixContext: StylixContext | undefined;
 
 /**
- * Gets the current Stylix context.
+ * React hook that gets the current Stylix context.
  */
 export function useStylixContext(): StylixContext {
   const ctx = useContext(stylixContext);
@@ -127,18 +146,50 @@ export function useStylixContext(): StylixContext {
   return ctx;
 }
 
-export function StylixProvider({
-  id,
-  devMode,
-  plugins,
-  media,
-  styleElement,
-  children,
-  ssr,
-}: StylixProviderProps): React.ReactElement {
-  const ctx = useRef<StylixContext | null>(null);
+/**
+ * Props for StylixProvider when passing an existing context.
+ */
+type StylixProviderPropsWithContext = {
+  context: StylixContext;
+};
+
+/**
+ * Props for StylixProvider when creating a new context.
+ */
+type StylixProviderPropsWithConfig = {
+  id?: string;
+  devMode?: boolean;
+  plugins?: StylixPlugin[] | StylixPlugin[][];
+  styleElement?: HTMLStyleElement;
+  media?: StylixMediaDefinition;
+  ssr?: boolean;
+  children: any;
+};
+
+/**
+ * Props for the StylixProvider component.
+ */
+type StylixProviderProps = StylixProviderPropsWithContext | StylixProviderPropsWithConfig;
+
+/**
+ * StylixProvider component. Provides a Stylix context to its descendent elements.
+ * Can either accept an existing context via the `context` prop, or create a new context
+ * using the other configuration props.
+ */
+export function StylixProvider(props: StylixProviderProps): React.ReactElement {
+  const { context, id, devMode, plugins, media, styleElement, children, ssr } =
+    props as StylixProviderPropsWithContext & StylixProviderPropsWithConfig;
+
+  const ctx = useRef(context);
   if (!ctx.current)
-    ctx.current = createStylixContext({ id, devMode, plugins, media, styleElement, ssr });
+    ctx.current = createStylixContext({
+      id,
+      devMode,
+      plugins,
+      media,
+      styleElement,
+      ssr,
+    });
 
   ctx.current.styleCollector = useContext(styleCollectorContext);
 

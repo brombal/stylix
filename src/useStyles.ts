@@ -1,12 +1,11 @@
-import { useRef } from 'react';
+import { useInsertionEffect, useRef } from 'react';
 import applyRules from './applyRules';
 import { getParentComponentName } from './getParentComponentName';
 import { applyPlugins } from './plugins';
-import { type StylixContext, useStylixContext } from './StylixProvider';
 import stylesToRuleArray from './stylesToRuleArray';
+import { type StylixContext, useStylixContext } from './stylixContext';
 import type { StylixObject, StylixStyles } from './types';
 import { isEmpty } from './util/isEmpty';
-import useIsoLayoutEffect from './util/useIsoLayoutEffect';
 
 function cleanup(ctx: StylixContext): void {
   if (typeof ctx.cleanupRequest !== 'undefined') return;
@@ -28,6 +27,57 @@ function cleanup(ctx: StylixContext): void {
   }
 }
 
+export function createStyles(config: {
+  stylixCtx: StylixContext;
+  key?: string;
+  styles: StylixStyles;
+  global?: boolean;
+  debugLabel?: string;
+}): { className: string; key: string } {
+  const { stylixCtx, global } = config;
+  let styles = config.styles;
+  const priorKey = config.key || '';
+
+  let stylesKey = '';
+  if (styles && !isEmpty(styles)) {
+    // Preprocess styles with plugins
+    styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
+    // Generate styles key
+    stylesKey = styles ? (global ? 'global:' : '') + JSON.stringify(styles) : '';
+  }
+
+  if (stylesKey && !stylixCtx.rules[stylesKey]) {
+    stylixCtx.styleCounter++;
+    const debugLabel = config.debugLabel || (stylixCtx.devMode && getParentComponentName()) || '';
+    const className = `stylix-${(stylixCtx.styleCounter).toString(36)}${debugLabel ? `-${debugLabel}` : ''}`;
+    // If not global styles, wrap original styles with classname
+    if (!global) styles = { [`.${className}`]: styles };
+    stylixCtx.rules[stylesKey] = {
+      className,
+      rules: stylesToRuleArray(styles as StylixObject, className, stylixCtx),
+      refs: 0,
+    };
+  }
+
+  const isChanged = stylesKey !== priorKey;
+  const ruleSet = stylesKey ? stylixCtx.rules[stylesKey] : null;
+
+  if (isChanged) {
+    // Mark styles to be applied
+    stylixCtx.requestApply = true;
+
+    // When json changes, add/remove ref count
+    const priorRuleSet = priorKey ? stylixCtx.rules[priorKey] : null;
+    if (priorRuleSet) priorRuleSet.refs--;
+    if (ruleSet) ruleSet.refs++;
+  }
+
+  return {
+    className: ruleSet?.className || '',
+    key: stylesKey,
+  };
+}
+
 /**
  * Accepts a Stylix CSS object and returns a unique className.
  * The styles are registered with the Stylix context and will be applied to the document.
@@ -40,74 +90,35 @@ export function useStyles(
 ): string {
   const stylixCtx = useStylixContext();
 
-  const prevStylesJson = useRef('');
+  const prevStylesKey = useRef('');
 
-  // Preprocess styles with plugins
-  if (styles && !isEmpty(styles))
-    styles = applyPlugins('preprocessStyles', styles, null, stylixCtx);
+  const s = createStyles({
+    stylixCtx,
+    styles,
+    global: options.global,
+    debugLabel: options.debugLabel,
+    key: prevStylesKey.current,
+  });
 
-  let stylesJson = styles && !isEmpty(styles) ? JSON.stringify(styles) : '';
-  if (stylesJson && options.global) stylesJson = `global:${stylesJson}`;
-
-  const changed = stylesJson !== prevStylesJson.current;
-  prevStylesJson.current = stylesJson;
-
-  options.debugLabel ||= stylixCtx.devMode ? getParentComponentName() : '';
-
-  if (stylesJson && !stylixCtx.rules[stylesJson]) {
-    stylixCtx.styleCounter++;
-    const className = `stylix-${(stylixCtx.styleCounter).toString(36)}${options.debugLabel ? `-${options.debugLabel}` : ''}`;
-    // If not global styles, wrap original styles with classname
-    if (!options.global) styles = { [`.${className}`]: styles };
-    stylixCtx.rules[stylesJson] = {
-      className,
-      rules: stylesToRuleArray(styles as StylixObject, className, stylixCtx),
-      refs: 0,
-    };
-  }
-
-  if (changed) stylixCtx.requestApply = true;
-
-  // When json changes, add/remove ref count
-  const ruleSet = stylixCtx.rules[stylesJson];
-  if (stylesJson && changed && ruleSet) {
-    ruleSet.refs++;
-  }
+  prevStylesKey.current = s.key;
 
   // Apply styles if requested.
-  // This runs on every render. We utilize useLayoutEffect so that it runs *after* all the other
+  // This runs on every render. We utilize useInsertionEffect so that it runs *after* all the other
   // renders have completed. stylixCtx.requestApply guards against multiple runs. This reduces the number of calls
   // to applyRules(), but prevents styles potentially being added to the DOM after other components force the
   // browser to compute styles.
-  useIsoLayoutEffect(
-    () => {
-      if (!stylixCtx.requestApply) return;
-      stylixCtx.requestApply = false;
-      applyRules(stylixCtx);
-    },
-    undefined,
-    true,
-    stylixCtx.ssr,
-  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stylixCtx is stable
+  useInsertionEffect(() => {
+    if (!stylixCtx.requestApply) return;
+    stylixCtx.requestApply = false;
+    applyRules(stylixCtx);
 
-  useIsoLayoutEffect(
-    () => {
-      if (!stylesJson || !changed) return;
+    return () => {
+      cleanup(stylixCtx);
+    };
+  }, [s.key]);
 
-      return () => {
-        const ruleSet = stylixCtx.rules[stylesJson];
-        if (!ruleSet) return;
-        ruleSet.refs--;
-        if (ruleSet.refs <= 0) stylixCtx.rules[stylesJson] = undefined;
-        cleanup(stylixCtx);
-      };
-    },
-    [stylesJson],
-    false,
-    stylixCtx.ssr,
-  );
-
-  return stylixCtx.rules[stylesJson]?.className || '';
+  return s.className;
 }
 
 export function useKeyframes(keyframes: any) {

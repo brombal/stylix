@@ -9,6 +9,15 @@ type IntrinsicElements = (typeof htmlTags)[number];
  */
 type HTMLProps<TTag extends keyof React.JSX.IntrinsicElements> = React.JSX.IntrinsicElements[TTag];
 
+type OpaqueMediaStyles = {
+    __opaqueMediaStyles: true;
+};
+type StylixMediaValue = {
+    [key: string]: OpaqueMediaStyles | StylixMediaValue;
+};
+type StylixMediaFunc = (styles: OpaqueMediaStyles) => StylixMediaValue;
+type StylixMediaDefinition = Record<string, StylixMediaFunc>;
+
 type CSSProperties = CSS.StandardPropertiesHyphen<number | string> & CSS.VendorPropertiesHyphen<number | string> & CSS.StandardProperties<number | string> & CSS.VendorProperties<number | string>;
 type Override<T, U> = Omit<T, keyof U> & U;
 /**
@@ -27,7 +36,10 @@ type StylixStyles = StylixObject | null | undefined | false | StylixStyles[];
  * Represents a value for a CSS prop in a Stylix object.
  * The value can be a single value or an object with keys for different media queries.
  */
-type StylixValue<T> = T | Record<string, T>;
+type StylixValue<T> = T | {
+    default?: T | undefined;
+    [key: string]: T | undefined;
+};
 /**
  * Used to indicate that a component can accept all Stylix properties, including
  * all standard CSS properties, additional user-defined custom style props, and the $css prop.
@@ -90,60 +102,19 @@ type StylixHTMLProps<TTag extends IntrinsicElements> = Extends<HTMLProps<TTag>, 
 interface StylixPropsExtensions {
 }
 
-declare const customProps: (customProps: Record<string, any>) => StylixPlugin[];
-
-/**
- * Stylix plugin function context object
- */
-type StylixPluginFunctionContext = StylixPublicContext & {
-    className: string | null;
-};
-/**
- * Stylix plugin interface
- */
-type StylixPlugin = {
-    name: string;
-    before?: string;
-    after?: string;
-    atIndex?: number;
-} & ({
-    name: string;
-    type: 'initialize';
-    plugin(ctx: StylixPluginFunctionContext): void;
-} | {
-    type: 'processStyles' | 'preprocessStyles';
-    plugin(ctx: StylixPluginFunctionContext, styles: StylixStyles): StylixStyles;
-});
-declare const defaultPlugins: StylixPlugin[];
-
-type OpaqueMediaStyles = {
-    __opaqueMediaStyles: true;
-};
-type StylixMediaValue = {
-    [key: string]: OpaqueMediaStyles | StylixMediaValue;
-};
-type StylixMediaFunc = (styles: OpaqueMediaStyles) => StylixMediaValue;
-type StylixMediaDefinition = Record<string, StylixMediaFunc>;
-
 /**
  * Stylix context
  *
- * The <StylixProvider> wrapper represents an "instance" of Stylix - a configuration, set of plugins, and reference to
- * the <style> element where css is output. All nodes contained within a <StylixProvider> element will share this
- * Stylix instance's configuration.
+ * A Stylix context represents an "instance" of Stylix - a configuration, set of plugins, and reference to
+ * the <style> element where css is output.
  *
- * See the README for more details.
+ * A <StylixProvider> creates a context instance and provides it via React context to its descendent elements.
+ * All nodes contained within a <StylixProvider> element will share this context.
  */
-type StylixProviderProps = {
-    id?: string;
-    devMode?: boolean;
-    plugins?: StylixPlugin[] | StylixPlugin[][];
-    styleElement?: HTMLStyleElement;
-    media?: StylixMediaDefinition;
-    ssr?: boolean;
-    children: any;
-};
-type StylixContext$1 = {
+/**
+ * The Stylix context object.
+ */
+type StylixContext = {
     id: string;
     devMode: boolean;
     media: StylixMediaDefinition | undefined;
@@ -164,19 +135,74 @@ type StylixContext$1 = {
     cleanupRequest?: number;
     requestApply: boolean;
     classifyProps(props: Record<string, unknown>): [Record<string, unknown>, Record<string, unknown>];
+    styles(styles: StylixStyles, config?: {
+        global: boolean;
+    }): string;
 };
-type StylixPublicContext = Pick<StylixContext$1, 'id' | 'devMode' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'>;
 /**
- * Gets the current Stylix context.
+ * React hook that gets the current Stylix context.
  */
-declare function useStylixContext(): StylixContext$1;
-declare function StylixProvider({ id, devMode, plugins, media, styleElement, children, ssr, }: StylixProviderProps): React.ReactElement;
+declare function useStylixContext(): StylixContext;
+/**
+ * Props for StylixProvider when passing an existing context.
+ */
+type StylixProviderPropsWithContext = {
+    context: StylixContext;
+};
+/**
+ * Props for StylixProvider when creating a new context.
+ */
+type StylixProviderPropsWithConfig = {
+    id?: string;
+    devMode?: boolean;
+    plugins?: StylixPlugin[] | StylixPlugin[][];
+    styleElement?: HTMLStyleElement;
+    media?: StylixMediaDefinition;
+    ssr?: boolean;
+    children: any;
+};
+/**
+ * Props for the StylixProvider component.
+ */
+type StylixProviderProps = StylixProviderPropsWithContext | StylixProviderPropsWithConfig;
+/**
+ * StylixProvider component. Provides a Stylix context to its descendent elements.
+ * Can either accept an existing context via the `context` prop, or create a new context
+ * using the other configuration props.
+ */
+declare function StylixProvider(props: StylixProviderProps): React.ReactElement;
+
+declare const customProps: (customProps: Record<string, any>) => StylixPlugin[];
+
+/**
+ * Stylix plugin function context object
+ */
+type StylixPluginFunctionContext = Pick<StylixContext, 'id' | 'devMode' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'> & {
+    className: string | null;
+};
+/**
+ * Stylix plugin interface
+ */
+type StylixPlugin = {
+    name: string;
+    before?: string;
+    after?: string;
+    atIndex?: number;
+} & ({
+    name: string;
+    type: 'initialize';
+    plugin(ctx: StylixPluginFunctionContext): void;
+} | {
+    type: 'processStyles' | 'preprocessStyles';
+    plugin(ctx: StylixPluginFunctionContext, styles: StylixStyles): StylixStyles;
+});
+declare const defaultPlugins: StylixPlugin[];
+
+declare function RenderServerStyles(props: Partial<HTMLProps<'style'>>): react_jsx_runtime.JSX.Element;
 
 declare function StyleElement(props: {
     styles: string[];
 } & Partial<HTMLProps<'style'>>): react_jsx_runtime.JSX.Element;
-
-declare function RenderServerStyles(props: Partial<HTMLProps<'style'>>): react_jsx_runtime.JSX.Element;
 
 /**
  * Additional properties on the Stylix ($) component and its html component properties (`<$.div>`, etc).
@@ -317,8 +343,6 @@ type MapObjectFunction<TContext extends object = object> = (key: string | number
  * ```
  */
 declare function mapObject<TSource, TContext extends object>(source: TSource, mapFn: MapObjectFunction<TContext>, context?: TContext): TSource;
-
-type StylixContext = StylixPublicContext;
 
 export { RenderServerStyles, StyleElement, StylixProvider, createStyleCollector, customProps, cx, Stylix as default, defaultPlugins, mapObject, styleCollectorContext, useGlobalStyles, useKeyframes, useStyles, useStylixContext };
 export type { Extends, HTMLProps, IntrinsicElements, StyleCollector, Stylix$Component, StylixContext, StylixHTMLProps, StylixObject, StylixPlugin, StylixPluginFunctionContext, StylixProps, StylixPropsExtensions, StylixStyles, StylixValue };

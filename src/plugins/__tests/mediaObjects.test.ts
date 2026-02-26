@@ -262,4 +262,76 @@ describe('mediaObjects', () => {
       }),
     );
   });
+
+  it('should reduce simple default values', () => {
+    expect(
+      JSON.stringify(
+        reduceArrays(
+          processMediaStyles(media, styleProps, {
+            div: {
+              default: { color: 'color-default' },
+              fontSize: { default: 'font-size-default' },
+            },
+          }),
+        ),
+      ),
+    ).toEqual(
+      JSON.stringify({
+        div: {
+          color: 'color-default',
+          fontSize: 'font-size-default',
+        },
+      }),
+    );
+  });
+
+  it('should convert media and container queries on selector', () => {
+    expect(
+      JSON.stringify(
+        reduceArrays(
+          processMediaStyles(media, styleProps, {
+            div: {
+              color: 'color-default',
+              '@media (max-width: 1000px)': { color: 'color-mobile' },
+              '@container (max-width: 1000px)': { color: 'color-container' },
+            },
+          }),
+        ),
+      ),
+    ).toEqual(
+      JSON.stringify({
+        div: {
+          color: 'color-default',
+          '@media (max-width: 1000px)': { color: 'color-mobile' },
+          '@container (max-width: 1000px)': { color: 'color-container' },
+        },
+      }),
+    );
+  });
+
+  it('should convert media and container queries on style props', () => {
+    expect(
+      JSON.stringify(
+        reduceArrays(
+          processMediaStyles(media, styleProps, {
+            div: {
+              color: {
+                default: 'color-default',
+                '@media (max-width: 1000px)': 'color-mobile',
+                '@container (max-width: 1000px)': 'color-container',
+              },
+            },
+          }),
+        ),
+      ),
+    ).toEqual(
+      JSON.stringify({
+        div: {
+          color: 'color-default',
+          '@media (max-width: 1000px)': { color: 'color-mobile' },
+          '@container (max-width: 1000px)': { color: 'color-container' },
+        },
+      }),
+    );
+  });
 });

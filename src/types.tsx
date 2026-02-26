@@ -34,7 +34,7 @@ export type StylixStyles = StylixObject | null | undefined | false | StylixStyle
  * Represents a value for a CSS prop in a Stylix object.
  * The value can be a single value or an object with keys for different media queries.
  */
-export type StylixValue<T> = T | Record<string, T>;
+export type StylixValue<T> = T | { default?: T | undefined; [key: string]: T | undefined };
 
 /**
  * Used to indicate that a component can accept all Stylix properties, including

@@ -32,7 +32,9 @@ describe('customProps', () => {
   };
 
   it('basic', () => {
-    const [json, styles] = renderStylix(<$.div flexbox />, [customProps(myCustomProps)]);
+    const [json, styles] = renderStylix(<$.div flexbox />, {
+      plugins: [customProps(myCustomProps)],
+    });
     expect(json).toMatchSnapshot();
     expect(styles).toMatchSnapshot();
   });
@@ -51,7 +53,9 @@ describe('customProps', () => {
         <$.div flexBlue />
         <$.div marginArray={[1, 2, 3, 4]} />
       </$.div>,
-      [customProps(myCustomProps)],
+      {
+        plugins: [customProps(myCustomProps)],
+      },
     );
     expect(json).toMatchSnapshot();
     expect(styles).toMatchSnapshot();

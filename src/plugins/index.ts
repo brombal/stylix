@@ -1,4 +1,4 @@
-import type { StylixContext, StylixPublicContext } from '../StylixProvider';
+import type { StylixContext } from '../stylixContext';
 import type { StylixStyles } from '../types';
 import { cleanStyles } from './cleanStyles';
 import { defaultPixelUnits } from './defaultUnits';
@@ -8,11 +8,15 @@ import { mergeArrays } from './mergeArrays';
 import { prepareStyles } from './prepareStyles';
 import { propCasing } from './propCasing';
 import { replace$$class } from './replace$$class';
+import {hoistLayers} from "./hoistLayers";
 
 /**
  * Stylix plugin function context object
  */
-export type StylixPluginFunctionContext = StylixPublicContext & { className: string | null };
+export type StylixPluginFunctionContext = Pick<
+  StylixContext,
+  'id' | 'devMode' | 'media' | 'stylesheet' | 'styleElement' | 'styleProps'
+> & { className: string | null };
 
 /**
  * Stylix plugin interface
@@ -81,6 +85,7 @@ export const defaultPlugins: StylixPlugin[] = [
   mergeArrays,
   propCasing,
   hoistKeyframes,
+  hoistLayers,
   replace$$class,
   defaultPixelUnits,
   cleanStyles,

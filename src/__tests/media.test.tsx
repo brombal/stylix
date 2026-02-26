@@ -5,11 +5,12 @@ describe('mediaObjects', () => {
   it('should work', () => {
     const [json, styles] = renderStylix(
       <$.div flex-direction={{ default: 'row', mobile: 'column' }} />,
-      undefined,
       {
-        mobile: (styles) => ({
-          '@media (max-width: 600px)': styles,
-        }),
+        media: {
+          mobile: (styles) => ({
+            '@media (max-width: 600px)': styles,
+          }),
+        },
       },
     );
 
@@ -31,11 +32,12 @@ describe('mediaObjects', () => {
       >
         test
       </$.div>,
-      undefined,
       {
-        mobile: (styles) => ({
-          '@media (max-width: 600px)': styles,
-        }),
+        media: {
+          mobile: (styles) => ({
+            '@media (max-width: 600px)': styles,
+          }),
+        },
       },
     );
 
@@ -56,11 +58,12 @@ describe('mediaObjects', () => {
       >
         test
       </$.div>,
-      undefined,
       {
-        mobile: (styles) => ({
-          '@media (max-width: 600px)': styles,
-        }),
+        media: {
+          mobile: (styles) => ({
+            '@media (max-width: 600px)': styles,
+          }),
+        },
       },
     );
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { IntrinsicElements } from './elements';
-import { useStylixContext } from './StylixProvider';
+import { useStylixContext } from './stylixContext';
 import type { Extends, StylixProps, StylixStyles } from './types';
 import { useStyles } from './useStyles';
 import { isEmpty } from './util/isEmpty';
@@ -88,7 +88,7 @@ export function _Stylix<TElement extends React.ElementType>(
   if (React.isValidElement($el)) {
     const $elProps = {
       ...($el.props as any),
-      ref,
+      ref: ('ref' in $el && $el.ref) || ref,
       /**
        * `allProps` must override `$el.props` because the latter may contain default prop values provided by defaultProps.
        * The expectation is that for <$ $el={<SomeComponent />} someComponentProp="my value" />,

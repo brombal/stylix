@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`layer declarations should render 1`] = `"<div class="stylix-1"></div>"`;
+
+exports[`layer declarations should render 2`] = `
+"@layer test, span, test, span, other;
+.stylix-1 {
+@layer test {
+  font-size: 20px; } }"
+`;
