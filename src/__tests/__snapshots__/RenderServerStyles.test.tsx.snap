@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RenderServerStyles should not render anything on client 1`] = `"<div class="stylix-1">red</div><div class="stylix-2">green</div><style type="text/css"></style>"`;
 

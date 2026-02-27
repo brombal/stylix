@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`useKeyframes() should hoist nested keyframes to root 1`] = `"<div class="stylix-2" data-testid="div1"><div class="stylix-3">test</div></div>"`;
 

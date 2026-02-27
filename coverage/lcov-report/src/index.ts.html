@@ -89,41 +89,46 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">55x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">18x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">18x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">18x</span>
-<span class="cline-any cline-yes">101x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">22x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">107x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">61x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">18x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import './elements';
-import type { StylixPublicContext } from './StylixProvider';
 &nbsp;
+export type { HTMLProps, IntrinsicElements } from './elements';
+export {
+  customProps,
+<span class="fstat-no" title="function not covered" >  defaultPlugins,</span>
+  type StylixPlugin,
+  type StylixPluginFunctionContext,
+} from './plugins';
+export { RenderServerStyles } from './RenderServerStyles';
 export { <span class="fstat-no" title="function not covered" >StyleElement </span>} from './StyleElement';
-export { StylixProvider, <span class="fstat-no" title="function not covered" >useStylixContext </span>} from './StylixProvider';
+export { Stylix as default, type Stylix$Component } from './Stylix';
+export { <span class="fstat-no" title="function not covered" >createStyleCollector,</span> type StyleCollector, <span class="fstat-no" title="function not covered" >styleCollectorContext </span>} from './styleCollector';
+export { type StylixContext, StylixProvider, <span class="fstat-no" title="function not covered" >useStylixContext </span>} from './stylixContext';
 export type {
   Extends,
   StylixHTMLProps,
@@ -133,17 +138,6 @@ export type {
   StylixStyles,
   StylixValue,
 } from './types';
-export type StylixContext = StylixPublicContext;
-export type { HTMLProps, IntrinsicElements } from './elements';
-export {
-  customProps,
-<span class="fstat-no" title="function not covered" >  defaultPlugins,</span>
-  type StylixPlugin,
-  type StylixPluginFunctionContext,
-} from './plugins';
-export { RenderServerStyles } from './RenderServerStyles';
-export { Stylix as default, type Stylix$Component } from './Stylix';
-export { <span class="fstat-no" title="function not covered" >createStyleCollector,</span> type StyleCollector, <span class="fstat-no" title="function not covered" >styleCollectorContext </span>} from './styleCollector';
 export { useGlobalStyles, useKeyframes, <span class="fstat-no" title="function not covered" >useStyles </span>} from './useStyles';
 export { <span class="fstat-no" title="function not covered" >cx </span>} from './util/cx';
 export { <span class="fstat-no" title="function not covered" >mapObject </span>} from './util/mapObject';
@@ -154,7 +148,7 @@ export { <span class="fstat-no" title="function not covered" >mapObject </span>}
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-24T23:17:41.464Z
+                at 2026-02-27T00:03:18.263Z
             </div>
         <script src="../prettify.js"></script>
         <script>

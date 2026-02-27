@@ -99,15 +99,8 @@ describe('mapObject', () => {
   });
 
   test('should return input if not object or array', () => {
-    expect(
-      // @ts-expect-error testing invalid input
-      mapObject('foo', () => {}),
-    ).toEqual('foo');
-
-    expect(
-      // @ts-expect-error testing invalid input
-      mapObject(1, () => {}),
-    ).toEqual(1);
+    expect(mapObject('foo', () => {})).toEqual('foo');
+    expect(mapObject(1, () => {})).toEqual(1);
   });
 
   test('should correctly map nested mixed object/array', () => {

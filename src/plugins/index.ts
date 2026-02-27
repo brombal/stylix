@@ -3,12 +3,12 @@ import type { StylixStyles } from '../types';
 import { cleanStyles } from './cleanStyles';
 import { defaultPixelUnits } from './defaultUnits';
 import { hoistKeyframes } from './hoistKeyframes';
+import { hoistLayers } from './hoistLayers';
 import { mediaObjects } from './mediaObjects';
 import { mergeArrays } from './mergeArrays';
 import { prepareStyles } from './prepareStyles';
 import { propCasing } from './propCasing';
 import { replace$$class } from './replace$$class';
-import {hoistLayers} from "./hoistLayers";
 
 /**
  * Stylix plugin function context object

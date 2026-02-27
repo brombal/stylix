@@ -1,4 +1,4 @@
-type ObjectOrArray = Record<string | number, unknown>;
+export type ObjectOrArray = unknown[] & Record<string, unknown>;
 
 export type MapObjectFunction<TContext extends object = object> = (
   key: string | number,

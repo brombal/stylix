@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/plugins/cleanStyles.ts</title>
+    <title>Code coverage report for src/plugins/hoistLayers.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,20 +19,20 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/plugins</a> cleanStyles.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/plugins</a> hoistLayers.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">84.61% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>12/12</span>
+                <span class='fraction'>11/13</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/13</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -90,20 +90,26 @@
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
 <a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">19x</span>
-<span class="cline-any cline-yes">19x</span>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">19x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">19x</span>
-<span class="cline-any cline-yes">203x</span>
-<span class="cline-any cline-yes">261x</span>
-<span class="cline-any cline-yes">261x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">253x</span>
-<span class="cline-any cline-yes">146x</span>
-<span class="cline-any cline-yes">146x</span>
+<span class="cline-any cline-yes">150x</span>
+<span class="cline-any cline-yes">262x</span>
+<span class="cline-any cline-yes">262x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">258x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">93x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">150x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -117,31 +123,34 @@
 <span class="cline-any cline-yes">56x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { isEmpty } from '../util/isEmpty';
-import { isPlainObject } from '../util/isPlainObject';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { isPlainObject } from '../util/isPlainObject';
 import type { StylixPlugin } from './index';
 &nbsp;
-export function _cleanStyles(object: any): void {
-  for (const key in object) {
-    const value = object[key];
-    if (value === null || value === undefined || value === '' || value === false)
-      delete object[key];
-    else if (isPlainObject(value) || Array.isArray(value)) {
-      _cleanStyles(value);
-      if (isEmpty(value)) delete object[key];
+export function _hoistLayers(styles: any, root: any) {
+  for (const key in styles) {
+    const value = styles[key];
+    if (typeof value === 'string' &amp;&amp; key.startsWith('@layer')) {
+      // Add layer rules as-is directly to root object
+      root['@layer'] ||= [];
+      root['@layer'].push(value.replace('@layer', '').trim());
+      <span class="missing-if-branch" title="else path not taken" >E</span>if (styles !== root) delete styles[key];
+    } else if (isPlainObject(value)) {
+      // Recursively flatten nested styles
+      _hoistLayers(value, root);
     }
   }
+  return styles;
 }
 &nbsp;
 /**
- * Removes null, undefined, and empty string values from style objects.
+ * Hoists @layer declarations to root of styles object.
  */
-export const cleanStyles: StylixPlugin = {
-  name: 'cleanStyles',
+export const hoistLayers: StylixPlugin = {
+  name: 'hoistLayers',
   type: 'processStyles',
   plugin(_ctx, styles) {
-    _cleanStyles(styles);
-    return styles;
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (styles &amp;&amp; typeof styles === 'object' &amp;&amp; !Array.isArray(styles)) styles['@layer'] = [];
+    return _hoistLayers(styles, styles);
   },
 };
 &nbsp;</pre></td></tr></table></pre>

@@ -1,4 +1,4 @@
-import {_hoistLayers} from '../hoistLayers';
+import { _hoistLayers } from '../hoistLayers';
 
 describe('hoistLayers', () => {
   it('should hoist layers', () => {
@@ -14,11 +14,9 @@ describe('hoistLayers', () => {
       },
       span: {
         '@layer': 'test2',
-      }
+      },
     };
-    expect(
-      _hoistLayers(styles, styles),
-    ).toEqual({
+    expect(_hoistLayers(styles, styles)).toEqual({
       '@layer': ['nested, test', 'test2'],
       '@layer test': {
         color: 'red',
@@ -28,7 +26,7 @@ describe('hoistLayers', () => {
           background: 'blue',
         },
       },
-      span: {}
+      span: {},
     });
   });
 });

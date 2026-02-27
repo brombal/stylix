@@ -1,6 +1,62 @@
 import { jsx } from 'react/jsx-runtime';
 import React, { createContext, useRef, useInsertionEffect, useContext, useEffect } from 'react';
 
+function flattenRules(ctx) {
+    return Object.values(ctx.rules)
+        .flatMap((val) => (val && val.refs > 0 ? val.rules : []))
+        .filter(Boolean);
+}
+/**
+ * Applies rules from given StylixContext to the <style> element.
+ */
+function applyRules(ctx) {
+    if (ctx.styleCollector) {
+        const flattenedRules = flattenRules(ctx);
+        ctx.styleCollector.length = 0;
+        ctx.styleCollector.push(...flattenedRules);
+        return;
+    }
+    if (ctx.ssr)
+        return;
+    const supportsAdoptedStylesheets = 'adoptedStyleSheets' in document;
+    // If there's no style element, and we're in dev mode, create one
+    if (!ctx.styleElement && (ctx.devMode || !supportsAdoptedStylesheets)) {
+        ctx.styleElement = document.createElement('style');
+        ctx.styleElement.className = 'stylix';
+        if (ctx.id)
+            ctx.styleElement.id = `stylix-${ctx.id}`;
+        document.head.appendChild(ctx.styleElement);
+    }
+    if (ctx.styleElement) {
+        // If there's a style element, use it
+        const flattenedRules = flattenRules(ctx);
+        ctx.styleElement.innerHTML = flattenedRules.join('\n');
+    }
+    else {
+        // Still no stylesheet yet, create one
+        if (!ctx.stylesheet) {
+            ctx.stylesheet = new CSSStyleSheet();
+            if (supportsAdoptedStylesheets) {
+                document.adoptedStyleSheets.push(ctx.stylesheet);
+            }
+            else if (ctx.stylesheet.ownerNode) {
+                document.head.appendChild(ctx.stylesheet.ownerNode);
+            }
+        }
+        const stylesheet = ctx.stylesheet;
+        const flattenedRules = flattenRules(ctx);
+        if (stylesheet.replaceSync) {
+            try {
+                stylesheet.replaceSync(flattenedRules.join('\n'));
+            }
+            catch (e) {
+                // Errors are ignored, this just means that a browser doesn't support a certain CSS feature.
+                console.warn(e);
+            }
+        }
+    }
+}
+
 function classifyProps(props, knownStyleProps) {
     const styles = {};
     const other = {};
@@ -651,6 +707,36 @@ const hoistKeyframes = {
     },
 };
 
+function _hoistLayers(styles, root) {
+    for (const key in styles) {
+        const value = styles[key];
+        if (typeof value === 'string' && key.startsWith('@layer')) {
+            // Add layer rules as-is directly to root object
+            root['@layer'] ||= [];
+            root['@layer'].push(value.replace('@layer', '').trim());
+            if (styles !== root)
+                delete styles[key];
+        }
+        else if (isPlainObject(value)) {
+            // Recursively flatten nested styles
+            _hoistLayers(value, root);
+        }
+    }
+    return styles;
+}
+/**
+ * Hoists @layer declarations to root of styles object.
+ */
+const hoistLayers = {
+    name: 'hoistLayers',
+    type: 'processStyles',
+    plugin(_ctx, styles) {
+        if (styles && typeof styles === 'object' && !Array.isArray(styles))
+            styles['@layer'] = [];
+        return _hoistLayers(styles, styles);
+    },
+};
+
 /**
  * Expands media objects using the media definitions from the Stylix context.
  */
@@ -819,36 +905,6 @@ const replace$$classMap = (key, value, target, context, mapRecursive) => {
     target[key] = value;
 };
 
-function _hoistLayers(styles, root) {
-    for (const key in styles) {
-        const value = styles[key];
-        if (typeof value === 'string' && key.startsWith('@layer')) {
-            // Add layer rules as-is directly to root object
-            root['@layer'] ||= [];
-            root['@layer'].push(value.replace('@layer', '').trim());
-            if (styles !== root)
-                delete styles[key];
-        }
-        else if (isPlainObject(value)) {
-            // Recursively flatten nested styles
-            _hoistLayers(value, root);
-        }
-    }
-    return styles;
-}
-/**
- * Hoists @layer declarations to root of styles object.
- */
-const hoistLayers = {
-    name: 'hoistLayers',
-    type: 'processStyles',
-    plugin(_ctx, styles) {
-        if (styles && typeof styles === 'object' && !Array.isArray(styles))
-            styles['@layer'] = [];
-        return _hoistLayers(styles, styles);
-    },
-};
-
 function _customPropsProcess(styles, customProps) {
     if (typeof styles !== 'object' || styles === null)
         return styles;
@@ -951,64 +1007,6 @@ function createStyleCollector() {
     };
     collector.render.displayName = 'StylixStyleCollectorRenderer';
     return collector;
-}
-
-const detectSSR = () => !(typeof window !== 'undefined' && window.document?.head?.appendChild);
-
-function flattenRules(ctx) {
-    return Object.values(ctx.rules)
-        .flatMap((val) => (val && val.refs > 0 ? val.rules : []))
-        .filter(Boolean);
-}
-/**
- * Applies rules from given StylixContext to the <style> element.
- */
-function applyRules(ctx) {
-    if (ctx.styleCollector) {
-        const flattenedRules = flattenRules(ctx);
-        ctx.styleCollector.length = 0;
-        ctx.styleCollector.push(...flattenedRules);
-        return;
-    }
-    if (ctx.ssr)
-        return;
-    const supportsAdoptedStylesheets = 'adoptedStyleSheets' in document;
-    // If there's no style element, and we're in dev mode, create one
-    if (!ctx.styleElement && (ctx.devMode || !supportsAdoptedStylesheets)) {
-        ctx.styleElement = document.createElement('style');
-        ctx.styleElement.className = 'stylix';
-        if (ctx.id)
-            ctx.styleElement.id = `stylix-${ctx.id}`;
-        document.head.appendChild(ctx.styleElement);
-    }
-    if (ctx.styleElement) {
-        // If there's a style element, use it
-        const flattenedRules = flattenRules(ctx);
-        ctx.styleElement.innerHTML = flattenedRules.join('\n');
-    }
-    else {
-        // Still no stylesheet yet, create one
-        if (!ctx.stylesheet) {
-            ctx.stylesheet = new CSSStyleSheet();
-            if (supportsAdoptedStylesheets) {
-                document.adoptedStyleSheets.push(ctx.stylesheet);
-            }
-            else if (ctx.stylesheet.ownerNode) {
-                document.head.appendChild(ctx.stylesheet.ownerNode);
-            }
-        }
-        const stylesheet = ctx.stylesheet;
-        const flattenedRules = flattenRules(ctx);
-        if (stylesheet.replaceSync) {
-            try {
-                stylesheet.replaceSync(flattenedRules.join('\n'));
-            }
-            catch (e) {
-                // Errors are ignored, this just means that a browser doesn't support a certain CSS feature.
-                console.warn(e);
-            }
-        }
-    }
 }
 
 function getParentComponentName() {
@@ -1171,6 +1169,8 @@ function useKeyframes(keyframes) {
 function useGlobalStyles(styles, options = { disabled: false }) {
     return useStyles(styles, { ...options, global: true });
 }
+
+const detectSSR = () => !(typeof window !== 'undefined' && window.document?.head?.appendChild);
 
 /**
  * Default style props mapping. This will be populated on the first call to createStylixContext.

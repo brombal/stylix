@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`html elements should pass htmlContent and htmlTranslate props correctly 1`] = `"<div class="stylix-1" content="html-content" translate="yes" data-testid="div"></div>"`;
 

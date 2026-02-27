@@ -1,14 +1,14 @@
 import type React from 'react';
 import { createContext, useContext, useEffect, useRef } from 'react';
+import applyRules from './applyRules';
 import { classifyProps, simplifyStylePropName } from './classifyProps';
 import cssProps from './css-props.json';
 import { applyPlugins, defaultPlugins, type StylixPlugin } from './plugins';
 import type { StylixMediaDefinition } from './plugins/mediaObjects';
 import { styleCollectorContext } from './styleCollector';
-import { detectSSR } from './util/useIsoLayoutEffect';
-import { StylixStyles } from './types';
+import type { StylixStyles } from './types';
 import { createStyles } from './useStyles';
-import applyRules from './applyRules';
+import { detectSSR } from './util/useIsoLayoutEffect';
 
 /**
  * Stylix context

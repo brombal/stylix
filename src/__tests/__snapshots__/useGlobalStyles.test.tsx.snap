@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`global styles should handle matching global and component styles 1`] = `"<div><main data-testid="main">test</main><div class="stylix-2" data-testid="div"><main data-testid="inner-main">test</main></div></div>"`;
 

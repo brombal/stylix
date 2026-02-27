@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
-import { cleanup, render, RenderResult } from '@testing-library/react';
+import { cleanup, type RenderResult, render } from '@testing-library/react';
 import type React from 'react';
 
-import { StylixContext, StylixProvider } from '../index';
+import { type StylixContext, StylixProvider } from '../index';
 import type { StylixMediaDefinition } from '../plugins/mediaObjects';
 
 type RenderStylixReturn = readonly [string, string, ReturnType<typeof render>, HTMLStyleElement] & {
