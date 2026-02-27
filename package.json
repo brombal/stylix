@@ -31,7 +31,10 @@
   "license": "MIT",
   "homepage": "https://github.com/brombal/stylix",
   "bugs": "https://github.com/brombal/stylix/issues",
-  "repository": "https://github.com/brombal/stylix",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brombal/stylix.git"
+  },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
