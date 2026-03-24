@@ -140,7 +140,7 @@ type StylixContext = {
     };
     styleProps: Record<string, string>;
     ssr?: boolean;
-    cleanupRequest?: number;
+    cleanupRequest: boolean;
     requestApply: boolean;
     classifyProps(props: Record<string, unknown>): [Record<string, unknown>, Record<string, unknown>];
     styles(styles: StylixStyles, config?: {

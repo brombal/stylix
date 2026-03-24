@@ -30,6 +30,7 @@ function applyRules(ctx) {
     if (ctx.styleElement) {
         // If there's a style element, use it
         const flattenedRules = flattenRules(ctx);
+        console.log('applyRules', flattenedRules.length);
         ctx.styleElement.innerHTML = flattenedRules.join('\n');
     }
     else {
@@ -1079,7 +1080,7 @@ function stylesToRuleArray(styles, className, context) {
 }
 
 function cleanup(ctx) {
-    if (typeof ctx.cleanupRequest !== 'undefined')
+    if (ctx.cleanupRequest)
         return;
     const doCleanup = () => {
         for (const i in ctx.rules) {
@@ -1088,13 +1089,17 @@ function cleanup(ctx) {
                 delete ctx.rules[i];
             }
         }
-        ctx.cleanupRequest = undefined;
+        applyRules(ctx);
+        ctx.cleanupRequest = false;
     };
+    // queueMicrotask in devMode so the cleanupRequest guard batches simultaneous unmounts
+    // before applyRules is called; setTimeout(100) serves the same purpose in production.
+    ctx.cleanupRequest = true;
     if (ctx.devMode) {
-        doCleanup();
+        queueMicrotask(doCleanup);
     }
     else {
-        ctx.cleanupRequest = setTimeout(doCleanup, 100);
+        setTimeout(doCleanup, 100);
     }
 }
 function createStyles(config) {
@@ -1126,10 +1131,7 @@ function createStyles(config) {
     if (isChanged) {
         // Mark styles to be applied
         stylixCtx.requestApply = true;
-        // When json changes, add/remove ref count
-        const priorRuleSet = priorKey ? stylixCtx.rules[priorKey] : null;
-        if (priorRuleSet)
-            priorRuleSet.refs--;
+        // Increment ref count for new styles; decrement is handled by the useInsertionEffect cleanup
         if (ruleSet)
             ruleSet.refs++;
     }
@@ -1162,11 +1164,20 @@ function useStyles(styles, options = { global: false }) {
     // browser to compute styles.
     // biome-ignore lint/correctness/useExhaustiveDependencies: stylixCtx is stable
     useInsertionEffect(() => {
-        if (!stylixCtx.requestApply)
-            return;
-        stylixCtx.requestApply = false;
-        applyRules(stylixCtx);
+        const capturedKey = s.key;
+        if (stylixCtx.requestApply) {
+            stylixCtx.requestApply = false;
+            applyRules(stylixCtx);
+        }
+        // Always register a cleanup to decrement refs when styles change or component unmounts.
+        // This runs whether or not requestApply was true — guards against missing cleanup when
+        // a sibling component already called applyRules in the same commit.
         return () => {
+            if (capturedKey) {
+                const rule = stylixCtx.rules[capturedKey];
+                if (rule)
+                    rule.refs--;
+            }
             cleanup(stylixCtx);
         };
     }, [s.key]);
@@ -1204,7 +1215,7 @@ function createStylixContext(userValues = {}) {
         styleCounter: 0,
         rules: {},
         ssr: userValues.ssr ?? detectSSR(),
-        cleanupRequest: undefined,
+        cleanupRequest: false,
         requestApply: false,
         classifyProps(props) {
             const [styles, other] = classifyProps(props, this.styleProps);

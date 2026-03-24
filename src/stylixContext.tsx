@@ -44,7 +44,7 @@ export type StylixContext = {
   };
   styleProps: Record<string, string>;
   ssr?: boolean;
-  cleanupRequest?: number;
+  cleanupRequest: boolean;
   requestApply: boolean;
 
   classifyProps(props: Record<string, unknown>): [Record<string, unknown>, Record<string, unknown>];
@@ -89,7 +89,7 @@ export function createStylixContext(userValues: CreateStylixContextConfig = {}):
     styleCounter: 0,
     rules: {},
     ssr: userValues.ssr ?? detectSSR(),
-    cleanupRequest: undefined,
+    cleanupRequest: false,
     requestApply: false,
 
     classifyProps(props: Record<string, unknown>) {

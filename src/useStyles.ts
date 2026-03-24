@@ -8,7 +8,7 @@ import type { StylixObject, StylixStyles } from './types';
 import { isEmpty } from './util/isEmpty';
 
 function cleanup(ctx: StylixContext): void {
-  if (typeof ctx.cleanupRequest !== 'undefined') return;
+  if (ctx.cleanupRequest) return;
 
   const doCleanup = () => {
     for (const i in ctx.rules) {
@@ -17,13 +17,17 @@ function cleanup(ctx: StylixContext): void {
         delete ctx.rules[i];
       }
     }
-    ctx.cleanupRequest = undefined;
+    applyRules(ctx);
+    ctx.cleanupRequest = false;
   };
 
+  // queueMicrotask in devMode so the cleanupRequest guard batches simultaneous unmounts
+  // before applyRules is called; setTimeout(100) serves the same purpose in production.
+  ctx.cleanupRequest = true;
   if (ctx.devMode) {
-    doCleanup();
+    queueMicrotask(doCleanup);
   } else {
-    ctx.cleanupRequest = setTimeout(doCleanup, 100) as any;
+    setTimeout(doCleanup, 100);
   }
 }
 
@@ -66,9 +70,7 @@ export function createStyles(config: {
     // Mark styles to be applied
     stylixCtx.requestApply = true;
 
-    // When json changes, add/remove ref count
-    const priorRuleSet = priorKey ? stylixCtx.rules[priorKey] : null;
-    if (priorRuleSet) priorRuleSet.refs--;
+    // Increment ref count for new styles; decrement is handled by the useInsertionEffect cleanup
     if (ruleSet) ruleSet.refs++;
   }
 
@@ -109,11 +111,21 @@ export function useStyles(
   // browser to compute styles.
   // biome-ignore lint/correctness/useExhaustiveDependencies: stylixCtx is stable
   useInsertionEffect(() => {
-    if (!stylixCtx.requestApply) return;
-    stylixCtx.requestApply = false;
-    applyRules(stylixCtx);
+    const capturedKey = s.key;
 
+    if (stylixCtx.requestApply) {
+      stylixCtx.requestApply = false;
+      applyRules(stylixCtx);
+    }
+
+    // Always register a cleanup to decrement refs when styles change or component unmounts.
+    // This runs whether or not requestApply was true — guards against missing cleanup when
+    // a sibling component already called applyRules in the same commit.
     return () => {
+      if (capturedKey) {
+        const rule = stylixCtx.rules[capturedKey];
+        if (rule) rule.refs--;
+      }
       cleanup(stylixCtx);
     };
   }, [s.key]);
