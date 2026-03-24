@@ -32,7 +32,6 @@ export default function applyRules(ctx: StylixContext): void {
   if (ctx.styleElement) {
     // If there's a style element, use it
     const flattenedRules = flattenRules(ctx);
-    console.log('applyRules', flattenedRules.length);
     ctx.styleElement.innerHTML = flattenedRules.join('\n');
   } else {
     // Still no stylesheet yet, create one

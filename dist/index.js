@@ -30,7 +30,6 @@ function applyRules(ctx) {
     if (ctx.styleElement) {
         // If there's a style element, use it
         const flattenedRules = flattenRules(ctx);
-        console.log('applyRules', flattenedRules.length);
         ctx.styleElement.innerHTML = flattenedRules.join('\n');
     }
     else {
