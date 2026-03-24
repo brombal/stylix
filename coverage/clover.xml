@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1772150598282" clover="3.2.0">
-  <project timestamp="1772150598283" name="All files">
+<coverage generated="1772475541809" clover="3.2.0">
+  <project timestamp="1772475541809" name="All files">
     <metrics statements="486" coveredstatements="449" conditionals="330" coveredconditionals="276" methods="87" coveredmethods="74" elements="903" coveredelements="799" complexity="0" loc="486" ncloc="486" packages="4" files="29" classes="29"/>
     <package name="src">
       <metrics statements="255" coveredstatements="221" conditionals="167" coveredconditionals="125" methods="49" coveredmethods="37"/>
@@ -137,9 +137,9 @@
         <line num="12" count="107" type="stmt"/>
         <line num="13" count="18" type="stmt"/>
         <line num="14" count="61" type="stmt"/>
-        <line num="24" count="24" type="stmt"/>
-        <line num="25" count="18" type="stmt"/>
-        <line num="26" count="18" type="stmt"/>
+        <line num="26" count="24" type="stmt"/>
+        <line num="27" count="18" type="stmt"/>
+        <line num="28" count="18" type="stmt"/>
       </file>
       <file name="styleCollector.tsx" path="/Users/alex/dev/stylix/stylix-core/src/styleCollector.tsx">
         <metrics statements="10" coveredstatements="4" conditionals="2" coveredconditionals="0" methods="3" coveredmethods="0"/>

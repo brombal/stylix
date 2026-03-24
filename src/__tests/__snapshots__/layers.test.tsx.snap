@@ -8,3 +8,12 @@ exports[`layer declarations should render 2`] = `
 @layer test {
   font-size: 20px; } }"
 `;
+
+exports[`layer declarations should render scopes 1`] = `"<div class="stylix0-1"></div>"`;
+
+exports[`layer declarations should render scopes 2`] = `
+".stylix0-1 {
+span {
+@scope (.foo) to (.bar) {
+  color: red; } } }"
+`;

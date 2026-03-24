@@ -179,6 +179,54 @@ describe('mediaObjects', () => {
     );
   });
 
+  it('should handle nested media objects for style props', () => {
+    expect(
+      JSON.stringify(
+        reduceArrays(
+          processMediaStyles(media, styleProps, {
+            span: {
+              fontWeight: {
+                default: 'fw-default',
+                mobile: {
+                  dark: 'fw-mobile-dark',
+                  light: 'fw-mobile-light',
+                },
+              },
+              color: {
+                default: {
+                  dark: 'color-dark',
+                  light: 'color-light',
+                },
+                mobile: 'color-mobile',
+              },
+              fontSize: {
+                mobile: {
+                  '@media (custom-rule)': {
+                    dark: 'size-mobile-custom',
+                  },
+                },
+              },
+            },
+          }),
+        ),
+      ),
+    ).toEqual(
+      JSON.stringify({
+        span: {
+          fontWeight: 'fw-default',
+          'html[theme="dark"] &': { color: 'color-dark' },
+          'html[theme="light"] &': { color: 'color-light' },
+          '@media (max-width: 600px)': {
+            'html[theme="dark"] &': { fontWeight: 'fw-mobile-dark' },
+            'html[theme="light"] &': { fontWeight: 'fw-mobile-light' },
+            color: 'color-mobile',
+            '@media (custom-rule)': { 'html[theme="dark"] &': 'size-mobile-custom' },
+          },
+        },
+      }),
+    );
+  });
+
   it('should convert arrays in media objects', () => {
     expect(
       JSON.stringify(

@@ -1,4 +1,5 @@
 import type * as CSS from 'csstype';
+import type { ComponentType } from 'react';
 import type { HTMLProps, IntrinsicElements } from './elements';
 
 type CSSProperties = CSS.StandardPropertiesHyphen<number | string> &
@@ -17,6 +18,11 @@ export type Extends<T1, T2, T3 = unknown, T4 = unknown> = Override<
   Override<Override<T1, T2>, T3>,
   T4
 >;
+
+/**
+ * Any React component or intrinsic element that accepts a className prop.
+ */
+export type ClassNameComponent = IntrinsicElements | ComponentType<{ className?: string }>;
 
 // Stylix types
 
@@ -86,6 +92,16 @@ export type StylixProps = {
  * ```
  */
 export type StylixHTMLProps<TTag extends IntrinsicElements> = Extends<HTMLProps<TTag>, StylixProps>;
+
+/**
+ * Props for any component or HTML tag that can accept Stylix properties in addition to its own.
+ */
+export type StylixElementProps<TElement extends ClassNameComponent> =
+  TElement extends IntrinsicElements
+    ? Extends<HTMLProps<TElement>, StylixProps>
+    : TElement extends ComponentType<infer P>
+      ? Extends<P, StylixProps>
+      : never;
 
 /**
  * Used to allow users to add custom props to Stylix components.

@@ -25,7 +25,7 @@ export default function applyRules(ctx: StylixContext): void {
   if (!ctx.styleElement && (ctx.devMode || !supportsAdoptedStylesheets)) {
     ctx.styleElement = document.createElement('style');
     ctx.styleElement.className = 'stylix';
-    if (ctx.id) ctx.styleElement.id = `stylix-${ctx.id}`;
+    if (ctx.id) ctx.styleElement.id = `${ctx.id}-styles`;
     document.head.appendChild(ctx.styleElement);
   }
 

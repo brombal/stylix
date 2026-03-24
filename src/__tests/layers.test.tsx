@@ -23,4 +23,30 @@ describe('layer declarations', () => {
     expect(json).toMatchSnapshot();
     expect(styles).toMatchSnapshot();
   });
+
+  it('should render scopes', () => {
+    const el = (
+      <$.div
+        $css={{
+          color: 'purple',
+
+          '@scope (.foo) to (.bar)': {
+            color: 'red',
+          },
+        }}
+      >
+        <span className=".foo">
+          <span>foo</span>
+          <span className=".bar">
+            <span>bar</span>
+          </span>
+        </span>
+      </$.div>
+    );
+
+    const [json, styles] = renderStylix(el);
+
+    expect(json).toMatchSnapshot();
+    expect(styles).toMatchSnapshot();
+  });
 });

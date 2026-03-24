@@ -4,11 +4,7 @@ import type { StylixPlugin, StylixPluginFunctionContext } from './index';
 
 type OpaqueMediaStyles = { __opaqueMediaStyles: true };
 
-export type StylixMediaValue = {
-  [key: string]: OpaqueMediaStyles | StylixMediaValue;
-};
-
-type StylixMediaFunc = (styles: OpaqueMediaStyles) => StylixMediaValue;
+type StylixMediaFunc = (styles: OpaqueMediaStyles) => StylixStyles;
 
 export type StylixMediaDefinition = Record<string, StylixMediaFunc>;
 
@@ -21,7 +17,7 @@ export const mediaObjects: StylixPlugin = {
   plugin: mediaObjectsPlugin,
 };
 
-function mediaObjectsPlugin(ctx: StylixPluginFunctionContext, styles: StylixStyles): StylixObject {
+function mediaObjectsPlugin(ctx: StylixPluginFunctionContext, styles: StylixStyles): StylixStyles {
   if (!ctx.media) return styles as StylixObject;
   return processMediaStyles(ctx.media, ctx.styleProps, styles);
 }
@@ -30,12 +26,19 @@ export function processMediaStyles(
   mediaDef: StylixMediaDefinition,
   styleProps: Record<string, string>,
   styles: any,
-): any {
-  if (!styles || typeof styles !== 'object') return styles;
+  // styleKey is provided when recursively processing a nested media object for a style prop (e.g. { color: { mobile: { dark: 'red' } } }).
+  // It should be continuously passed down until the actual style value is reached, at which point it will be used to construct the styles
+  // object passed to the media function (e.g. mediaDef['mobile']({ color: 'red' }))
+  nestedStyleKey?: string,
+): StylixStyles {
+  if (!styles || typeof styles !== 'object')
+    return nestedStyleKey ? { [nestedStyleKey]: styles } : styles;
 
   // If styles is an array, just recursively map it
   if (Array.isArray(styles)) {
-    return styles.map((style: any) => processMediaStyles(mediaDef, styleProps, style));
+    return styles.flatMap((style: any) =>
+      processMediaStyles(mediaDef, styleProps, style),
+    ) as StylixStyles[];
   }
 
   mediaDef.default ||= (styles: any) => styles;
@@ -56,22 +59,18 @@ export function processMediaStyles(
       for (const mediaKey in styleValue) {
         result[mediaKey] ||= [];
 
+        // process recursively
+        const processed = processMediaStyles(mediaDef, styleProps, styleValue[mediaKey], styleKey);
+
         // mediaKey corresponds to a media definition
         if (mediaKey in mediaDef) {
-          result[mediaKey].push(
-            mediaDef[mediaKey]({
-              // process recursively
-              [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
-            } as OpaqueMediaStyles),
-          );
+          result[mediaKey].push(mediaDef[mediaKey](processed as OpaqueMediaStyles));
         }
 
         // mediaKey does not correspond to a media definition, it must be a @media or @container rule
         else {
           result[mediaKey].push({
-            [mediaKey]: {
-              [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
-            },
+            [mediaKey]: processed,
           });
         }
       }
@@ -83,14 +82,21 @@ export function processMediaStyles(
       result[styleKey].push(
         mediaDef[styleKey](
           // process recursively
-          processMediaStyles(mediaDef, styleProps, styleValue),
+          processMediaStyles(
+            mediaDef,
+            styleProps,
+            styleValue,
+            nestedStyleKey,
+          ) as unknown as OpaqueMediaStyles,
         ),
       );
       continue;
     }
 
     // Key is a selector, just process recursively and add to plain styles
-    result.default.push({ [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue) });
+    result.default.push({
+      [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue),
+    });
   }
 
   const results = Object.values(result);

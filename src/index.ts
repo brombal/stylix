@@ -13,7 +13,9 @@ export { Stylix as default, type Stylix$Component } from './Stylix';
 export { createStyleCollector, type StyleCollector, styleCollectorContext } from './styleCollector';
 export { type StylixContext, StylixProvider, useStylixContext } from './stylixContext';
 export type {
+  ClassNameComponent,
   Extends,
+  StylixElementProps,
   StylixHTMLProps,
   StylixObject,
   StylixProps,

@@ -49,7 +49,7 @@ export function createStyles(config: {
   if (stylesKey && !stylixCtx.rules[stylesKey]) {
     stylixCtx.styleCounter++;
     const debugLabel = config.debugLabel || (stylixCtx.devMode && getParentComponentName()) || '';
-    const className = `stylix-${(stylixCtx.styleCounter).toString(36)}${debugLabel ? `-${debugLabel}` : ''}`;
+    const className = `${stylixCtx.id}-${(stylixCtx.styleCounter).toString(36)}${debugLabel ? `-${debugLabel}` : ''}`;
     // If not global styles, wrap original styles with classname
     if (!global) styles = { [`.${className}`]: styles };
     stylixCtx.rules[stylesKey] = {

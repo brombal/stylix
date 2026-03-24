@@ -24,7 +24,7 @@ function applyRules(ctx) {
         ctx.styleElement = document.createElement('style');
         ctx.styleElement.className = 'stylix';
         if (ctx.id)
-            ctx.styleElement.id = `stylix-${ctx.id}`;
+            ctx.styleElement.id = `${ctx.id}-styles`;
         document.head.appendChild(ctx.styleElement);
     }
     if (ctx.styleElement) {
@@ -680,7 +680,7 @@ const defaultUnitsMap = (key, value, target, ctx, mapRecursive) => {
 };
 const defaultPixelUnits = defaultUnits();
 
-function _hoistKeyframes(styles, root) {
+function _hoistKeyframes(styles, root, ctx) {
     for (const key in styles) {
         const value = styles[key];
         if (key.startsWith('@keyframes')) {
@@ -689,9 +689,15 @@ function _hoistKeyframes(styles, root) {
             if (styles !== root)
                 delete styles[key];
         }
+        if (key.startsWith('@scope')) {
+            // Add scopes rules as-is directly to root object
+            root[key] = { [`.${ctx.className}`]: value };
+            if (styles !== root)
+                delete styles[key];
+        }
         else if (isPlainObject(value)) {
             // Recursively flatten nested styles
-            _hoistKeyframes(value, root);
+            _hoistKeyframes(value, root, ctx);
         }
     }
     return styles;
@@ -703,7 +709,7 @@ const hoistKeyframes = {
     name: 'hoistKeyframes',
     type: 'processStyles',
     plugin(_ctx, styles) {
-        return _hoistKeyframes(styles, styles);
+        return _hoistKeyframes(styles, styles, _ctx);
     },
 };
 
@@ -750,12 +756,16 @@ function mediaObjectsPlugin(ctx, styles) {
         return styles;
     return processMediaStyles(ctx.media, ctx.styleProps, styles);
 }
-function processMediaStyles(mediaDef, styleProps, styles) {
+function processMediaStyles(mediaDef, styleProps, styles, 
+// styleKey is provided when recursively processing a nested media object for a style prop (e.g. { color: { mobile: { dark: 'red' } } }).
+// It should be continuously passed down until the actual style value is reached, at which point it will be used to construct the styles
+// object passed to the media function (e.g. mediaDef['mobile']({ color: 'red' }))
+nestedStyleKey) {
     if (!styles || typeof styles !== 'object')
-        return styles;
+        return nestedStyleKey ? { [nestedStyleKey]: styles } : styles;
     // If styles is an array, just recursively map it
     if (Array.isArray(styles)) {
-        return styles.map((style) => processMediaStyles(mediaDef, styleProps, style));
+        return styles.flatMap((style) => processMediaStyles(mediaDef, styleProps, style));
     }
     mediaDef.default ||= (styles) => styles;
     const result = { default: [] };
@@ -770,19 +780,16 @@ function processMediaStyles(mediaDef, styleProps, styles) {
             // An object for a style prop is definitely a media object
             for (const mediaKey in styleValue) {
                 result[mediaKey] ||= [];
+                // process recursively
+                const processed = processMediaStyles(mediaDef, styleProps, styleValue[mediaKey], styleKey);
                 // mediaKey corresponds to a media definition
                 if (mediaKey in mediaDef) {
-                    result[mediaKey].push(mediaDef[mediaKey]({
-                        // process recursively
-                        [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
-                    }));
+                    result[mediaKey].push(mediaDef[mediaKey](processed));
                 }
                 // mediaKey does not correspond to a media definition, it must be a @media or @container rule
                 else {
                     result[mediaKey].push({
-                        [mediaKey]: {
-                            [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue[mediaKey]),
-                        },
+                        [mediaKey]: processed,
                     });
                 }
             }
@@ -792,11 +799,13 @@ function processMediaStyles(mediaDef, styleProps, styles) {
             result[styleKey] ||= [];
             result[styleKey].push(mediaDef[styleKey](
             // process recursively
-            processMediaStyles(mediaDef, styleProps, styleValue)));
+            processMediaStyles(mediaDef, styleProps, styleValue, nestedStyleKey)));
             continue;
         }
         // Key is a selector, just process recursively and add to plain styles
-        result.default.push({ [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue) });
+        result.default.push({
+            [styleKey]: processMediaStyles(mediaDef, styleProps, styleValue),
+        });
     }
     const results = Object.values(result);
     return results.length === 1 ? results[0] : results.length === 0 ? null : results;
@@ -1102,7 +1111,7 @@ function createStyles(config) {
     if (stylesKey && !stylixCtx.rules[stylesKey]) {
         stylixCtx.styleCounter++;
         const debugLabel = config.debugLabel || (stylixCtx.devMode && getParentComponentName()) || '';
-        const className = `stylix-${(stylixCtx.styleCounter).toString(36)}${debugLabel ? `-${debugLabel}` : ''}`;
+        const className = `${stylixCtx.id}-${(stylixCtx.styleCounter).toString(36)}${debugLabel ? `-${debugLabel}` : ''}`;
         // If not global styles, wrap original styles with classname
         if (!global)
             styles = { [`.${className}`]: styles };
@@ -1176,6 +1185,7 @@ const detectSSR = () => !(typeof window !== 'undefined' && window.document?.head
  * Default style props mapping. This will be populated on the first call to createStylixContext.
  */
 let defaultStyleProps;
+window.__stylixNextId = 0;
 function createStylixContext(userValues = {}) {
     if (!defaultStyleProps) {
         defaultStyleProps = {};
@@ -1184,11 +1194,12 @@ function createStylixContext(userValues = {}) {
         }
     }
     const ctx = {
-        id: userValues.id || '$default',
+        id: userValues.id || `stylix${window.__stylixNextId++}`,
         devMode: !!userValues.devMode,
         styleProps: defaultStyleProps,
         media: userValues.media,
         styleElement: userValues.styleElement,
+        styleElementIsUserProvided: !!userValues.styleElement,
         plugins: defaultPlugins.flat(),
         styleCounter: 0,
         rules: {},
@@ -1273,7 +1284,8 @@ function StylixProvider(props) {
     // When the component is unmounted, remove the style element, if any
     useEffect(() => {
         return () => {
-            ctx.current?.styleElement?.remove();
+            if (ctx.current?.styleElement && !ctx.current.styleElementIsUserProvided)
+                ctx.current.styleElement.remove();
         };
     }, []);
     return jsx(stylixContext.Provider, { value: ctx.current, children: children });

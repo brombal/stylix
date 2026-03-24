@@ -30,6 +30,7 @@ export type StylixContext = {
   plugins: StylixPlugin[];
   stylesheet?: CSSStyleSheet;
   styleElement?: HTMLStyleElement;
+  styleElementIsUserProvided: boolean;
   styleCollector?: string[];
   styleCounter: number;
   rules: {
@@ -67,6 +68,8 @@ type CreateStylixContextConfig = {
   ssr?: boolean;
 };
 
+(window as any).__stylixNextId = 0;
+
 export function createStylixContext(userValues: CreateStylixContextConfig = {}): StylixContext {
   if (!defaultStyleProps) {
     defaultStyleProps = {};
@@ -76,11 +79,12 @@ export function createStylixContext(userValues: CreateStylixContextConfig = {}):
   }
 
   const ctx: StylixContext = {
-    id: userValues.id || '$default',
+    id: userValues.id || `stylix${(window as any).__stylixNextId++}`,
     devMode: !!userValues.devMode,
     styleProps: defaultStyleProps,
     media: userValues.media,
     styleElement: userValues.styleElement,
+    styleElementIsUserProvided: !!userValues.styleElement,
     plugins: defaultPlugins.flat(),
     styleCounter: 0,
     rules: {},
@@ -196,7 +200,8 @@ export function StylixProvider(props: StylixProviderProps): React.ReactElement {
   // When the component is unmounted, remove the style element, if any
   useEffect(() => {
     return () => {
-      ctx.current?.styleElement?.remove();
+      if (ctx.current?.styleElement && !ctx.current.styleElementIsUserProvided)
+        ctx.current.styleElement.remove();
     };
   }, []);
 
